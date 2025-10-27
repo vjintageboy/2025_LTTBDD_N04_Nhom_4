@@ -64,8 +64,24 @@ class FirestoreService {
   /// Create a new mood entry
   Future<void> createMoodEntry(MoodEntry entry) async {
     try {
-      await _db.collection('moodEntries').doc(entry.entryId).set(entry.toMap());
-      print('✅ Mood entry created successfully');
+      // Generate a new document ID if entryId is empty
+      final docRef = entry.entryId.isEmpty
+          ? _db.collection('moodEntries').doc()
+          : _db.collection('moodEntries').doc(entry.entryId);
+      
+      // Create a new entry with the generated ID
+      final entryWithId = MoodEntry(
+        entryId: docRef.id,
+        userId: entry.userId,
+        moodLevel: entry.moodLevel,
+        note: entry.note,
+        timestamp: entry.timestamp,
+        emotionFactors: entry.emotionFactors,
+        tags: entry.tags,
+      );
+      
+      await docRef.set(entryWithId.toMap());
+      print('✅ Mood entry created successfully with ID: ${docRef.id}');
     } catch (e) {
       print('❌ Error creating mood entry: $e');
       rethrow;

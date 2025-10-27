@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/welcome_page.dart';
+import '../mood/mood_log_page.dart';
+import '../mood/mood_history_page.dart';
 import '../../services/firestore_service.dart';
 import '../../models/meditation.dart';
 import '../../models/streak.dart';
@@ -18,9 +20,25 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    Widget currentTab;
+    
+    switch (_selectedIndex) {
+      case 0:
+        currentTab = const HomeTab();
+        break;
+      case 1:
+        currentTab = const MoodHistoryPage();
+        break;
+      case 3:
+        currentTab = _buildProfileTab();
+        break;
+      default:
+        currentTab = _buildOtherTab();
+    }
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
-      body: _selectedIndex == 0 ? const HomeTab() : _buildOtherTab(),
+      body: currentTab,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -351,44 +369,52 @@ class _HomeTabState extends State<HomeTab> {
     }
     return SafeArea(
       child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Greeting
-              Text(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Greeting with padding
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Text(
                 '${_getGreeting()}, ${_getUserName()}',
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
                 ),
               ),
+            ),
             const SizedBox(height: 24),
             
-            // Today's Mood and Streak
-            Row(
-              children: [
-                Expanded(
-                  child: _buildMoodCard(),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildStreakCard(),
-                ),
-              ],
+            // Today's Mood and Streak with padding
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildMoodCard(),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildStreakCard(),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 32),
             
-            // Featured Meditations
-            const Text(
-              'Featured Meditations',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
+            // Featured Meditations title with padding
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Featured Meditations',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
             const SizedBox(height: 16),
+            // Meditation list - full width scroll with left padding only
             SizedBox(
               height: 240,
               child: _meditations.isEmpty
@@ -422,6 +448,7 @@ class _HomeTabState extends State<HomeTab> {
                     )
                   : ListView.builder(
                       scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.only(left: 20, right: 20),
                       itemCount: _meditations.length,
                       itemBuilder: (context, index) {
                         final meditation = _meditations[index];
@@ -446,26 +473,32 @@ class _HomeTabState extends State<HomeTab> {
             ),
             const SizedBox(height: 32),
             
-            // Categories
-            const Text(
-              'Categories',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
+            // Categories with padding
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'Categories',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
             const SizedBox(height: 16),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                _buildCategoryChip('Stress', const Color(0xFFE8F5E9)),
-                _buildCategoryChip('Anxiety', const Color(0xFFE3F2FD)),
-                _buildCategoryChip('Sleep', const Color(0xFFD1F2EB)),
-                _buildCategoryChip('Focus', const Color(0xFFFFF3E0)),
-                _buildCategoryChip('Meditation', const Color(0xFFF3E5F5)),
-                _buildCategoryChip('Calm', const Color(0xFFFCE4EC)),
-              ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  _buildCategoryChip('Stress', const Color(0xFFE8F5E9)),
+                  _buildCategoryChip('Anxiety', const Color(0xFFE3F2FD)),
+                  _buildCategoryChip('Sleep', const Color(0xFFD1F2EB)),
+                  _buildCategoryChip('Focus', const Color(0xFFFFF3E0)),
+                  _buildCategoryChip('Meditation', const Color(0xFFF3E5F5)),
+                  _buildCategoryChip('Calm', const Color(0xFFFCE4EC)),
+                ],
+              ),
             ),
             const SizedBox(height: 20),
           ],
@@ -475,56 +508,73 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Widget _buildMoodCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Today's Mood",
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.black54,
+    return GestureDetector(
+      onTap: () async {
+        // Navigate to Mood Log Page
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MoodLogPage()),
+        );
+        
+        // Reload data if mood was logged
+        if (result == true && mounted) {
+          _loadData();
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
             ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50).withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.sentiment_satisfied_alt,
-                  color: Color(0xFF4CAF50),
-                  size: 24,
-                ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Today's Mood",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.black54,
               ),
-              const SizedBox(width: 12),
-              const Text(
-                'Calm',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4CAF50).withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.sentiment_satisfied_alt,
+                    color: Color(0xFF4CAF50),
+                    size: 24,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Track Mood',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -572,26 +622,28 @@ class _HomeTabState extends State<HomeTab> {
                 ),
               ),
               const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '$streakDays',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      height: 1,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$streakDays',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        height: 1,
+                      ),
                     ),
-                  ),
-                  const Text(
-                    'days',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black54,
+                    const Text(
+                      'days',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black54,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
