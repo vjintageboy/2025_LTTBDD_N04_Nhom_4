@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../home/home_page.dart';
 import 'login_page.dart';
+import '../../services/firestore_service.dart';
+import '../../models/user_profile.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -47,6 +49,18 @@ class _SignUpPageState extends State<SignUpPage> {
       // Update display name
       await userCredential.user?.updateDisplayName(_nameController.text.trim());
 
+      // ✨ Tạo user profile trong Firestore
+      final firestoreService = FirestoreService();
+      final profile = UserProfile(
+        profileId: userCredential.user!.uid,
+        userId: userCredential.user!.uid,
+        fullName: _nameController.text.trim(),
+        goals: ['Giảm stress', 'Ngủ ngon hơn', 'Tăng tập trung'],
+      );
+      
+      await firestoreService.createUserProfile(profile);
+      print('✅ User profile created in Firestore');
+
       if (mounted) {
         // Navigate to home page
         Navigator.pushReplacement(
@@ -68,6 +82,15 @@ class _SignUpPageState extends State<SignUpPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
