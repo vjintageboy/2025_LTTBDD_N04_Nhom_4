@@ -349,20 +349,21 @@ class _HomeTabState extends State<HomeTab> {
         child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
       );
     }
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Greeting
-            Text(
-              '${_getGreeting()}, ${_getUserName()}',
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Greeting
+              Text(
+                '${_getGreeting()}, ${_getUserName()}',
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-            ),
             const SizedBox(height: 24),
             
             // Today's Mood and Streak
