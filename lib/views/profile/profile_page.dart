@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/welcome_page.dart';
+import '../mood/mood_analytics_page.dart';
 import '../../services/firestore_service.dart';
 import '../../models/streak.dart';
-import '../../core/utils/test_data_helper.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -185,7 +185,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   title: 'Statistics',
                   subtitle: 'View your mood analytics',
                   onTap: () {
-                    // TODO: Navigate to statistics page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MoodAnalyticsPage(),
+                      ),
+                    );
                   },
                 ),
                 const SizedBox(height: 12),

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../models/mood_entry.dart';
 import '../../services/firestore_service.dart';
 import 'mood_log_page.dart';
+import 'mood_analytics_page.dart';
 
 class MoodHistoryPage extends StatefulWidget {
   const MoodHistoryPage({super.key});
@@ -115,6 +116,20 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.analytics_outlined, color: Colors.black),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MoodAnalyticsPage(),
+                ),
+              );
+            },
+            tooltip: 'View Analytics',
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50)))
