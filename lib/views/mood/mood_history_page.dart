@@ -6,6 +6,10 @@ import '../../services/firestore_service.dart';
 import 'mood_log_page.dart';
 import 'mood_analytics_page.dart';
 import 'mood_entry_detail_page.dart';
+import 'utils/mood_helpers.dart';
+import 'widgets/mood_filter_bar.dart';
+import 'widgets/mood_empty_state.dart';
+import 'widgets/calendar_legend.dart';
 
 class MoodHistoryPage extends StatefulWidget {
   const MoodHistoryPage({super.key});
@@ -57,57 +61,6 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
           SnackBar(content: Text('Error loading mood history: $e')),
         );
       }
-    }
-  }
-
-  String _getMoodEmoji(int level) {
-    switch (level) {
-      case 1:
-        return '😞';
-      case 2:
-        return '😕';
-      case 3:
-        return '😐';
-      case 4:
-        return '🙂';
-      case 5:
-        return '😄';
-      default:
-        return '😐';
-    }
-  }
-
-  String _getMoodLabel(int level) {
-    switch (level) {
-      case 1:
-        return 'Very Poor';
-      case 2:
-        return 'Poor';
-      case 3:
-        return 'Okay';
-      case 4:
-        return 'Good';
-      case 5:
-        return 'Excellent';
-      default:
-        return 'Okay';
-    }
-  }
-
-  Color _getMoodColor(int level) {
-    switch (level) {
-      case 1:
-        return Colors.red.shade400;
-      case 2:
-        return Colors.orange.shade400;
-      case 3:
-        return Colors.yellow.shade700;
-      case 4:
-        return Colors.lightGreen.shade600;
-      case 5:
-        return Colors.green.shade600;
-      default:
-        return Colors.grey;
     }
   }
 
@@ -281,106 +234,41 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
     );
   }
 
-  Widget _buildMoodFilterBar() {
-    return Container(
-      height: 80,
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.shade200, width: 1),
-        ),
-      ),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: [
-          _buildFilterChip('All', 0, Icons.filter_list),
-          const SizedBox(width: 8),
-          _buildFilterChip('😞 Very Poor', 1, null),
-          const SizedBox(width: 8),
-          _buildFilterChip('😕 Poor', 2, null),
-          const SizedBox(width: 8),
-          _buildFilterChip('😐 Okay', 3, null),
-          const SizedBox(width: 8),
-          _buildFilterChip('🙂 Good', 4, null),
-          const SizedBox(width: 8),
-          _buildFilterChip('😄 Excellent', 5, null),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String label, int value, IconData? icon) {
-    final isSelected = _selectedMoodFilter == value;
-    return FilterChip(
-      selected: isSelected,
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 16, color: isSelected ? Colors.white : Colors.grey.shade700),
-            const SizedBox(width: 6),
-          ],
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : Colors.grey.shade700,
-            ),
-          ),
-        ],
-      ),
-      selectedColor: const Color(0xFF4CAF50),
-      backgroundColor: Colors.grey.shade100,
-      checkmarkColor: Colors.white,
-      onSelected: (selected) {
-        setState(() {
-          _selectedMoodFilter = value;
-        });
-      },
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: isSelected ? const Color(0xFF4CAF50) : Colors.grey.shade300,
-          width: 1.5,
-        ),
-      ),
-    );
-  }
-
   Widget _buildGroupedView() {
     final grouped = _groupedEntries;
-    
-    if (grouped.isEmpty) {
-      return _buildEmptyState();
-    }
-
     final sortedKeys = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
 
     return Column(
       children: [
-        // Mood filter bar (only in Grouped view)
-        _buildMoodFilterBar(),
+        // Mood filter bar (always visible in Grouped view)
+        MoodFilterBar(
+          selectedFilter: _selectedMoodFilter,
+          onFilterChanged: (value) {
+            setState(() {
+              _selectedMoodFilter = value;
+            });
+          },
+        ),
         
-        // Grouped list
+        // Content area
         Expanded(
-          child: RefreshIndicator(
-            onRefresh: _loadMoodEntries,
-            color: const Color(0xFF4CAF50),
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: sortedKeys.length,
-              itemBuilder: (context, index) {
-                final dateKey = sortedKeys[index];
-                final entries = grouped[dateKey]!;
-                final date = DateTime.parse(dateKey);
-                
-                return _buildDateGroup(date, entries);
-              },
-            ),
-          ),
+          child: grouped.isEmpty
+              ? const MoodEmptyState()
+              : RefreshIndicator(
+                  onRefresh: _loadMoodEntries,
+                  color: const Color(0xFF4CAF50),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: sortedKeys.length,
+                    itemBuilder: (context, index) {
+                      final dateKey = sortedKeys[index];
+                      final entries = grouped[dateKey]!;
+                      final date = DateTime.parse(dateKey);
+                      
+                      return _buildDateGroup(date, entries);
+                    },
+                  ),
+                ),
         ),
       ],
     );
@@ -422,17 +310,17 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _getMoodColor(avgMood.round()).withOpacity(0.2),
+                  color: MoodHelpers.getMoodColor(avgMood.round()).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _getMoodColor(avgMood.round()).withOpacity(0.5),
+                    color: MoodHelpers.getMoodColor(avgMood.round()).withOpacity(0.5),
                   ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      _getMoodEmoji(avgMood.round()),
+                      MoodHelpers.getMoodEmoji(avgMood.round()),
                       style: const TextStyle(fontSize: 14),
                     ),
                     const SizedBox(width: 4),
@@ -441,7 +329,7 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: _getMoodColor(avgMood.round()),
+                        color: MoodHelpers.getMoodColor(avgMood.round()),
                       ),
                     ),
                   ],
@@ -466,7 +354,7 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
 
   Widget _buildCalendarView() {
     if (_moodEntries.isEmpty) {
-      return _buildEmptyState();
+      return const MoodEmptyState();
     }
 
     // Group entries by date
@@ -547,7 +435,7 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
                   const SizedBox(height: 24),
                   
                   // Legend
-                  _buildCalendarLegend(),
+                  const CalendarLegend(),
                   
                   const SizedBox(height: 24),
                   
@@ -637,7 +525,7 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
               child: Container(
                 decoration: BoxDecoration(
                   color: avgMood != null
-                      ? _getMoodColor(avgMood.round()).withOpacity(0.3)
+                      ? MoodHelpers.getMoodColor(avgMood.round()).withOpacity(0.3)
                       : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
@@ -670,7 +558,7 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
                         child: Container(
                           padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
-                            color: _getMoodColor(avgMood!.round()),
+                            color: MoodHelpers.getMoodColor(avgMood!.round()),
                             shape: BoxShape.circle,
                           ),
                           child: Text(
@@ -688,63 +576,6 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
               ),
             );
           },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCalendarLegend() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Legend',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            children: [
-              _buildLegendItem('😞', 'Very Poor', Colors.red.shade400),
-              _buildLegendItem('😕', 'Poor', Colors.orange.shade400),
-              _buildLegendItem('😐', 'Okay', Colors.yellow.shade700),
-              _buildLegendItem('🙂', 'Good', Colors.lightGreen.shade600),
-              _buildLegendItem('😄', 'Excellent', Colors.green.shade600),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLegendItem(String emoji, String label, Color color) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 20,
-          height: 20,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: color.withOpacity(0.5)),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          '$emoji $label',
-          style: const TextStyle(fontSize: 12),
         ),
       ],
     );
@@ -794,16 +625,16 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: _getMoodColor(avgMood.round()).withOpacity(0.2),
+                  color: MoodHelpers.getMoodColor(avgMood.round()).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _getMoodColor(avgMood.round()).withOpacity(0.5),
+                    color: MoodHelpers.getMoodColor(avgMood.round()).withOpacity(0.5),
                   ),
                 ),
                 child: Row(
                   children: [
                     Text(
-                      _getMoodEmoji(avgMood.round()),
+                      MoodHelpers.getMoodEmoji(avgMood.round()),
                       style: const TextStyle(fontSize: 18),
                     ),
                     const SizedBox(width: 6),
@@ -812,7 +643,7 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: _getMoodColor(avgMood.round()),
+                        color: MoodHelpers.getMoodColor(avgMood.round()),
                       ),
                     ),
                   ],
@@ -824,42 +655,6 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
         const SizedBox(height: 12),
         ...entries.map((entry) => _buildMoodEntryCard(entry, showDate: false)),
       ],
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            _selectedMoodFilter == 0 ? Icons.mood : Icons.filter_alt_off,
-            size: 64,
-            color: Colors.grey.shade400,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _selectedMoodFilter == 0 
-                ? 'No mood entries yet'
-                : 'No entries for this mood',
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _selectedMoodFilter == 0
-                ? 'Start tracking your mood today!'
-                : 'Try a different filter',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade500,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -938,11 +733,11 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: _getMoodColor(entry.moodLevel).withOpacity(0.1),
+                          color: MoodHelpers.getMoodColor(entry.moodLevel).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          _getMoodEmoji(entry.moodLevel),
+                          MoodHelpers.getMoodEmoji(entry.moodLevel),
                           style: const TextStyle(fontSize: 28),
                         ),
                       ),
@@ -952,11 +747,11 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _getMoodLabel(entry.moodLevel),
+                              MoodHelpers.getMoodLabel(entry.moodLevel),
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
-                                color: _getMoodColor(entry.moodLevel),
+                                color: MoodHelpers.getMoodColor(entry.moodLevel),
                               ),
                             ),
                             const SizedBox(height: 4),
