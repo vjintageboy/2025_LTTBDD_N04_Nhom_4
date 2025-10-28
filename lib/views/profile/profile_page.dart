@@ -1,85 +1,169 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/welcome_page.dart';
+import '../../services/firestore_service.dart';
+import '../../models/streak.dart';
+import '../../core/utils/test_data_helper.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final FirestoreService _firestoreService = FirestoreService();
 
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+    
+    if (user == null) {
+      return const Scaffold(
+        body: Center(child: Text('User not logged in')),
+      );
+    }
 
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(24.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text(
-                  'Profile',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 
-                // User Info Card
+                // User Avatar
                 Container(
-                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF8BC34A),
+                      width: 3,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: const Color(0xFF8BC34A).withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
-                  child: Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundColor: const Color(0xFF4CAF50).withOpacity(0.2),
-                        child: Text(
-                          user?.displayName?.substring(0, 1).toUpperCase() ?? 'U',
-                          style: const TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF4CAF50),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        user?.displayName ?? 'User',
+                  child: CircleAvatar(
+                    radius: 60,
+                    backgroundColor: Colors.white,
+                    child: CircleAvatar(
+                      radius: 56,
+                      backgroundColor: const Color(0xFF8BC34A).withOpacity(0.1),
+                      child: Text(
+                        user.displayName?.substring(0, 1).toUpperCase() ?? 'U',
                         style: const TextStyle(
-                          fontSize: 20,
+                          fontSize: 48,
                           fontWeight: FontWeight.w700,
+                          color: Color(0xFF689F38),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        user?.email ?? '',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
+                
+                // User Name
+                Text(
+                  user.displayName ?? 'User Name',
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1A1A1A),
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                
+                const SizedBox(height: 8),
+                
+                // User Email
+                Text(
+                  user.email ?? 'user@email.com',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                
+                const SizedBox(height: 32),
+                
+                // Streak Cards Row with StreamBuilder
+                StreamBuilder<Streak?>(
+                  stream: _firestoreService.streamStreak(user.uid),
+                  builder: (context, snapshot) {
+                    // Show loading state
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: _buildStreakCardLoading(),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildStreakCardLoading(),
+                          ),
+                        ],
+                      );
+                    }
+                    
+                    // Get streak data or use defaults
+                    final streak = snapshot.data;
+                    final currentStreak = streak?.currentStreak ?? 0;
+                    final longestStreak = streak?.longestStreak ?? 0;
+                    
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: _buildStreakCard(
+                            title: 'Current Streak',
+                            value: '$currentStreak ${currentStreak == 1 ? 'Day' : 'Days'}',
+                            color: const Color(0xFF8BC34A),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildStreakCard(
+                            title: 'Longest Streak',
+                            value: '$longestStreak ${longestStreak == 1 ? 'Day' : 'Days'}',
+                            color: const Color(0xFF689F38),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                
+                const SizedBox(height: 32),
+                
+                // Settings Title
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Settings',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1A1A1A),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 
                 // Profile Options
                 _buildProfileOption(
                   icon: Icons.person_outline,
                   title: 'Edit Profile',
+                  subtitle: 'Update your personal information',
                   onTap: () {
                     // TODO: Navigate to edit profile page
                   },
@@ -89,6 +173,7 @@ class ProfilePage extends StatelessWidget {
                 _buildProfileOption(
                   icon: Icons.notifications_none,
                   title: 'Notifications',
+                  subtitle: 'Manage notification preferences',
                   onTap: () {
                     // TODO: Navigate to notifications settings
                   },
@@ -96,8 +181,19 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(height: 12),
                 
                 _buildProfileOption(
+                  icon: Icons.bar_chart_rounded,
+                  title: 'Statistics',
+                  subtitle: 'View your mood analytics',
+                  onTap: () {
+                    // TODO: Navigate to statistics page
+                  },
+                ),
+                const SizedBox(height: 12),
+                
+                _buildProfileOption(
                   icon: Icons.privacy_tip_outlined,
                   title: 'Privacy & Security',
+                  subtitle: 'Control your privacy settings',
                   onTap: () {
                     // TODO: Navigate to privacy settings
                   },
@@ -107,60 +203,73 @@ class ProfilePage extends StatelessWidget {
                 _buildProfileOption(
                   icon: Icons.help_outline,
                   title: 'Help & Support',
+                  subtitle: 'Get help and contact us',
                   onTap: () {
                     // TODO: Navigate to help page
                   },
                 ),
-                
-                const SizedBox(height: 32),
-                
+
                 // Logout Button
-                ElevatedButton(
-                  onPressed: () async {
-                    final shouldLogout = await _showLogoutDialog(context);
-                    
-                    if (shouldLogout == true) {
-                      try {
-                        await FirebaseAuth.instance.signOut();
-                        
-                        if (context.mounted) {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (context) => const WelcomePage(),
-                            ),
-                            (route) => false,
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Lỗi đăng xuất: ${e.toString()}'),
-                              duration: const Duration(seconds: 3),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      final shouldLogout = await _showLogoutDialog(context);
+                      
+                      if (shouldLogout == true) {
+                        try {
+                          await FirebaseAuth.instance.signOut();
+                          
+                          if (context.mounted) {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (context) => const WelcomePage(),
+                              ),
+                              (route) => false,
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Lỗi đăng xuất: ${e.toString()}'),
+                                duration: const Duration(seconds: 3),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
                         }
                       }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red.shade400,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red.shade600,
+                      side: BorderSide(
+                        color: Colors.red.shade300,
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    'Đăng xuất',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.logout, size: 20, color: Colors.red.shade600),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Đăng xuất',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.red.shade600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 32),
               ],
             ),
           ),
@@ -169,22 +278,143 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
+  Widget _buildTestButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16),
+      label: Text(label),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.amber[700],
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStreakCard({
+    required String title,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.grey[200]!,
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+              letterSpacing: 0.2,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              color: color,
+              letterSpacing: -0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStreakCardLoading() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.grey[200]!,
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 80,
+            height: 14,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: 60,
+            height: 24,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildProfileOption({
     required IconData icon,
     required String title,
+    required String subtitle,
     required VoidCallback onTap,
   }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.grey[200]!,
+            width: 1.5,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withOpacity(0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -193,30 +423,46 @@ class ProfilePage extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF4CAF50).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                color: const Color(0xFF1A1A1A),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
                 icon,
-                color: const Color(0xFF4CAF50),
+                color: Colors.white,
                 size: 24,
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1A1A1A),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right,
-              color: Colors.black26,
+              color: Colors.grey[400],
+              size: 24,
             ),
           ],
         ),
