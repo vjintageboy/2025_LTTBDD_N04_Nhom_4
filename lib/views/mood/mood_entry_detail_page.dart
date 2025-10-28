@@ -123,18 +123,6 @@ class _MoodEntryDetailPageState extends State<MoodEntryDetailPage> {
     }
   }
 
-  void _toggleEdit() {
-    setState(() {
-      if (_isEditing) {
-        // Cancel editing - restore original values
-        _selectedMoodLevel = widget.entry.moodLevel;
-        _selectedFactors = Set<String>.from(widget.entry.emotionFactors);
-        _noteController.text = widget.entry.note ?? '';
-      }
-      _isEditing = !_isEditing;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('EEEE, MMMM dd, yyyy');
@@ -159,22 +147,42 @@ class _MoodEntryDetailPageState extends State<MoodEntryDetailPage> {
         ),
         centerTitle: true,
         actions: [
-          if (!_isEditing)
-            IconButton(
-              icon: const Icon(Icons.edit_outlined, color: Colors.black),
-              onPressed: _toggleEdit,
-              tooltip: 'Edit',
-            )
-          else
-            TextButton(
-              onPressed: _toggleEdit,
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.w600,
+          if (_isEditing) ...[
+            if (_isSaving)
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF4CAF50),
+                    strokeWidth: 2.5,
+                  ),
+                ),
+              )
+            else
+              TextButton(
+                onPressed: _saveChanges,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                ),
+                child: const Text(
+                  'Save',
+                  style: TextStyle(
+                    color: Color(0xFF4CAF50),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
+          ] else
+            IconButton(
+              icon: const Icon(Icons.edit_rounded, color: Color(0xFF4CAF50)),
+              onPressed: () {
+                setState(() {
+                  _isEditing = true;
+                });
+              },
             ),
         ],
       ),
@@ -415,29 +423,6 @@ class _MoodEntryDetailPageState extends State<MoodEntryDetailPage> {
           ),
         ),
       ),
-      floatingActionButton: _isEditing
-          ? FloatingActionButton.extended(
-              onPressed: _isSaving ? null : _saveChanges,
-              backgroundColor: const Color(0xFF4CAF50),
-              icon: _isSaving
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Icon(Icons.save, color: Colors.white),
-              label: Text(
-                _isSaving ? 'Saving...' : 'Save Changes',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            )
-          : null,
     );
   }
 }

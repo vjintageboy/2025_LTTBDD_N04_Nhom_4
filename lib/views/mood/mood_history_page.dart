@@ -252,27 +252,54 @@ class _MoodHistoryPageState extends State<MoodHistoryPage> with SingleTickerProv
                 _buildCalendarView(),
               ],
             ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const MoodLogPage()),
-          );
-          
-          if (result == true) {
-            _loadMoodEntries();
-          }
-        },
-        backgroundColor: const Color(0xFF4CAF50),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Log Mood',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
+      floatingActionButton: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        child: FloatingActionButton.extended(
+          onPressed: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MoodLogPage()),
+            );
+            
+            if (result == true) {
+              _loadMoodEntries();
+            }
+          },
+          backgroundColor: Colors.white,
+          foregroundColor: const Color(0xFF4CAF50),
+          elevation: 2,
+          highlightElevation: 4,
+          icon: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4CAF50).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.add_rounded,
+              color: Color(0xFF4CAF50),
+              size: 20,
+            ),
+          ),
+          label: const Text(
+            'Log Mood',
+            style: TextStyle(
+              color: Color(0xFF4CAF50),
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+              letterSpacing: 0.2,
+            ),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: const Color(0xFF4CAF50).withOpacity(0.2),
+              width: 1.5,
+            ),
           ),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 

@@ -116,6 +116,35 @@ class _MoodLogPageState extends State<MoodLogPage> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          if (_isSaving)
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Color(0xFF4CAF50),
+                  strokeWidth: 2.5,
+                ),
+              ),
+            )
+          else
+            TextButton(
+              onPressed: _saveMoodEntry,
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              child: const Text(
+                'Save',
+                style: TextStyle(
+                  color: Color(0xFF4CAF50),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -281,20 +310,6 @@ class _MoodLogPageState extends State<MoodLogPage> {
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _isSaving ? null : _saveMoodEntry,
-        backgroundColor: const Color(0xFF4CAF50),
-        child: _isSaving
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              )
-            : const Icon(Icons.check, color: Colors.white, size: 28),
       ),
     );
   }
