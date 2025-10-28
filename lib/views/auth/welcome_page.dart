@@ -4,7 +4,7 @@ import 'login_page.dart';
 import 'signup_page.dart';
 
 // ============================================================================
-// WELCOME PAGE - ENTERPRISE GRADE
+// WELCOME PAGE - CEO MODERN DESIGN
 // ============================================================================
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -27,31 +27,31 @@ class _WelcomePageState extends State<WelcomePage>
   void initState() {
     super.initState();
 
-    // Fade animation for logo
+    // Fade animation
     _fadeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1200),
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeIn),
     );
 
-    // Scale animation for logo
+    // Scale animation
     _scaleController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1400),
     );
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(parent: _scaleController, curve: Curves.easeOutBack),
     );
 
-    // Slide animation for buttons
+    // Slide animation
     _slideController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 900),
     );
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
+      begin: const Offset(0, 0.4),
       end: Offset.zero,
     ).animate(
       CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
@@ -60,7 +60,7 @@ class _WelcomePageState extends State<WelcomePage>
     // Start animations
     _fadeController.forward();
     _scaleController.forward();
-    Future.delayed(const Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 400), () {
       if (mounted) _slideController.forward();
     });
   }
@@ -81,18 +81,10 @@ class _WelcomePageState extends State<WelcomePage>
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
             opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 0.1),
-                end: Offset.zero,
-              ).animate(
-                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-              ),
-              child: child,
-            ),
+            child: child,
           );
         },
-        transitionDuration: const Duration(milliseconds: 400),
+        transitionDuration: const Duration(milliseconds: 300),
       ),
     );
   }
@@ -102,152 +94,238 @@ class _WelcomePageState extends State<WelcomePage>
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFF2C6D8),
-              Color(0xFFE8B5D3),
-              Color(0xFFBFD9FF),
-            ],
-            stops: [0.0, 0.5, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Spacer(flex: 2),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: Column(
+            children: [
+              const Spacer(flex: 1),
 
-                // Animated Logo
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: ScaleTransition(
-                    scale: _scaleAnimation,
-                    child: Hero(
-                      tag: 'app_logo',
-                      child: Container(
-                        width: size.width * 0.4,
-                        height: size.width * 0.4,
+              // Animated Logo/Brand
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: Hero(
+                    tag: 'app_logo',
+                    child: Container(
+                      width: size.width * 0.4,
+                      height: size.width * 0.4,
                         decoration: BoxDecoration(
-                          color: Colors.white,
                           borderRadius: BorderRadius.circular(28),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF7B2BB0).withOpacity(0.3),
-                              blurRadius: 30,
-                              offset: const Offset(0, 15),
-                              spreadRadius: 5,
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 40,
+                              offset: const Offset(0, 20),
+                              spreadRadius: 0,
                             ),
                           ],
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(28),
-                          child: Image.asset(
-                            'assets/images/logo.png',
-                            fit: BoxFit.cover,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(28),
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // App Name
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: const Text(
+                  'MOODIKI',
+                  style: TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontSize: 38,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 2,
+                    height: 1,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Tagline
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: Text(
+                  'Track your emotions, elevate your mindset',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.3,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Sub-tagline
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.grey[300]!,
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    'Professional wellbeing platform',
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ),
+
+              const Spacer(flex: 2),
+
+              // Feature highlights
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: Column(
+                  children: [
+                    _FeatureItem(
+                      icon: Icons.psychology_outlined,
+                      text: 'AI-powered insights',
+                    ),
+                    const SizedBox(height: 16),
+                    _FeatureItem(
+                      icon: Icons.trending_up,
+                      text: 'Track progress over time',
+                    ),
+                    const SizedBox(height: 16),
+                    _FeatureItem(
+                      icon: Icons.shield_outlined,
+                      text: 'Private and secure',
+                    ),
+                  ],
+                ),
+              ),
+
+              const Spacer(flex: 1),
+
+              // Animated Buttons
+              SlideTransition(
+                position: _slideAnimation,
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Column(
+                    children: [
+                      // Sign Up Button
+                      _PrimaryButton(
+                        text: 'Get Started',
+                        onPressed: () => _navigateToPage(const SignUpPage()),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Login Button
+                      _SecondaryButton(
+                        text: 'Sign In',
+                        onPressed: () => _navigateToPage(const LoginPage()),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Terms link
+                      Text.rich(
+                        TextSpan(
+                          text: 'By continuing, you agree to our ',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
                           ),
+                          children: [
+                            TextSpan(
+                              text: 'Terms & Privacy',
+                              style: TextStyle(
+                                color: Colors.grey[800],
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
                         ),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
+                    ],
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 40),
-
-                // App Name with Gradient
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: ShaderMask(
-                    shaderCallback: (bounds) => const LinearGradient(
-                      colors: [
-                        Color(0xFF7B2BB0),
-                        Color(0xFF9B4FD0),
-                      ],
-                    ).createShader(bounds),
-                    child: const Text(
-                      'MOODIKI',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 40,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 3,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Slogan
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.25),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: const Text(
-                      'Ghi lại cảm xúc của bạn',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const Spacer(flex: 3),
-
-                // Animated Buttons
-                SlideTransition(
-                  position: _slideAnimation,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Column(
-                      children: [
-                        // Sign Up Button
-                        _PrimaryButton(
-                          text: 'Đăng ký',
-                          onPressed: () => _navigateToPage(const SignUpPage()),
-                          backgroundColor: const Color(0xFF7B2BB0),
-                          foregroundColor: Colors.white,
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Login Button
-                        _SecondaryButton(
-                          text: 'Đăng nhập',
-                          onPressed: () => _navigateToPage(const LoginPage()),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const Spacer(flex: 1),
-              ],
-            ),
+              const SizedBox(height: 24),
+            ],
           ),
         ),
       ),
+    );
+  }
+}
+
+// ============================================================================
+// FEATURE ITEM COMPONENT
+// ============================================================================
+class _FeatureItem extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _FeatureItem({
+    required this.icon,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A1A),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            icon,
+            color: Colors.white,
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          text,
+          style: TextStyle(
+            color: Colors.grey[800],
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -258,14 +336,10 @@ class _WelcomePageState extends State<WelcomePage>
 class _PrimaryButton extends StatefulWidget {
   final String text;
   final VoidCallback onPressed;
-  final Color backgroundColor;
-  final Color foregroundColor;
 
   const _PrimaryButton({
     required this.text,
     required this.onPressed,
-    required this.backgroundColor,
-    required this.foregroundColor,
   });
 
   @override
@@ -276,15 +350,16 @@ class _PrimaryButtonState extends State<_PrimaryButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  bool _isPressed = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 100),
+      duration: const Duration(milliseconds: 150),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -295,33 +370,73 @@ class _PrimaryButtonState extends State<_PrimaryButton>
     super.dispose();
   }
 
+  void _handleTapDown(TapDownDetails details) {
+    setState(() => _isPressed = true);
+    _controller.forward();
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    setState(() => _isPressed = false);
+    _controller.reverse();
+  }
+
+  void _handleTapCancel() {
+    setState(() => _isPressed = false);
+    _controller.reverse();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: ElevatedButton(
-          onPressed: () {
-            _controller.forward().then((_) => _controller.reverse());
-            widget.onPressed();
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: widget.backgroundColor,
-            foregroundColor: widget.foregroundColor,
-            elevation: 8,
-            shadowColor: widget.backgroundColor.withOpacity(0.4),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
+    return GestureDetector(
+      onTapDown: _handleTapDown,
+      onTapUp: _handleTapUp,
+      onTapCancel: _handleTapCancel,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: double.infinity,
+          height: 60,
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A1A),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: _isPressed
+                ? []
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
           ),
-          child: Text(
-            widget.text,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.5,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: widget.onPressed,
+              borderRadius: BorderRadius.circular(16),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      widget.text,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(
+                      Icons.arrow_forward,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -350,15 +465,16 @@ class _SecondaryButtonState extends State<_SecondaryButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  bool _isPressed = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 100),
+      duration: const Duration(milliseconds: 150),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -369,34 +485,66 @@ class _SecondaryButtonState extends State<_SecondaryButton>
     super.dispose();
   }
 
+  void _handleTapDown(TapDownDetails details) {
+    setState(() => _isPressed = true);
+    _controller.forward();
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    setState(() => _isPressed = false);
+    _controller.reverse();
+  }
+
+  void _handleTapCancel() {
+    setState(() => _isPressed = false);
+    _controller.reverse();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: OutlinedButton(
-          onPressed: () {
-            _controller.forward().then((_) => _controller.reverse());
-            widget.onPressed();
-          },
-          style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF7B2BB0),
-            side: const BorderSide(color: Colors.white, width: 2.5),
-            backgroundColor: Colors.white.withOpacity(0.95),
-            elevation: 4,
-            shadowColor: Colors.black.withOpacity(0.1),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+    return GestureDetector(
+      onTapDown: _handleTapDown,
+      onTapUp: _handleTapUp,
+      onTapCancel: _handleTapCancel,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: double.infinity,
+          height: 60,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: _isPressed ? const Color(0xFF1A1A1A) : Colors.grey[300]!,
+              width: 1.5,
             ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: _isPressed
+                ? []
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
           ),
-          child: Text(
-            widget.text,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.5,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: widget.onPressed,
+              borderRadius: BorderRadius.circular(16),
+              child: Center(
+                child: Text(
+                  widget.text,
+                  style: const TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
