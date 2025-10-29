@@ -88,11 +88,16 @@ class Expert {
   static Future<List<Expert>> getAllExperts() async {
     final snapshot = await FirebaseFirestore.instance
         .collection('experts')
-        .where('isAvailable', isEqualTo: true)
-        .orderBy('rating', descending: true)
         .get();
 
-    return snapshot.docs.map((doc) => Expert.fromSnapshot(doc)).toList();
+    // Filter and sort in memory to avoid needing Firestore index
+    final experts = snapshot.docs
+        .map((doc) => Expert.fromSnapshot(doc))
+        .where((expert) => expert.isAvailable)
+        .toList();
+    
+    experts.sort((a, b) => b.rating.compareTo(a.rating));
+    return experts;
   }
 
   // Get experts by specialization
@@ -100,11 +105,16 @@ class Expert {
     final snapshot = await FirebaseFirestore.instance
         .collection('experts')
         .where('specialization', isEqualTo: specialization)
-        .where('isAvailable', isEqualTo: true)
-        .orderBy('rating', descending: true)
         .get();
 
-    return snapshot.docs.map((doc) => Expert.fromSnapshot(doc)).toList();
+    // Filter and sort in memory
+    final experts = snapshot.docs
+        .map((doc) => Expert.fromSnapshot(doc))
+        .where((expert) => expert.isAvailable)
+        .toList();
+    
+    experts.sort((a, b) => b.rating.compareTo(a.rating));
+    return experts;
   }
 
   // Get expert by ID

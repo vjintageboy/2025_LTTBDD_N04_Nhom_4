@@ -4,6 +4,7 @@ import '../mood/mood_log_page.dart';
 import '../mood/mood_history_page.dart';
 import '../meditation/meditation_detail_page.dart';
 import '../profile/profile_page.dart';
+import '../expert/expert_list_page.dart';
 import '../../services/firestore_service.dart';
 import '../../models/meditation.dart';
 import '../../models/streak.dart';
@@ -28,6 +29,9 @@ class _HomePageState extends State<HomePage> {
         break;
       case 1:
         currentTab = const MoodHistoryPage();
+        break;
+      case 2:
+        currentTab = const ExpertListPage();
         break;
       case 3:
         currentTab = const ProfilePage();
