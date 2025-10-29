@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import '../home/home_page.dart';
 import 'signup_page.dart';
+import '../../core/providers/auth_provider.dart';
+import '../../core/constants/app_strings.dart';
+import '../../core/constants/app_colors.dart';
+import '../../shared/widgets/modern_text_field.dart';
+import '../../shared/widgets/primary_button.dart';
+import '../../shared/widgets/social_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,7 +20,6 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
   bool _obscurePassword = true;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -46,51 +51,30 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    final authProvider = context.read<AuthProvider>();
+    
+    final success = await authProvider.signIn(
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
 
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+    if (!mounted) return;
+
+    if (success) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
-      
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
-      }
-    } on FirebaseAuthException catch (e) {
-      String message = 'Đã xảy ra lỗi';
-      if (e.code == 'user-not-found') {
-        message = 'Không tìm thấy tài khoản với email này';
-      } else if (e.code == 'wrong-password') {
-        message = 'Mật khẩu không đúng';
-      } else if (e.code == 'invalid-email') {
-        message = 'Email không hợp lệ';
-      } else if (e.code == 'user-disabled') {
-        message = 'Tài khoản đã bị vô hiệu hóa';
-      }
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: const Color(0xFF1A1A1A),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            margin: const EdgeInsets.all(16),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authProvider.errorMessage ?? AppStrings.signInFailed),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
     }
   }
 
@@ -166,34 +150,34 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                     ),
                     const SizedBox(height: 32),
                     // Email field
-                    _buildModernTextField(
+                    ModernTextField(
                       controller: _emailController,
-                      label: 'Email Address',
-                      hint: 'your.email@company.com',
+                      label: AppStrings.emailAddress,
+                      hint: AppStrings.emailHint,
                       icon: Icons.mail_outline,
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
+                          return AppStrings.enterEmail;
                         }
                         if (!value.contains('@')) {
-                          return 'Please enter a valid email';
+                          return AppStrings.enterValidEmail;
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
                     // Password field
-                    _buildModernTextField(
+                    ModernTextField(
                       controller: _passwordController,
-                      label: 'Password',
-                      hint: '••••••••',
+                      label: AppStrings.password,
+                      hint: AppStrings.passwordHint,
                       icon: Icons.lock_outline,
                       obscureText: _obscurePassword,
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                          color: Colors.grey[600],
+                          color: AppColors.textSecondary,
                           size: 22,
                         ),
                         onPressed: () {
@@ -204,10 +188,10 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
+                          return AppStrings.enterPassword;
                         }
                         if (value.length < 6) {
-                          return 'Password must be at least 6 characters';
+                          return AppStrings.passwordTooShort;
                         }
                         return null;
                       },
@@ -223,10 +207,10 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         ),
-                        child: Text(
-                          'Forgot Password?',
+                        child: const Text(
+                          AppStrings.forgotPassword,
                           style: TextStyle(
-                            color: Colors.grey[700],
+                            color: AppColors.textSecondary,
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
@@ -235,65 +219,34 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                     ),
                     const SizedBox(height: 16),
                     // Login button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _login,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1A1A1A),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          disabledBackgroundColor: const Color(0xFF1A1A1A).withOpacity(0.6),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2.5,
-                                ),
-                              )
-                            : const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Sign In',
-                                    style: TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.3,
-                                    ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Icon(Icons.arrow_forward, size: 20),
-                                ],
-                              ),
-                      ),
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, child) {
+                        return PrimaryButton(
+                          text: AppStrings.signIn,
+                          icon: Icons.arrow_forward,
+                          isLoading: authProvider.isLoading,
+                          onPressed: _login,
+                        );
+                      },
                     ),
                     const SizedBox(height: 16),
                     // Divider
                     Row(
                       children: [
-                        Expanded(child: Divider(color: Colors.grey[300], thickness: 1)),
+                        const Expanded(child: Divider(color: AppColors.borderMedium, thickness: 1)),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
-                            'OR',
+                            AppStrings.or,
                             style: TextStyle(
-                              color: Colors.grey[500],
+                              color: AppColors.textSecondary.withOpacity(0.8),
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 1,
                             ),
                           ),
                         ),
-                        Expanded(child: Divider(color: Colors.grey[300], thickness: 1)),
+                        const Expanded(child: Divider(color: AppColors.borderMedium, thickness: 1)),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -301,9 +254,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                     Row(
                       children: [
                         Expanded(
-                          child: _buildSocialButton(
+                          child: SocialButton(
                             icon: Icons.g_mobiledata,
-                            label: 'Google',
+                            label: AppStrings.google,
                             onPressed: () {
                               // TODO: Implement Google sign in
                             },
@@ -311,9 +264,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: _buildSocialButton(
+                          child: SocialButton(
                             icon: Icons.apple,
-                            label: 'Apple',
+                            label: AppStrings.apple,
                             onPressed: () {
                               // TODO: Implement Apple sign in
                             },
@@ -327,10 +280,10 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'Don\'t have an account? ',
+                          const Text(
+                            AppStrings.dontHaveAccount,
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                               fontSize: 15,
                             ),
                           ),
@@ -347,9 +300,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                             child: const Text(
-                              'Sign Up',
+                              AppStrings.signUp,
                               style: TextStyle(
-                                color: Color(0xFF1A1A1A),
+                                color: AppColors.primary,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15,
                               ),
@@ -363,119 +316,6 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                 ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildModernTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    required IconData icon,
-    TextInputType? keyboardType,
-    bool obscureText = false,
-    Widget? suffixIcon,
-    String? Function(String?)? validator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF1A1A1A),
-            letterSpacing: 0.2,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          obscureText: obscureText,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF1A1A1A),
-          ),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(
-              color: Colors.grey[400],
-              fontWeight: FontWeight.w400,
-            ),
-            prefixIcon: Padding(
-              padding: const EdgeInsets.only(left: 16, right: 12),
-              child: Icon(icon, color: Colors.grey[600], size: 22),
-            ),
-            suffixIcon: suffixIcon,
-            filled: true,
-            fillColor: Colors.grey[50],
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.grey[200]!, width: 1.5),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(color: Colors.grey[200]!, width: 1.5),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xFF1A1A1A), width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xFFE53935), width: 1.5),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xFFE53935), width: 2),
-            ),
-            errorStyle: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          validator: validator,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSocialButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!, width: 1.5),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(14),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: const Color(0xFF1A1A1A), size: 24),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF1A1A1A),
-                ),
-              ),
-            ],
           ),
         ),
       ),
