@@ -1,0 +1,141 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/appointment.dart';
+
+class AppointmentService {
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  // Create appointment
+  Future<String?> createAppointment(Appointment appointment) async {
+    try {
+      final docRef = _db.collection('appointments').doc();
+      final newAppointment = Appointment(
+        appointmentId: docRef.id,
+        userId: appointment.userId,
+        expertId: appointment.expertId,
+        expertName: appointment.expertName,
+        expertAvatarUrl: appointment.expertAvatarUrl,
+        callType: appointment.callType,
+        appointmentDate: appointment.appointmentDate,
+        durationMinutes: appointment.durationMinutes,
+        price: appointment.price,
+        status: AppointmentStatus.confirmed, // Auto-confirm
+        userNotes: appointment.userNotes,
+      );
+
+      await docRef.set(newAppointment.toMap());
+      return docRef.id;
+    } catch (e) {
+      print('❌ Error creating appointment: $e');
+      return null;
+    }
+  }
+
+  // Get user appointments
+  Future<List<Appointment>> getUserAppointments(String userId) async {
+    try {
+      final snapshot = await _db
+          .collection('appointments')
+          .where('userId', isEqualTo: userId)
+          .orderBy('appointmentDate', descending: true)
+          .get();
+
+      return snapshot.docs.map((doc) => Appointment.fromSnapshot(doc)).toList();
+    } catch (e) {
+      print('❌ Error getting appointments: $e');
+      return [];
+    }
+  }
+
+  // Stream user appointments (real-time)
+  Stream<List<Appointment>> streamUserAppointments(String userId) {
+    return _db
+        .collection('appointments')
+        .where('userId', isEqualTo: userId)
+        .orderBy('appointmentDate', descending: true)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Appointment.fromSnapshot(doc)).toList());
+  }
+
+  // Cancel appointment
+  Future<void> cancelAppointment(String appointmentId) async {
+    try {
+      await _db.collection('appointments').doc(appointmentId).update({
+        'status': AppointmentStatus.cancelled.name,
+        'cancelledAt': Timestamp.now(),
+      });
+    } catch (e) {
+      print('❌ Error cancelling appointment: $e');
+      rethrow;
+    }
+  }
+
+  // Get booked time slots for expert on specific date
+  Future<List<String>> getBookedTimeSlots(
+    String expertId,
+    DateTime date,
+  ) async {
+    try {
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
+
+      final snapshot = await _db
+          .collection('appointments')
+          .where('expertId', isEqualTo: expertId)
+          .where('appointmentDate',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('appointmentDate',
+              isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
+          .where('status', isEqualTo: AppointmentStatus.confirmed.name)
+          .get();
+
+      return snapshot.docs.map((doc) {
+        final apt = Appointment.fromSnapshot(doc);
+        return _formatTimeSlot(apt.appointmentDate);
+      }).toList();
+    } catch (e) {
+      print('❌ Error getting booked slots: $e');
+      return [];
+    }
+  }
+
+  String _formatTimeSlot(DateTime dateTime) {
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  // Generate available time slots
+  List<String> generateTimeSlots({
+    required String startTime,
+    required String endTime,
+    required int intervalMinutes,
+  }) {
+    final slots = <String>[];
+    
+    final start = _parseTime(startTime);
+    final end = _parseTime(endTime);
+    
+    DateTime current = start;
+    while (current.isBefore(end)) {
+      final hour = current.hour.toString().padLeft(2, '0');
+      final minute = current.minute.toString().padLeft(2, '0');
+      slots.add('$hour:$minute');
+      current = current.add(Duration(minutes: intervalMinutes));
+    }
+    
+    return slots;
+  }
+
+  DateTime _parseTime(String time) {
+    final parts = time.split(':');
+    final now = DateTime.now();
+    return DateTime(
+      now.year,
+      now.month,
+      now.day,
+      int.parse(parts[0]),
+      int.parse(parts[1]),
+    );
+  }
+}

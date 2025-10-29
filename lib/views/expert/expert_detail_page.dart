@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/expert.dart';
+import '../appointment/booking_page.dart';
 
 class ExpertDetailPage extends StatelessWidget {
   final Expert expert;
@@ -298,11 +299,10 @@ class ExpertDetailPage extends StatelessWidget {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    // TODO: Navigate to booking page
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Booking page coming soon!'),
-                        backgroundColor: Color(0xFF4CAF50),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BookingPage(expert: expert),
                       ),
                     );
                   },
