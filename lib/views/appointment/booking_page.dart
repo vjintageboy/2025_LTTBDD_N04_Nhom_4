@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../models/expert.dart';
 import '../../models/appointment.dart';
 import '../../services/appointment_service.dart';
@@ -578,10 +579,10 @@ class _BookingPageState extends State<BookingPage> {
                   const SizedBox(height: 4),
                   Text(
                     _formatPrice(_currentPrice),
-                    style: const TextStyle(
+                    style: GoogleFonts.roboto(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF4CAF50),
+                      color: const Color(0xFF4CAF50),
                     ),
                   ),
                 ],

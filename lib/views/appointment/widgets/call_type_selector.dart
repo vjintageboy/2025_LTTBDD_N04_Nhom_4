@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../models/appointment.dart';
 
 class CallTypeSelector extends StatelessWidget {
@@ -126,7 +127,9 @@ class CallTypeSelector extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  Wrap(
+                    spacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
                         title,
@@ -138,8 +141,7 @@ class CallTypeSelector extends StatelessWidget {
                               : Colors.grey.shade800,
                         ),
                       ),
-                      if (isRecommended) ...[
-                        const SizedBox(width: 8),
+                      if (isRecommended)
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -158,7 +160,6 @@ class CallTypeSelector extends StatelessWidget {
                             ),
                           ),
                         ),
-                      ],
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -176,7 +177,7 @@ class CallTypeSelector extends StatelessWidget {
             // Price
             Text(
               price,
-              style: TextStyle(
+              style: GoogleFonts.roboto(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: isSelected

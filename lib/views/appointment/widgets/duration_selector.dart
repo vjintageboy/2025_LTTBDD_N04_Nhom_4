@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class DurationSelector extends StatelessWidget {
   final int selectedDuration;
@@ -123,7 +124,7 @@ class DurationSelector extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               _formatPrice(price),
-              style: TextStyle(
+              style: GoogleFonts.roboto(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: isSelected
