@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/welcome_page.dart';
 import '../mood/mood_analytics_page.dart';
+import '../appointment/my_appointments_page.dart';
 import '../../services/firestore_service.dart';
 import '../../models/streak.dart';
 
@@ -189,6 +190,21 @@ class _ProfilePageState extends State<ProfilePage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => const MoodAnalyticsPage(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                
+                _buildProfileOption(
+                  icon: Icons.calendar_month_outlined,
+                  title: 'My Appointments',
+                  subtitle: 'View and manage your bookings',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MyAppointmentsPage(),
                       ),
                     );
                   },

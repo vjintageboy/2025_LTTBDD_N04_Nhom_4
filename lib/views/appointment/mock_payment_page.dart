@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../models/appointment.dart';
 import 'package:intl/intl.dart';
+import 'my_appointments_page.dart';
 
 class MockPaymentPage extends StatefulWidget {
   final Appointment appointment;
@@ -120,9 +121,14 @@ class _MockPaymentPageState extends State<MockPaymentPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigate to My Appointments
+                    // Close all booking dialogs and navigate to My Appointments
                     Navigator.of(context).popUntil((route) => route.isFirst);
-                    // TODO: Navigate to My Appointments tab
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MyAppointmentsPage(),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4CAF50),

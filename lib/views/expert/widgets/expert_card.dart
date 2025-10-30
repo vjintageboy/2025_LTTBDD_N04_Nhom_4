@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../models/expert.dart';
+import '../../../models/appointment.dart';
 
 class ExpertCard extends StatelessWidget {
   final Expert expert;
@@ -13,6 +15,13 @@ class ExpertCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Calculate starting price (Voice 30min)
+    final startingPrice = Appointment.calculatePrice(
+      expertBasePrice: expert.pricePerSession,
+      callType: CallType.voice,
+      duration: 30,
+    );
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -166,23 +175,28 @@ class ExpertCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF4CAF50).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        '\$${expert.pricePerSession.toInt()}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF2E7D32),
+                    // ✅ Show "From ₫XX,XXX"
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'From',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _formatPrice(startingPrice),
+                          style: GoogleFonts.roboto(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF2E7D32),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     Icon(Icons.chevron_right, color: Colors.grey.shade400),
@@ -194,5 +208,12 @@ class ExpertCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatPrice(double price) {
+    return '₫${price.toInt().toString().replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]},',
+        )}';
   }
 }

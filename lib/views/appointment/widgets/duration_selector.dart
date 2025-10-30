@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../models/appointment.dart';
 
 class DurationSelector extends StatelessWidget {
   final int selectedDuration;
+  final CallType callType;
+  final double expertBasePrice; // ✅ NEW
   final ValueChanged<int> onChanged;
-  final double price30;
-  final double price60;
 
   const DurationSelector({
     super.key,
     required this.selectedDuration,
+    required this.callType,
+    required this.expertBasePrice, // ✅ NEW
     required this.onChanged,
-    required this.price30,
-    required this.price60,
   });
 
   @override
@@ -34,7 +35,11 @@ class DurationSelector extends StatelessWidget {
             Expanded(
               child: _buildDurationOption(
                 duration: 30,
-                price: price30,
+                price: Appointment.calculatePrice(
+                  expertBasePrice: expertBasePrice,
+                  callType: callType,
+                  duration: 30,
+                ),
                 isSelected: selectedDuration == 30,
                 onTap: () => onChanged(30),
               ),
@@ -43,7 +48,11 @@ class DurationSelector extends StatelessWidget {
             Expanded(
               child: _buildDurationOption(
                 duration: 60,
-                price: price60,
+                price: Appointment.calculatePrice(
+                  expertBasePrice: expertBasePrice,
+                  callType: callType,
+                  duration: 60,
+                ),
                 isSelected: selectedDuration == 60,
                 onTap: () => onChanged(60),
               ),
@@ -60,21 +69,18 @@ class DurationSelector extends StatelessWidget {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
         decoration: BoxDecoration(
           color: isSelected
               ? const Color(0xFF4CAF50).withOpacity(0.1)
-              : Colors.white,
+              : Colors.grey.shade50,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected
-                ? const Color(0xFF4CAF50)
-                : Colors.grey.shade300,
-            width: isSelected ? 2 : 1.5,
+            color: isSelected ? const Color(0xFF4CAF50) : Colors.grey.shade300,
+            width: 2,
           ),
         ),
         child: Column(
@@ -82,7 +88,6 @@ class DurationSelector extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Radio button
                 Container(
                   width: 20,
                   height: 20,
@@ -94,16 +99,14 @@ class DurationSelector extends StatelessWidget {
                           : Colors.grey.shade400,
                       width: 2,
                     ),
+                    color: isSelected ? const Color(0xFF4CAF50) : Colors.transparent,
                   ),
                   child: isSelected
-                      ? Center(
-                          child: Container(
-                            width: 10,
-                            height: 10,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Color(0xFF4CAF50),
-                            ),
+                      ? const Center(
+                          child: Icon(
+                            Icons.circle,
+                            size: 10,
+                            color: Colors.white,
                           ),
                         )
                       : null,
@@ -116,7 +119,7 @@ class DurationSelector extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     color: isSelected
                         ? const Color(0xFF4CAF50)
-                        : Colors.grey.shade800,
+                        : const Color(0xFF1A1A1A),
                   ),
                 ),
               ],
@@ -127,9 +130,7 @@ class DurationSelector extends StatelessWidget {
               style: GoogleFonts.roboto(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: isSelected
-                    ? const Color(0xFF4CAF50)
-                    : Colors.grey.shade600,
+                color: isSelected ? const Color(0xFF4CAF50) : Colors.grey.shade600,
               ),
             ),
           ],
@@ -139,10 +140,9 @@ class DurationSelector extends StatelessWidget {
   }
 
   String _formatPrice(double price) {
-    if (price >= 1000) {
-      return '₫${(price / 1000).toStringAsFixed(0)}k';
-    } else {
-      return '₫${price.toInt()}';
-    }
+    return '₫${price.toInt().toString().replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]},',
+        )}';
   }
 }

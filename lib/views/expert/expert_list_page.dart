@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/expert.dart';
 import 'widgets/expert_card.dart';
 import 'expert_detail_page.dart';
+import '../appointment/my_appointments_page.dart';
 
 class ExpertListPage extends StatefulWidget {
   const ExpertListPage({super.key});
@@ -84,6 +85,55 @@ class _ExpertListPageState extends State<ExpertListPage> {
         ),
         centerTitle: true,
         automaticallyImplyLeading: false, // Remove back button
+        actions: [
+          // My Appointments button
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.calendar_month_outlined,
+                  color: Color(0xFF4CAF50),
+                  size: 28,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MyAppointmentsPage(),
+                    ),
+                  );
+                },
+                tooltip: 'My Appointments',
+              ),
+              // Optional: Badge for pending appointments count
+              // Positioned(
+              //   right: 8,
+              //   top: 8,
+              //   child: Container(
+              //     padding: const EdgeInsets.all(4),
+              //     decoration: const BoxDecoration(
+              //       color: Colors.red,
+              //       shape: BoxShape.circle,
+              //     ),
+              //     constraints: const BoxConstraints(
+              //       minWidth: 16,
+              //       minHeight: 16,
+              //     ),
+              //     child: const Text(
+              //       '2',
+              //       style: TextStyle(
+              //         color: Colors.white,
+              //         fontSize: 10,
+              //         fontWeight: FontWeight.w700,
+              //       ),
+              //       textAlign: TextAlign.center,
+              //     ),
+              //   ),
+              // ),
+            ],
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: Column(
         children: [

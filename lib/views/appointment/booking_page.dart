@@ -117,7 +117,11 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   double get _currentPrice {
-    return Appointment.calculatePrice(_selectedCallType, _selectedDuration);
+    return Appointment.calculatePrice(
+      expertBasePrice: widget.expert.pricePerSession,
+      callType: _selectedCallType,
+      duration: _selectedDuration,
+    );
   }
 
   String _formatPrice(double price) {
@@ -191,10 +195,10 @@ class _BookingPageState extends State<BookingPage> {
       expertId: widget.expert.expertId,
       expertName: widget.expert.displayName,
       expertAvatarUrl: widget.expert.avatarUrl,
+      expertBasePrice: widget.expert.pricePerSession, // ✅ Save expert base price
       callType: _selectedCallType,
       appointmentDate: appointmentDateTime,
       durationMinutes: _selectedDuration,
-      price: _currentPrice,
       userNotes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
@@ -331,9 +335,9 @@ class _BookingPageState extends State<BookingPage> {
               padding: const EdgeInsets.all(20),
               child: DurationSelector(
                 selectedDuration: _selectedDuration,
+                callType: _selectedCallType,
+                expertBasePrice: widget.expert.pricePerSession, // ✅ Pass expert base price
                 onChanged: _onDurationChanged,
-                price30: Appointment.calculatePrice(_selectedCallType, 30),
-                price60: Appointment.calculatePrice(_selectedCallType, 60),
               ),
             ),
             const SizedBox(height: 8),
