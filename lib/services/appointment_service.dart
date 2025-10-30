@@ -14,10 +14,10 @@ class AppointmentService {
         expertId: appointment.expertId,
         expertName: appointment.expertName,
         expertAvatarUrl: appointment.expertAvatarUrl,
+        expertBasePrice: appointment.expertBasePrice, // ✅ NEW
         callType: appointment.callType,
         appointmentDate: appointment.appointmentDate,
         durationMinutes: appointment.durationMinutes,
-        price: appointment.price,
         status: AppointmentStatus.confirmed, // Auto-confirm
         userNotes: appointment.userNotes,
       );
@@ -36,10 +36,16 @@ class AppointmentService {
       final snapshot = await _db
           .collection('appointments')
           .where('userId', isEqualTo: userId)
-          .orderBy('appointmentDate', descending: true)
           .get();
 
-      return snapshot.docs.map((doc) => Appointment.fromSnapshot(doc)).toList();
+      final appointments = snapshot.docs
+          .map((doc) => Appointment.fromSnapshot(doc))
+          .toList();
+      
+      // Sort trong code thay vì Firestore
+      appointments.sort((a, b) => b.appointmentDate.compareTo(a.appointmentDate));
+      
+      return appointments;
     } catch (e) {
       print('❌ Error getting appointments: $e');
       return [];
@@ -51,10 +57,17 @@ class AppointmentService {
     return _db
         .collection('appointments')
         .where('userId', isEqualTo: userId)
-        .orderBy('appointmentDate', descending: true)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => Appointment.fromSnapshot(doc)).toList());
+        .map((snapshot) {
+          final appointments = snapshot.docs
+              .map((doc) => Appointment.fromSnapshot(doc))
+              .toList();
+          
+          // Sort trong code thay vì Firestore
+          appointments.sort((a, b) => b.appointmentDate.compareTo(a.appointmentDate));
+          
+          return appointments;
+        });
   }
 
   // Cancel appointment

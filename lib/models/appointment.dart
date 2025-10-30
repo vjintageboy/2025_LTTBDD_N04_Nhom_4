@@ -18,12 +18,12 @@ class Appointment {
   final String expertId;
   final String expertName;
   final String? expertAvatarUrl;
+  final double expertBasePrice; // ✅ NEW: Lưu base price của expert tại thời điểm book
   
   final CallType callType;
   final DateTime appointmentDate;
   final int durationMinutes;
   
-  final double price;
   final AppointmentStatus status;
   final String? userNotes;
   
@@ -36,15 +36,24 @@ class Appointment {
     required this.expertId,
     required this.expertName,
     this.expertAvatarUrl,
+    required this.expertBasePrice, // ✅ NEW
     required this.callType,
     required this.appointmentDate,
     required this.durationMinutes,
-    required this.price,
     this.status = AppointmentStatus.confirmed,
     this.userNotes,
     DateTime? createdAt,
     this.cancelledAt,
   }) : createdAt = createdAt ?? DateTime.now();
+
+  // ✅ Getter: Tính giá động
+  double get price {
+    return calculatePrice(
+      expertBasePrice: expertBasePrice,
+      callType: callType,
+      duration: durationMinutes,
+    );
+  }
 
   // Getters
   String get callTypeLabel {
@@ -71,10 +80,25 @@ class Appointment {
     return appointmentDate.add(Duration(minutes: durationMinutes));
   }
 
-  // Calculate price based on call type and duration
-  static double calculatePrice(CallType callType, int duration) {
-    final basePricePerHour = callType == CallType.voice ? 100000.0 : 150000.0;
-    return duration == 30 ? basePricePerHour / 2 : basePricePerHour;
+  // ✅ Calculate price based on expert base price, call type and duration
+  static double calculatePrice({
+    required double expertBasePrice,
+    required CallType callType,
+    required int duration,
+  }) {
+    double finalPrice = expertBasePrice;
+    
+    // Voice Call = 67% of Video Call
+    if (callType == CallType.voice) {
+      finalPrice = finalPrice * 0.67;
+    }
+    
+    // 30min = 50% of 60min
+    if (duration == 30) {
+      finalPrice = finalPrice * 0.5;
+    }
+    
+    return finalPrice;
   }
 
   // Convert to Map for Firestore
@@ -85,10 +109,10 @@ class Appointment {
       'expertId': expertId,
       'expertName': expertName,
       'expertAvatarUrl': expertAvatarUrl,
+      'expertBasePrice': expertBasePrice, // ✅ NEW
       'callType': callType.name,
       'appointmentDate': Timestamp.fromDate(appointmentDate),
       'durationMinutes': durationMinutes,
-      'price': price,
       'status': status.name,
       'userNotes': userNotes,
       'createdAt': Timestamp.fromDate(createdAt),
@@ -105,13 +129,13 @@ class Appointment {
       expertId: data['expertId'] ?? '',
       expertName: data['expertName'] ?? '',
       expertAvatarUrl: data['expertAvatarUrl'],
+      expertBasePrice: (data['expertBasePrice'] ?? 150000.0).toDouble(), // ✅ NEW
       callType: CallType.values.firstWhere(
         (e) => e.name == data['callType'],
         orElse: () => CallType.video,
       ),
       appointmentDate: (data['appointmentDate'] as Timestamp).toDate(),
       durationMinutes: data['durationMinutes'] ?? 60,
-      price: (data['price'] ?? 0.0).toDouble(),
       status: AppointmentStatus.values.firstWhere(
         (e) => e.name == data['status'],
         orElse: () => AppointmentStatus.confirmed,
@@ -133,10 +157,10 @@ class Appointment {
       expertId: expertId,
       expertName: expertName,
       expertAvatarUrl: expertAvatarUrl,
+      expertBasePrice: expertBasePrice, // ✅ NEW
       callType: callType,
       appointmentDate: appointmentDate,
       durationMinutes: durationMinutes,
-      price: price,
       status: status ?? this.status,
       userNotes: userNotes,
       createdAt: createdAt,
