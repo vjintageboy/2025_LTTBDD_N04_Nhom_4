@@ -79,20 +79,27 @@ class AppointmentService {
       final startOfDay = DateTime(date.year, date.month, date.day);
       final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
 
+      // Simplified query - chỉ filter theo expertId
       final snapshot = await _db
           .collection('appointments')
           .where('expertId', isEqualTo: expertId)
-          .where('appointmentDate',
-              isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
-          .where('appointmentDate',
-              isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
-          .where('status', isEqualTo: AppointmentStatus.confirmed.name)
           .get();
 
-      return snapshot.docs.map((doc) {
-        final apt = Appointment.fromSnapshot(doc);
-        return _formatTimeSlot(apt.appointmentDate);
-      }).toList();
+      // Filter trong code thay vì Firestore
+      final bookedSlots = snapshot.docs
+          .map((doc) => Appointment.fromSnapshot(doc))
+          .where((apt) {
+            // Filter: status = confirmed
+            if (apt.status != AppointmentStatus.confirmed) return false;
+            
+            // Filter: date trong khoảng startOfDay -> endOfDay
+            return apt.appointmentDate.isAfter(startOfDay.subtract(const Duration(seconds: 1))) &&
+                   apt.appointmentDate.isBefore(endOfDay.add(const Duration(seconds: 1)));
+          })
+          .map((apt) => _formatTimeSlot(apt.appointmentDate))
+          .toList();
+
+      return bookedSlots;
     } catch (e) {
       print('❌ Error getting booked slots: $e');
       return [];
