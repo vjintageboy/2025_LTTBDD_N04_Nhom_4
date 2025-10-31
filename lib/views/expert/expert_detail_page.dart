@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../models/expert.dart';
+import '../../models/appointment.dart';
 import '../appointment/booking_page.dart';
 
 class ExpertDetailPage extends StatelessWidget {
@@ -276,19 +278,20 @@ class ExpertDetailPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Session Price',
+                    'From',
                     style: TextStyle(
                       fontSize: 12,
+                      fontWeight: FontWeight.w500,
                       color: Colors.grey.shade600,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '\$${expert.pricePerSession.toInt()}',
-                    style: const TextStyle(
+                    _formatPrice(_calculateStartingPrice()),
+                    style: GoogleFonts.roboto(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF4CAF50),
+                      color: const Color(0xFF4CAF50),
                     ),
                   ),
                 ],
@@ -329,6 +332,21 @@ class ExpertDetailPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  double _calculateStartingPrice() {
+    return Appointment.calculatePrice(
+      expertBasePrice: expert.pricePerSession,
+      callType: CallType.voice,
+      duration: 30,
+    );
+  }
+
+  String _formatPrice(double price) {
+    return '₫${price.toInt().toString().replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]},',
+        )}';
   }
 
   Widget _buildSectionTitle(String title) {

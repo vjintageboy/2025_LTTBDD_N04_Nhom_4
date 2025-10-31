@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../models/appointment.dart';
 
 class CallTypeSelector extends StatelessWidget {
@@ -32,7 +31,6 @@ class CallTypeSelector extends StatelessWidget {
           icon: '📞',
           title: 'Voice Call',
           description: 'Audio only consultation',
-          price: '₫100,000/60min',
           isSelected: selectedType == CallType.voice,
           onTap: () => onChanged(CallType.voice),
         ),
@@ -43,7 +41,6 @@ class CallTypeSelector extends StatelessWidget {
           icon: '🎥',
           title: 'Video Call',
           description: 'Face-to-face video consultation',
-          price: '₫150,000/60min',
           isRecommended: true,
           isSelected: selectedType == CallType.video,
           onTap: () => onChanged(CallType.video),
@@ -56,7 +53,6 @@ class CallTypeSelector extends StatelessWidget {
     required String icon,
     required String title,
     required String description,
-    required String price,
     bool isRecommended = false,
     required bool isSelected,
     required VoidCallback onTap,
@@ -171,18 +167,6 @@ class CallTypeSelector extends StatelessWidget {
                     ),
                   ),
                 ],
-              ),
-            ),
-            
-            // Price
-            Text(
-              price,
-              style: GoogleFonts.roboto(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: isSelected
-                    ? const Color(0xFF4CAF50)
-                    : Colors.grey.shade700,
               ),
             ),
           ],
