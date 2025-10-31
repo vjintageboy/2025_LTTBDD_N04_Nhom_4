@@ -41,10 +41,8 @@ class _BookingPageState extends State<BookingPage> {
   @override
   void initState() {
     super.initState();
-    // Set initial selected day to first available day (3 hours from now)
-    _selectedDay = DateTime.now().add(const Duration(hours: 3));
-    _focusedDay = _selectedDay!;
-    _loadAvailableSlots(_selectedDay!);
+    // Don't auto-select a day - let user choose
+    _focusedDay = DateTime.now();
   }
 
   @override
@@ -57,6 +55,17 @@ class _BookingPageState extends State<BookingPage> {
     setState(() => _isLoadingSlots = true);
 
     try {
+      // Check if expert is available on this day
+      final weekday = DateFormat('EEEE').format(date);
+      if (!widget.expert.availability.contains(weekday)) {
+        // Expert not available on this day - show no slots
+        setState(() {
+          _availableTimeSlots = [];
+          _isLoadingSlots = false;
+        });
+        return;
+      }
+
       // Get booked slots from Firestore
       _bookedTimeSlots = await _appointmentService.getBookedTimeSlots(
         widget.expert.expertId,
@@ -363,7 +372,7 @@ class _BookingPageState extends State<BookingPage> {
                     firstDay: DateTime.now(),
                     lastDay: DateTime.now().add(const Duration(days: 14)),
                     focusedDay: _focusedDay,
-                    selectedDayPredicate: (day) => _isSameDay(day, _selectedDay ?? DateTime.now()),
+                    selectedDayPredicate: (day) => _selectedDay != null && _isSameDay(day, _selectedDay!),
                     onDaySelected: _onDaySelected,
                     calendarFormat: CalendarFormat.month,
                     enabledDayPredicate: (day) {
@@ -397,6 +406,42 @@ class _BookingPageState extends State<BookingPage> {
             ),
             const SizedBox(height: 8),
 
+            // Helper message when no date selected
+            if (_selectedDay == null)
+              Container(
+                width: double.infinity,
+                color: Colors.white,
+                padding: const EdgeInsets.all(20),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.touch_app,
+                        size: 48,
+                        color: Colors.grey.shade400,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Select a date to view available time slots',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Choose a date from the calendar above',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
             // Time Slots
             if (_selectedDay != null) ...[
               Container(
@@ -425,12 +470,34 @@ class _BookingPageState extends State<BookingPage> {
                       Center(
                         child: Padding(
                           padding: const EdgeInsets.all(20),
-                          child: Text(
-                            'No available slots for this day',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey.shade600,
-                            ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.event_busy,
+                                size: 48,
+                                color: Colors.grey.shade400,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'No available slots for this day',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade800,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _isDayAvailable(_selectedDay!)
+                                    ? 'All slots are fully booked'
+                                    : 'Expert is not available on ${DateFormat('EEEE').format(_selectedDay!)}s',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade600,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         ),
                       )
@@ -479,65 +546,64 @@ class _BookingPageState extends State<BookingPage> {
                 ),
               ),
               const SizedBox(height: 8),
-            ],
 
-            // Notes
-            Container(
-              width: double.infinity,
-              color: Colors.white,
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Notes (Optional)',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1A1A1A),
+              // Notes - Only show when date is selected
+              Container(
+                width: double.infinity,
+                color: Colors.white,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Notes (Optional)',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1A1A1A),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _notesController,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      hintText: 'Any notes for the expert?',
-                      hintStyle: TextStyle(color: Colors.grey.shade400),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF4CAF50),
-                          width: 2,
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _notesController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        hintText: 'Any notes for the expert?',
+                        hintStyle: TextStyle(color: Colors.grey.shade400),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF4CAF50),
+                            width: 2,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
+              const SizedBox(height: 8),
 
-            // Cancellation Policy
-            Container(
-              width: double.infinity,
-              color: Colors.orange.shade50,
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: Colors.orange.shade700),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'You can cancel up to 4 hours before your appointment',
+              // Cancellation Policy
+              Container(
+                width: double.infinity,
+                color: Colors.orange.shade50,
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.orange.shade700),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'You can cancel up to 4 hours before your appointment',
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.orange.shade700,
@@ -548,6 +614,8 @@ class _BookingPageState extends State<BookingPage> {
                 ],
               ),
             ),
+            ],
+
             const SizedBox(height: 80),
           ],
         ),
@@ -594,10 +662,14 @@ class _BookingPageState extends State<BookingPage> {
               const SizedBox(width: 20),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: _confirmBooking,
+                  onPressed: (_selectedDay != null && _selectedTimeSlot != null)
+                      ? _confirmBooking
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4CAF50),
                     foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey.shade300,
+                    disabledForegroundColor: Colors.grey.shade600,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
