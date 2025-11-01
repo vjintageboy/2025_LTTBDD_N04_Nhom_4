@@ -185,11 +185,15 @@ class _HomeTabState extends State<HomeTab> {
         child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
       );
     }
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return RefreshIndicator(
+      onRefresh: _loadData,
+      color: const Color(0xFF4CAF50),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Greeting with padding
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -312,6 +316,7 @@ class _HomeTabState extends State<HomeTab> {
           ],
         ),
       ),
+    ),
     );
   }
 

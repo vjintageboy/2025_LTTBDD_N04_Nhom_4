@@ -16,6 +16,18 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final FirestoreService _firestoreService = FirestoreService();
 
+  Future<void> _refreshProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Recalculate streak to get latest data
+      await _firestoreService.recalculateStreak(user.uid);
+      // Force rebuild by calling setState
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -28,14 +40,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 20),
+      body: RefreshIndicator(
+        onRefresh: _refreshProfile,
+        color: const Color(0xFF8BC34A),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
                 
                 // User Avatar
                 Container(
@@ -297,6 +313,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ),
+    ),
     );
   }
 
