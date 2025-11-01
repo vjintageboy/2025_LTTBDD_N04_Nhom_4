@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../mood/mood_log_page.dart';
 import '../mood/mood_history_page.dart';
 import '../meditation/meditation_detail_page.dart';
 import '../profile/profile_page.dart';
 import '../expert/expert_list_page.dart';
 import '../streak/streak_history_page.dart';
+import '../admin/admin_badge.dart';
+import '../admin/admin_dashboard_widget.dart';
 import '../../services/firestore_service.dart';
 import '../../models/meditation.dart';
 import '../../models/streak.dart';
+import '../../scripts/migrate_existing_users.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -130,6 +134,8 @@ class _HomeTabState extends State<HomeTab> {
   Streak? _streak;
   bool _isLoading = true;
   String? _errorMessage;
+  bool _isAdmin = false; // ⭐ NEW - Track admin status
+  int _totalUsers = 0; // ⭐ NEW - Total users count
 
   // Dynamic colors for meditation cards
   final List<Color> _meditationColors = [
@@ -148,7 +154,27 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
+    _migrateUser(); // Migrate existing users
     _loadData();
+    _checkAdminStatus(); // ⭐ NEW
+  }
+
+  // Migrate existing Firebase Auth user to Firestore
+  Future<void> _migrateUser() async {
+    await migrateCurrentUser();
+  }
+
+  // ⭐ NEW - Check if user is admin
+  Future<void> _checkAdminStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final isAdmin = await _firestoreService.isAdmin(user.uid);
+    if (mounted) {
+      setState(() {
+        _isAdmin = isAdmin;
+      });
+    }
   }
 
   Future<void> _loadData() async {
@@ -164,15 +190,17 @@ class _HomeTabState extends State<HomeTab> {
       // Recalculate streak to ensure it's up-to-date
       await _firestoreService.recalculateStreak(user.uid);
       
-      // Load meditations and streak in parallel
+      // Load meditations, streak, and total users in parallel
       final results = await Future.wait([
         _firestoreService.getFeaturedMeditations(limit: 3),
         _firestoreService.getOrCreateStreak(user.uid),
+        _loadTotalUsers(), // ⭐ NEW - Load total users count
       ]);
 
       setState(() {
         _meditations = results[0] as List<Meditation>;
         _streak = results[1] as Streak;
+        _totalUsers = results[2] as int;
         _isLoading = false;
       });
     } catch (e) {
@@ -181,6 +209,20 @@ class _HomeTabState extends State<HomeTab> {
         _isLoading = false;
         _errorMessage = 'Không thể tải dữ liệu. Vui lòng thử lại.';
       });
+    }
+  }
+
+  // ⭐ NEW - Load total users count (excluding admins)
+  Future<int> _loadTotalUsers() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('role', isEqualTo: 'user') // ⭐ Only count regular users, not admins
+          .get();
+      return snapshot.docs.length;
+    } catch (e) {
+      print('❌ Error loading total users: $e');
+      return 0;
     }
   }
 
@@ -253,7 +295,10 @@ class _HomeTabState extends State<HomeTab> {
     }
 
     return RefreshIndicator(
-      onRefresh: _loadData,
+      onRefresh: () async {
+        await _loadData();
+        await _checkAdminStatus(); // ⭐ Refresh admin status too
+      },
       color: const Color(0xFF4CAF50),
       child: SafeArea(
         child: SingleChildScrollView(
@@ -261,124 +306,139 @@ class _HomeTabState extends State<HomeTab> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            // Greeting with padding
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: Text(
-                '${_getGreeting()}, ${_getUserName()}',
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            
-            // Today's Mood and Streak with padding
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildMoodCard(),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildStreakCard(),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-            
-            // Featured Meditations title with padding
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'Featured Meditations',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Meditation list - full width scroll with left padding only
-            SizedBox(
-              height: 240,
-              child: _meditations.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.spa_outlined,
-                            size: 48,
-                            color: Colors.grey.shade400,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Chưa có meditations',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ],
+              // ⭐ Greeting with Admin Badge
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${_getGreeting()}, ${_getUserName()}',
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
-                    )
-                  : ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.only(left: 20, right: 20),
-                      itemCount: _meditations.length,
-                      itemBuilder: (context, index) {
-                        final meditation = _meditations[index];
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            right: index < _meditations.length - 1 ? 16 : 0,
-                          ),
-                          child: _buildMeditationCard(
-                            meditation,
-                            _getMeditationColor(index),
-                          ),
-                        );
-                      },
                     ),
-            ),
-            const SizedBox(height: 32),
-            
-            // Categories with padding
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                'Categories',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
+                    // ⭐ Admin Badge
+                    if (_isAdmin) const AdminBadge(),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  _buildCategoryChip('Stress', const Color(0xFFE8F5E9)),
-                  _buildCategoryChip('Anxiety', const Color(0xFFE3F2FD)),
-                  _buildCategoryChip('Sleep', const Color(0xFFD1F2EB)),
-                  _buildCategoryChip('Focus', const Color(0xFFFFF3E0)),
-                  _buildCategoryChip('Meditation', const Color(0xFFF3E5F5)),
-                  _buildCategoryChip('Calm', const Color(0xFFFCE4EC)),
-                ],
+              const SizedBox(height: 24),
+
+              // ⭐ Admin Dashboard (if admin)
+              if (_isAdmin)
+                AdminDashboardWidget(
+                  meditations: _meditations,
+                  totalUsers: _totalUsers,
+                ),
+              
+              // Today's Mood and Streak with padding
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _buildMoodCard(),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildStreakCard(),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 32),
+              
+              // Featured Meditations title with padding
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'Featured Meditations',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Meditation list - full width scroll with left padding only
+              SizedBox(
+                height: 240,
+                child: _meditations.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.spa_outlined,
+                              size: 48,
+                              color: Colors.grey.shade400,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Chưa có meditations',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.only(left: 20, right: 20),
+                        itemCount: _meditations.length,
+                        itemBuilder: (context, index) {
+                          final meditation = _meditations[index];
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              right: index < _meditations.length - 1 ? 16 : 0,
+                            ),
+                            child: _buildMeditationCard(
+                              meditation,
+                              _getMeditationColor(index),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+              const SizedBox(height: 32),
+              
+              // Categories with padding
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  'Categories',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    _buildCategoryChip('Stress', const Color(0xFFE8F5E9)),
+                    _buildCategoryChip('Anxiety', const Color(0xFFE3F2FD)),
+                    _buildCategoryChip('Sleep', const Color(0xFFD1F2EB)),
+                    _buildCategoryChip('Focus', const Color(0xFFFFF3E0)),
+                    _buildCategoryChip('Meditation', const Color(0xFFF3E5F5)),
+                    _buildCategoryChip('Calm', const Color(0xFFFCE4EC)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 

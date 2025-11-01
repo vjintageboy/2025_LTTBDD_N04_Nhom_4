@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/firestore_service.dart';
 import '../../models/user_profile.dart';
+import '../../models/app_user.dart';
 import '../constants/app_constants.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
@@ -63,6 +64,14 @@ class AuthProvider extends ChangeNotifier {
       );
 
       await _firestoreService.createUserProfile(profile);
+
+      // Create Firestore user document (for role system)
+      await _firestoreService.createOrUpdateUser(
+        uid: userCredential.user!.uid,
+        email: email.trim(),
+        displayName: fullName.trim(),
+        role: UserRole.user, // Default role is 'user'
+      );
 
       _status = AuthStatus.authenticated;
       _currentUser = userCredential.user;
