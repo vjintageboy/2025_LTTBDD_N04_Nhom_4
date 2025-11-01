@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../mood/mood_log_page.dart';
 import '../mood/mood_history_page.dart';
 import '../meditation/meditation_detail_page.dart';
+import '../meditation/meditation_library_page.dart';
 import '../profile/profile_page.dart';
 import '../expert/expert_list_page.dart';
 import '../streak/streak_history_page.dart';
@@ -192,7 +193,7 @@ class _HomeTabState extends State<HomeTab> {
       
       // Load meditations, streak, and total users in parallel
       final results = await Future.wait([
-        _firestoreService.getFeaturedMeditations(limit: 3),
+        _firestoreService.getFeaturedMeditations(limit: 5), // ⭐ Increased to 5
         _firestoreService.getOrCreateStreak(user.uid),
         _loadTotalUsers(), // ⭐ NEW - Load total users count
       ]);
@@ -352,14 +353,48 @@ class _HomeTabState extends State<HomeTab> {
               const SizedBox(height: 32),
               
               // Featured Meditations title with padding
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  'Featured Meditations',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                  ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Featured Meditations',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MeditationLibraryPage(),
+                          ),
+                        );
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text(
+                            'View All',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF4CAF50),
+                            ),
+                          ),
+                          SizedBox(width: 4),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 12,
+                            color: Color(0xFF4CAF50),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
