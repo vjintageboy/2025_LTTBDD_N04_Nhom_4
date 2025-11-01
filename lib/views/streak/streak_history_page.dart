@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../../services/firestore_service.dart';
 import '../../models/streak.dart';
+import 'streak_debug_page.dart';
 
 class StreakHistoryPage extends StatefulWidget {
   const StreakHistoryPage({super.key});
@@ -75,6 +76,18 @@ class _StreakHistoryPageState extends State<StreakHistoryPage> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          // Debug tools button
+          IconButton(
+            icon: const Icon(Icons.bug_report, color: Colors.grey),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const StreakDebugPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(
