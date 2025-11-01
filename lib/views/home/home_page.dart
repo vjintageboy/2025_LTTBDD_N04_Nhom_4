@@ -129,6 +129,21 @@ class _HomeTabState extends State<HomeTab> {
   List<Meditation> _meditations = [];
   Streak? _streak;
   bool _isLoading = true;
+  String? _errorMessage;
+
+  // Dynamic colors for meditation cards
+  final List<Color> _meditationColors = [
+    Colors.green.shade700,
+    Colors.blue.shade400,
+    Colors.purple.shade400,
+    Colors.orange.shade400,
+    Colors.pink.shade400,
+    Colors.teal.shade400,
+  ];
+
+  Color _getMeditationColor(int index) {
+    return _meditationColors[index % _meditationColors.length];
+  }
 
   @override
   void initState() {
@@ -139,6 +154,11 @@ class _HomeTabState extends State<HomeTab> {
   Future<void> _loadData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
     try {
       // Recalculate streak to ensure it's up-to-date
@@ -159,6 +179,7 @@ class _HomeTabState extends State<HomeTab> {
       print('❌ Error loading data: $e');
       setState(() {
         _isLoading = false;
+        _errorMessage = 'Không thể tải dữ liệu. Vui lòng thử lại.';
       });
     }
   }
@@ -185,6 +206,52 @@ class _HomeTabState extends State<HomeTab> {
         child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
       );
     }
+
+    // Error state
+    if (_errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: Colors.red.shade300,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                _errorMessage!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _loadData,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Thử lại'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4CAF50),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return RefreshIndicator(
       onRefresh: _loadData,
       color: const Color(0xFF4CAF50),
@@ -266,18 +333,13 @@ class _HomeTabState extends State<HomeTab> {
                       itemCount: _meditations.length,
                       itemBuilder: (context, index) {
                         final meditation = _meditations[index];
-                        final colors = [
-                          Colors.green.shade700,
-                          Colors.blue.shade400,
-                          Colors.purple.shade400,
-                        ];
                         return Padding(
                           padding: EdgeInsets.only(
                             right: index < _meditations.length - 1 ? 16 : 0,
                           ),
                           child: _buildMeditationCard(
                             meditation,
-                            colors[index % colors.length],
+                            _getMeditationColor(index),
                           ),
                         );
                       },
