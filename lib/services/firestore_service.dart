@@ -207,6 +207,144 @@ class FirestoreService {
     });
   }
 
+  /// Update streak when user completes an activity (mood log or meditation)
+  Future<void> updateStreakForActivity(String userId) async {
+    try {
+      // Get current streak
+      final currentStreak = await getOrCreateStreak(userId);
+      
+      // Update streak using the model's logic
+      final updatedStreak = currentStreak.updateStreak();
+      
+      // Save to Firestore
+      await _db.collection('streaks').doc(userId).set(updatedStreak.toMap());
+      
+      print('✅ Streak updated: ${updatedStreak.currentStreak} days (longest: ${updatedStreak.longestStreak})');
+    } catch (e) {
+      print('❌ Error updating streak: $e');
+      rethrow;
+    }
+  }
+
+  /// Reset user's streak to zero
+  Future<void> resetStreak(String userId) async {
+    try {
+      await _db.collection('streaks').doc(userId).set({
+        'streakId': userId,
+        'userId': userId,
+        'currentStreak': 0,
+        'longestStreak': 0,
+        'lastActivityDate': null,
+        'totalActivities': 0,
+      });
+      print('✅ Streak reset successfully');
+    } catch (e) {
+      print('❌ Error resetting streak: $e');
+      rethrow;
+    }
+  }
+
+  /// Recalculate streak based on all activity dates
+  Future<void> recalculateStreak(String userId) async {
+    try {
+      // Get all activity dates
+      final activityDates = await getUserActivityDates(userId);
+      
+      if (activityDates.isEmpty) {
+        await resetStreak(userId);
+        return;
+      }
+      
+      // Sort dates in ascending order
+      activityDates.sort((a, b) => a.compareTo(b));
+      
+      int currentStreak = 0;
+      int longestStreak = 0;
+      DateTime? lastDate;
+      
+      for (var date in activityDates) {
+        if (lastDate == null) {
+          // First date
+          currentStreak = 1;
+          longestStreak = 1;
+        } else {
+          final daysDiff = date.difference(lastDate).inDays;
+          
+          if (daysDiff == 1) {
+            // Consecutive day
+            currentStreak++;
+            if (currentStreak > longestStreak) {
+              longestStreak = currentStreak;
+            }
+          } else if (daysDiff > 1) {
+            // Streak broken
+            currentStreak = 1;
+          }
+          // If daysDiff == 0, same day, don't change streak
+        }
+        lastDate = date;
+      }
+      
+      // Check if streak is still active (last activity was today or yesterday)
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final yesterday = today.subtract(const Duration(days: 1));
+      
+      if (lastDate != null) {
+        final lastActivityDay = DateTime(lastDate.year, lastDate.month, lastDate.day);
+        
+        if (!lastActivityDay.isAtSameMomentAs(today) && 
+            !lastActivityDay.isAtSameMomentAs(yesterday)) {
+          // Streak is broken (last activity was more than 1 day ago)
+          currentStreak = 0;
+        }
+      }
+      
+      // Save to database
+      await _db.collection('streaks').doc(userId).set({
+        'streakId': userId,
+        'userId': userId,
+        'currentStreak': currentStreak,
+        'longestStreak': longestStreak,
+        'lastActivityDate': lastDate != null ? Timestamp.fromDate(lastDate) : null,
+        'totalActivities': activityDates.length,
+      });
+      
+      print('✅ Streak recalculated: current=$currentStreak, longest=$longestStreak, total=${activityDates.length}');
+    } catch (e) {
+      print('❌ Error recalculating streak: $e');
+      rethrow;
+    }
+  }
+
+  /// Get all dates where user had activity (meditation or mood log)
+  Future<List<DateTime>> getUserActivityDates(String userId) async {
+    try {
+      final Set<DateTime> activityDates = {};
+      
+      // Get mood log dates
+      final moodSnapshot = await _db
+          .collection('moodEntries')
+          .where('userId', isEqualTo: userId)
+          .orderBy('timestamp', descending: true)
+          .get();
+      
+      for (var doc in moodSnapshot.docs) {
+        final timestamp = (doc.data()['timestamp'] as Timestamp).toDate();
+        final date = DateTime(timestamp.year, timestamp.month, timestamp.day);
+        activityDates.add(date);
+      }
+      
+      // Get meditation completion dates (if you have this collection)
+      // You can add this later when meditation completion is implemented
+      
+      return activityDates.toList()..sort((a, b) => b.compareTo(a));
+    } catch (e) {
+      print('❌ Error getting activity dates: $e');
+      return [];
+    }
+  }
+
   // ============================================================================
   // MEDITATION OPERATIONS
   // ============================================================================
