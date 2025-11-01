@@ -128,26 +128,20 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadMeditations,
+            icon: const Icon(Icons.add),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AddMeditationPage(),
+                ),
+              );
+              if (result == true) {
+                _loadMeditations();
+              }
+            },
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AddMeditationPage(),
-            ),
-          );
-          if (result == true) {
-            _loadMeditations();
-          }
-        },
-        backgroundColor: const Color(0xFF4CAF50),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Meditation'),
       ),
       body: Column(
         children: [
