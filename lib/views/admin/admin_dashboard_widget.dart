@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/meditation.dart';
+import 'add_meditation_page.dart';
+import 'meditation_management_page.dart';
 
 /// Admin Dashboard Widget - Hiển thị statistics và quick actions cho admin
 class AdminDashboardWidget extends StatelessWidget {
@@ -180,11 +182,10 @@ class AdminDashboardWidget extends StatelessWidget {
                 ],
               ),
               onTap: () {
-                // TODO: Navigate to upload meditation page
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Upload Meditation - Coming Soon!'),
-                    backgroundColor: Color(0xFF4CAF50),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddMeditationPage(),
                   ),
                 );
               },
@@ -194,20 +195,19 @@ class AdminDashboardWidget extends StatelessWidget {
           Expanded(
             child: _buildAdminButton(
               context: context,
-              icon: Icons.people_outline,
-              label: 'Manage Users',
+              icon: Icons.spa_outlined,
+              label: 'Manage Meditations',
               gradient: LinearGradient(
                 colors: [
-                  Colors.blue.shade400,
-                  Colors.blue.shade600,
+                  Colors.purple.shade400,
+                  Colors.purple.shade600,
                 ],
               ),
               onTap: () {
-                // TODO: Navigate to user management page
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('User Management - Coming Soon!'),
-                    backgroundColor: Colors.blue,
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MeditationManagementPage(),
                   ),
                 );
               },

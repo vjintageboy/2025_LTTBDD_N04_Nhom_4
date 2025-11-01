@@ -406,6 +406,51 @@ class FirestoreService {
         .map((snapshot) => snapshot.docs.map((doc) => Meditation.fromSnapshot(doc)).toList());
   }
 
+  /// Create a new meditation (Admin only)
+  Future<void> createMeditation(Meditation meditation) async {
+    try {
+      await _db.collection('meditations').doc(meditation.meditationId).set(meditation.toMap());
+      print('✅ Meditation created: ${meditation.title}');
+    } catch (e) {
+      print('❌ Error creating meditation: $e');
+      rethrow;
+    }
+  }
+
+  /// Update meditation (Admin only)
+  Future<void> updateMeditation(String meditationId, Map<String, dynamic> updates) async {
+    try {
+      await _db.collection('meditations').doc(meditationId).update(updates);
+      print('✅ Meditation updated: $meditationId');
+    } catch (e) {
+      print('❌ Error updating meditation: $e');
+      rethrow;
+    }
+  }
+
+  /// Delete meditation (Admin only)
+  Future<void> deleteMeditation(String meditationId) async {
+    try {
+      await _db.collection('meditations').doc(meditationId).delete();
+      print('✅ Meditation deleted: $meditationId');
+    } catch (e) {
+      print('❌ Error deleting meditation: $e');
+      rethrow;
+    }
+  }
+
+  /// Get meditation by ID
+  Future<Meditation?> getMeditationById(String meditationId) async {
+    try {
+      final doc = await _db.collection('meditations').doc(meditationId).get();
+      if (!doc.exists) return null;
+      return Meditation.fromSnapshot(doc);
+    } catch (e) {
+      print('❌ Error getting meditation: $e');
+      return null;
+    }
+  }
+
   // ============================================================================
   // UTILITY FUNCTIONS
   // ============================================================================
