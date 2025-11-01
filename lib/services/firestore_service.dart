@@ -3,6 +3,7 @@ import '../models/user_profile.dart';
 import '../models/mood_entry.dart';
 import '../models/streak.dart';
 import '../models/meditation.dart';
+import '../models/app_user.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -459,6 +460,118 @@ class FirestoreService {
       print('✅ Sample data initialized successfully');
     } catch (e) {
       print('❌ Error initializing sample data: $e');
+    }
+  }
+
+  // ============================================================================
+  // APP USER OPERATIONS (Admin System)
+  // ============================================================================
+
+  /// Create or update user document in Firestore
+  Future<void> createOrUpdateUser({
+    required String uid,
+    required String email,
+    required String displayName,
+    String? photoUrl,
+    UserRole? role,
+  }) async {
+    try {
+      final userDoc = _db.collection('users').doc(uid);
+      final docSnapshot = await userDoc.get();
+
+      if (docSnapshot.exists) {
+        // Update existing user
+        await userDoc.update({
+          'displayName': displayName,
+          'photoUrl': photoUrl,
+          'lastLoginAt': FieldValue.serverTimestamp(),
+        });
+        print('✅ User updated: $email');
+      } else {
+        // Create new user
+        final user = AppUser(
+          id: uid,
+          email: email,
+          displayName: displayName,
+          photoUrl: photoUrl,
+          role: role ?? UserRole.user,
+          createdAt: DateTime.now(),
+          lastLoginAt: DateTime.now(),
+        );
+        await userDoc.set(user.toFirestore());
+        print('✅ User created: $email (${role?.value ?? 'user'})');
+      }
+    } catch (e) {
+      print('❌ Error creating/updating user: $e');
+      rethrow;
+    }
+  }
+
+  /// Get user by ID
+  Future<AppUser?> getUser(String uid) async {
+    try {
+      final doc = await _db.collection('users').doc(uid).get();
+      
+      if (!doc.exists) {
+        print('❌ User not found: $uid');
+        return null;
+      }
+
+      return AppUser.fromFirestore(doc.data()!, doc.id);
+    } catch (e) {
+      print('❌ Error getting user: $e');
+      return null;
+    }
+  }
+
+  /// Stream user data (real-time updates)
+  Stream<AppUser?> streamUser(String uid) {
+    return _db.collection('users').doc(uid).snapshots().map((doc) {
+      if (!doc.exists) return null;
+      return AppUser.fromFirestore(doc.data()!, doc.id);
+    });
+  }
+
+  /// Check if user is admin
+  Future<bool> isAdmin(String uid) async {
+    final user = await getUser(uid);
+    return user?.isAdmin ?? false;
+  }
+
+  /// Update user role (admin only operation)
+  Future<void> updateUserRole(String uid, UserRole role) async {
+    try {
+      await _db.collection('users').doc(uid).update({
+        'role': role.value,
+      });
+      print('✅ User role updated: $uid → ${role.value}');
+    } catch (e) {
+      print('❌ Error updating user role: $e');
+      rethrow;
+    }
+  }
+
+  /// Update last login timestamp
+  Future<void> updateLastLogin(String uid) async {
+    try {
+      await _db.collection('users').doc(uid).update({
+        'lastLoginAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('❌ Error updating last login: $e');
+    }
+  }
+
+  /// Get all users (admin only)
+  Future<List<AppUser>> getAllUsers() async {
+    try {
+      final snapshot = await _db.collection('users').get();
+      return snapshot.docs
+          .map((doc) => AppUser.fromFirestore(doc.data(), doc.id))
+          .toList();
+    } catch (e) {
+      print('❌ Error getting all users: $e');
+      return [];
     }
   }
 }

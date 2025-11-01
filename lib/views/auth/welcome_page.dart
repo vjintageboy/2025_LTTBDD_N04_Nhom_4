@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'login_page.dart';
 import 'signup_page.dart';
+// import 'package:flutter/foundation.dart'; // ✅ Không cần nữa - đã xóa admin setup
+// import '../../scripts/create_admin.dart'; // ✅ Admin đã tạo - comment để không dùng nữa
 
 // ============================================================================
 // WELCOME PAGE - CEO MODERN DESIGN
@@ -89,6 +91,176 @@ class _WelcomePageState extends State<WelcomePage>
     );
   }
 
+  /* ============================================================================
+   * ADMIN SETUP - ĐÃ TẠO XONG, COMMENT ĐỂ TRÁNH TẠO LẠI
+   * ============================================================================
+   * Uncomment nếu cần tạo admin mới hoặc debug
+   * 
+  // Secret admin setup - Long press on logo (only in debug mode)
+  void _showAdminSetupDialog() {
+    if (!kDebugMode) return; // Only in debug mode
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Row(
+          children: const [
+            Icon(Icons.admin_panel_settings, color: Color(0xFF4CAF50)),
+            SizedBox(width: 12),
+            Text(
+              'Admin Setup',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Tạo admin account để quản lý app.',
+              style: TextStyle(fontSize: 15),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildInfoRow('Email:', 'admin@mindfulmoments.com'),
+                  const SizedBox(height: 8),
+                  _buildInfoRow('Password:', 'Admin@123456'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '⚠️ Chỉ chạy 1 lần khi setup app',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.orange.shade700,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Hủy',
+              style: TextStyle(
+                color: Colors.grey,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              
+              // Show loading
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF4CAF50),
+                  ),
+                ),
+              );
+
+              try {
+                await createAdminAccount();
+                
+                // Use Navigator.of with rootNavigator to ensure we have valid context
+                if (!mounted) return;
+                
+                // Close loading dialog
+                Navigator.of(context, rootNavigator: true).pop();
+                
+                // Show success snackbar
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('✅ Admin account created successfully!'),
+                    backgroundColor: Color(0xFF4CAF50),
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+              } catch (e) {
+                // Close loading dialog
+                if (!mounted) return;
+                Navigator.of(context, rootNavigator: true).pop();
+                
+                // Show error snackbar
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('❌ Error: $e'),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 5),
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4CAF50),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Tạo Admin',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey.shade700,
+              fontFamily: 'monospace',
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+  */ // End of commented admin setup code
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -103,6 +275,7 @@ class _WelcomePageState extends State<WelcomePage>
               const Spacer(flex: 1),
 
               // Animated Logo/Brand
+              // ✅ Admin đã tạo - đã xóa long press admin setup
               FadeTransition(
                 opacity: _fadeAnimation,
                 child: ScaleTransition(
