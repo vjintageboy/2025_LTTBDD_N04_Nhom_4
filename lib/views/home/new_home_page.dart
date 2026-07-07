@@ -10,7 +10,6 @@ import '../../services/notification_service.dart';
 import '../../scripts/migrate_existing_users.dart';
 import '../mood/mood_log_page.dart';
 import '../meditation/meditation_detail_page.dart';
-import '../expert/expert_list_page.dart';
 import '../streak/streak_history_page.dart';
 import '../chatbot/chatbot_page.dart';
 import '../notification/notifications_page.dart';
@@ -560,13 +559,6 @@ class _NewHomePageState extends State<NewHomePage>
 
   Widget _buildQuickActions() {
     final actions = [
-      _QuickAction(
-        label: context.l10n.expertConsultation,
-        icon: Icons.medical_services_outlined,
-        bg: const Color(0xFFE0F7F4),
-        iconColor: const Color(0xFF00796B),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExpertListPage())),
-      ),
       _QuickAction(
         label: context.l10n.aiAssistant,
         icon: Icons.smart_toy_outlined,

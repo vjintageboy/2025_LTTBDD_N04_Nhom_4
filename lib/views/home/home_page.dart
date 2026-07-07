@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../mood/mood_history_page.dart';
 import '../profile/profile_page.dart';
 import '../news/news_feed_page.dart';
-import '../expert/expert_list_page.dart';
 import '../chatbot/chatbot_page.dart';
 import '../../core/services/localization_service.dart';
 import '../../core/constants/app_colors.dart';
@@ -32,7 +31,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     NewHomePage(),
     MoodHistoryPage(),
     NewsFeedPage(),
-    ExpertListPage(),
     ProfilePage(),
   ];
 
@@ -125,7 +123,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 }
 
 // ============================================================================
-// GLASSMORPHISM BOTTOM NAV — 5 TABS
+// GLASSMORPHISM BOTTOM NAV — 4 TABS
 // ============================================================================
 class _OsBottomNav extends StatelessWidget {
   final int selectedIndex;
@@ -140,7 +138,6 @@ class _OsBottomNav extends StatelessWidget {
       _NavItem(icon: Icons.home_outlined,        filledIcon: Icons.home_rounded,        label: context.l10n.home),
       _NavItem(icon: Icons.mood_outlined,         filledIcon: Icons.mood_rounded,         label: context.l10n.mood),
       _NavItem(icon: Icons.article_outlined,      filledIcon: Icons.article_rounded,      label: context.l10n.news),
-      _NavItem(icon: Icons.spa_outlined,          filledIcon: Icons.spa_rounded,          label: context.l10n.experts),
       _NavItem(icon: Icons.person_outline_rounded,filledIcon: Icons.person_rounded,       label: context.l10n.profile),
     ];
 
