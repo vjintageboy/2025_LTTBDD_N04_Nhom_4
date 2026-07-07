@@ -164,99 +164,6 @@ class SupabaseService {
   }
 
   // ==========================================
-  // EXPERTS (bảng `experts`)
-  // ==========================================
-
-  /// Lấy danh sách tất cả expert đã được phê duyệt
-  Future<List<Map<String, dynamic>>> getApprovedExperts() async {
-    try {
-      // Primary: only approved experts
-      var experts = await _supabase
-          .from('experts')
-          .select()
-          .eq('is_approved', true)
-          .order('rating', ascending: false);
-
-      var expertList = List<Map<String, dynamic>>.from(experts);
-
-      // Fallback: if no approved experts, show all experts to avoid empty UX
-      if (expertList.isEmpty) {
-        experts = await _supabase
-            .from('experts')
-            .select()
-            .order('rating', ascending: false);
-        expertList = List<Map<String, dynamic>>.from(experts);
-      }
-
-      if (expertList.isEmpty) return [];
-
-      final expertIds = expertList
-          .map((e) => e['id'])
-          .where((id) => id != null)
-          .map((id) => id.toString())
-          .toSet()
-          .toList();
-
-      List<Map<String, dynamic>> users = [];
-      if (expertIds.isNotEmpty) {
-        try {
-          users = List<Map<String, dynamic>>.from(
-            await _supabase
-                .from('users')
-                .select('id, full_name, avatar_url, email')
-                .inFilter('id', expertIds),
-          );
-        } catch (e) {
-          // Keep experts visible even if users table query fails due RLS
-          debugPrint('⚠️ users query failed in getApprovedExperts: $e');
-        }
-      }
-
-      final usersMap = {for (final u in users) u['id']?.toString(): u};
-
-      return expertList.map((e) {
-        final enriched = Map<String, dynamic>.from(e);
-        enriched['users'] = usersMap[e['id']?.toString()];
-        return enriched;
-      }).toList();
-    } catch (e) {
-      debugPrint('❌ getApprovedExperts error: $e');
-      return [];
-    }
-  }
-
-  /// Lấy thông tin 1 expert theo id
-  Future<Map<String, dynamic>?> getExpertById(String expertId) async {
-    try {
-      final expert = await _supabase
-          .from('experts')
-          .select()
-          .eq('id', expertId)
-          .maybeSingle();
-
-      if (expert == null) return null;
-
-      Map<String, dynamic>? user;
-      try {
-        user = await _supabase
-            .from('users')
-            .select('id, full_name, avatar_url, email')
-            .eq('id', expertId)
-            .maybeSingle();
-      } catch (e) {
-        debugPrint('⚠️ users query failed in getExpertById: $e');
-      }
-
-      final enriched = Map<String, dynamic>.from(expert);
-      enriched['users'] = user;
-      return enriched;
-    } catch (e) {
-      debugPrint('❌ getExpertById error: $e');
-      return null;
-    }
-  }
-
-  // ==========================================
   // MOOD ENTRIES (bảng `mood_entries`)
   // ==========================================
 
@@ -285,50 +192,6 @@ class SupabaseService {
     } catch (e) {
       return [];
     }
-  }
-
-  // ==========================================
-  // APPOINTMENTS (bảng `appointments`)
-  // ==========================================
-
-  Future<List<Map<String, dynamic>>> getUserAppointments(String userId) async {
-    try {
-      final response = await _supabase
-          .from('appointments')
-          .select(
-            '*, experts!expert_id(bio, specialization, users!id(full_name, avatar_url))',
-          )
-          .eq('user_id', userId)
-          .order('appointment_date', ascending: false);
-      return List<Map<String, dynamic>>.from(response);
-    } catch (e) {
-      return [];
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> getExpertAppointments(
-    String expertId,
-  ) async {
-    try {
-      final response = await _supabase
-          .from('appointments')
-          .select('*, users!user_id(full_name, avatar_url, email)')
-          .eq('expert_id', expertId)
-          .order('appointment_date', ascending: false);
-      return List<Map<String, dynamic>>.from(response);
-    } catch (e) {
-      return [];
-    }
-  }
-
-  Future<void> updateAppointmentStatus(
-    String appointmentId,
-    String status,
-  ) async {
-    await _supabase
-        .from('appointments')
-        .update({'status': status})
-        .eq('id', appointmentId);
   }
 
   // ==========================================
@@ -500,9 +363,6 @@ class SupabaseService {
       return [];
     }
   }
-
-  // EXPERTS section simplified (using existing methods or cleanup)
-  // getApprovedExperts and getExpertById are already defined above (lines 157-184)
 
   // ==========================================
   // STREAKS (Lấy từ bảng `users`)
