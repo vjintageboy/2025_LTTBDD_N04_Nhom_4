@@ -23,7 +23,6 @@ Future<void> migrateCurrentUser() async {
       id: user.id,
       email: user.email ?? '',
       fullName: fullName,
-      role: 'user',
     );
     debugPrint('migrateCurrentUser: profile upserted');
   } catch (e) {

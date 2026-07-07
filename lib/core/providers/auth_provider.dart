@@ -82,7 +82,6 @@ class AuthProvider extends ChangeNotifier {
             id: res.user!.id,
             email: email.trim(),
             fullName: fullName.trim(),
-            role: 'user',
           );
         } catch (e) {
           debugPrint('Optional profile creation failed: $e');
@@ -288,7 +287,6 @@ class AuthProvider extends ChangeNotifier {
           id: user.id,
           email: user.email ?? '',
           fullName: name,
-          role: 'user',
         );
       }
     } catch (e) {

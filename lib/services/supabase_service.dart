@@ -24,14 +24,16 @@ class SupabaseService {
     required String id,
     required String email,
     required String fullName,
-    String role = 'user',
   }) async {
     try {
+      // Intentionally does NOT write `role`. This upsert runs on every sign-in
+      // via AuthProvider._ensureProfile; writing role here would reset an
+      // existing admin back to 'user'. New rows fall back to the column
+      // default ('user').
       await _supabase.from('users').upsert({
         'id': id,
         'email': email,
         'full_name': fullName,
-        'role': role,
       });
     } catch (e) {
       debugPrint('⚠️ createUserProfile failed: $e');
