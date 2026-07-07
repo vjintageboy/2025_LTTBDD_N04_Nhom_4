@@ -250,30 +250,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                                           fontSize: 16,
                                         ),
                                       ),
-                                      if (widget.post.authorRole ==
-                                          'expert') ...[
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 3,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primaryLight.withValues(alpha: 0.1),
-                                            borderRadius: BorderRadius.circular(
-                                              4,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            context.l10n.expert,
-                                            style: const TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.primaryLight,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+
                                     ],
                                   ),
                                   const SizedBox(height: 2),
@@ -806,7 +783,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       fontSize: 14,
                     ),
                   ),
-                  if (comment.userRole == 'expert' || comment.userRole == 'admin') ...[
+                  if (comment.userRole == 'admin') ...[
                     const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -814,20 +791,15 @@ class _PostDetailPageState extends State<PostDetailPage> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: (comment.userRole == 'admin'
-                                ? Colors.orange
-                                : AppColors.primaryLight)
-                            .withValues(alpha: 0.12),
+                        color: Colors.orange.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(
-                        comment.userRole == 'admin' ? 'Admin' : context.l10n.expert,
+                      child: const Text(
+                        'Admin',
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: comment.userRole == 'admin'
-                              ? Colors.orange.shade700
-                              : AppColors.primaryLight,
+                          color: Colors.orange,
                         ),
                       ),
                     ),

@@ -3,14 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 /// Profile Update Logic Tests
 /// 
 /// Verifies that profile updates go to correct Firestore collections
-/// based on user role (user, expert, admin)
+/// based on user role (user, admin)
 
 void main() {
   group('Profile Update Flow Tests', () {
     test('Regular user updates should affect users + profiles', () {
       // Given
       final role = 'user';
-      final uid = 'test-user-123';
       
       // Expected collections to update
       final expectedCollections = ['users', 'profiles'];
@@ -21,24 +20,9 @@ void main() {
       expect(actualCollections.length, 2);
     });
 
-    test('Expert updates should affect users + expertUsers', () {
-      // Given
-      final role = 'expert';
-      final uid = 'test-expert-456';
-      
-      // Expected collections to update
-      final expectedCollections = ['users', 'expertUsers'];
-      
-      // Verify
-      final actualCollections = _getCollectionsToUpdate(role);
-      expect(actualCollections, containsAll(expectedCollections));
-      expect(actualCollections.length, 2);
-    });
-
     test('Admin updates should affect users only', () {
       // Given
       final role = 'admin';
-      final uid = 'test-admin-789';
       
       // Expected collections to update
       final expectedCollections = ['users'];
@@ -70,13 +54,6 @@ void main() {
       expect(primaryCollection, 'profiles');
     });
 
-    test('Expert loads from expertUsers first', () {
-      final role = 'expert';
-      final primaryCollection = _getPrimaryLoadCollection(role);
-      
-      expect(primaryCollection, 'expertUsers');
-    });
-
     test('Admin loads from users only', () {
       final role = 'admin';
       final primaryCollection = _getPrimaryLoadCollection(role);
@@ -85,7 +62,7 @@ void main() {
     });
 
     test('All roles fallback to users collection', () {
-      final roles = ['user', 'expert', 'admin'];
+      final roles = ['user', 'admin'];
       
       for (final role in roles) {
         final fallbackCollection = 'users';
@@ -159,9 +136,7 @@ void main() {
 List<String> _getCollectionsToUpdate(String role) {
   final collections = <String>['users']; // Always update users
   
-  if (role == 'expert') {
-    collections.add('expertUsers');
-  } else if (role == 'user' || role == 'unknown') {
+  if (role == 'user' || role == 'unknown') {
     // Unknown roles default to user behavior
     collections.add('profiles');
   }
@@ -171,9 +146,7 @@ List<String> _getCollectionsToUpdate(String role) {
 }
 
 String _getPrimaryLoadCollection(String role) {
-  if (role == 'expert') {
-    return 'expertUsers';
-  } else if (role == 'user') {
+  if (role == 'user') {
     return 'profiles';
   } else {
     return 'users'; // Admin or unknown
@@ -189,25 +162,3 @@ bool _canAdminUpdateField(String field) {
   final allowedFields = ['role', 'isBanned', 'banReason', 'bannedAt'];
   return allowedFields.contains(field);
 }
-
-/// Expected Test Results:
-/// 
-/// Profile Update Flow Tests:
-/// ✅ Regular user updates should affect users + profiles
-/// ✅ Expert updates should affect users + expertUsers
-/// ✅ Admin updates should affect users only
-/// ✅ Unknown role defaults to user behavior
-/// 
-/// Data Load Flow Tests:
-/// ✅ Regular user loads from profiles first
-/// ✅ Expert loads from expertUsers first
-/// ✅ Admin loads from users only
-/// ✅ All roles fallback to users collection
-/// 
-/// Firestore Rules Compliance Tests:
-/// ✅ User can update own profile fields (6 fields)
-/// ✅ User CANNOT update admin fields (4 fields)
-/// ✅ Admin can update specific fields (4 fields)
-/// ✅ Admin CANNOT update user profile fields (6 fields)
-/// 
-/// Total: 12 tests, all passing ✅

@@ -38,7 +38,6 @@ Phong cách giao tiếp:
 Tính năng app Moodiki:
 - Meditation sessions (thư giãn, ngủ ngon, giảm stress, tập trung)
 - Mood tracking (ghi nhận tâm trạng hàng ngày)
-- Expert appointments (đặt lịch tư vấn chuyên gia)
 - Streak system (thành tích check-in liên tục)
 
 Lưu ý:

@@ -31,7 +31,7 @@ class NewsPost {
   final bool isAnonymous;
   final String authorName;
   final String? authorAvatarUrl;
-  final String authorRole; // 'user', 'expert', 'admin'
+  final String authorRole; // 'user', 'admin'
 
   final String title;
   final String content;

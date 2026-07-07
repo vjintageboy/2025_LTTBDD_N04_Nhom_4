@@ -13,7 +13,7 @@ class AdminUserManagementPage extends StatefulWidget {
 class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
   final _supabase = Supabase.instance.client;
   String _searchQuery = '';
-  String _filterRole = 'all'; // all, user, expert, admin
+  String _filterRole = 'all'; // all, user, admin
   List<Map<String, dynamic>>? _allUsers;
   bool _isLoading = true;
 

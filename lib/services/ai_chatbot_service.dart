@@ -678,17 +678,6 @@ $userMessage
       return '😊 Theo dõi tâm trạng giúp bạn hiểu rõ hơn về cảm xúc của mình!\n\nMỗi ngày, hãy dành vài giây để ghi lại cảm xúc. Bạn sẽ nhận được:\n\n• Insights về patterns cảm xúc\n• Gợi ý meditations phù hợp\n• Streak và achievements\n\nHôm nay bạn cảm thấy thế nào?';
     }
 
-    // Expert/Appointment
-    if (_containsAny(lowerMessage, [
-      'expert',
-      'chuyên gia',
-      'tư vấn',
-      'appointment',
-      'đặt lịch',
-    ])) {
-      return '👨‍⚕️ Bạn muốn đặt lịch với chuyên gia?\n\nChúng tôi có đội ngũ chuyên gia tâm lý và wellness coaches sẵn sàng hỗ trợ bạn.\n\n**Cách đặt lịch:**\n1. Vào tab "Chuyên gia"\n2. Chọn chuyên gia phù hợp\n3. Chọn thời gian\n4. Xác nhận\n\nCuộc hẹn của bạn sẽ được xác nhận qua email!';
-    }
-
     // Statistics (Admin)
     if (isAdmin &&
         _containsAny(lowerMessage, [

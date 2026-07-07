@@ -52,13 +52,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       // Determine which collection to load from based on role
       DocumentSnapshot? profileDoc;
 
-      if (role == 'expert') {
-        // Load from expertUsers collection
-        profileDoc = await FirebaseFirestore.instance
-            .collection('expertUsers')
-            .doc(user.uid)
-            .get();
-      } else if (role == 'user') {
+      if (role == 'user') {
         // Load from profiles collection (legacy)
         profileDoc = await FirebaseFirestore.instance
             .collection('profiles')
@@ -75,18 +69,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
         final data = profileDoc.data() as Map<String, dynamic>?;
         if (data != null) {
           setState(() {
-            // Load photo - different field names for different roles
-            if (role == 'expert') {
-              // ExpertUser uses 'photoUrl'
-              if (data.containsKey('photoUrl') && data['photoUrl'] != null) {
-                _photoUrl = data['photoUrl'] as String;
-              }
-            } else {
-              // Regular user uses 'photoBase64'
-              if (data.containsKey('photoBase64') &&
-                  data['photoBase64'] != null) {
-                _photoUrl = data['photoBase64'] as String;
-              }
+            // Load photo
+            if (data.containsKey('photoBase64') &&
+                data['photoBase64'] != null) {
+              _photoUrl = data['photoBase64'] as String;
+            } else if (data.containsKey('photoUrl') &&
+                data['photoUrl'] != null) {
+              _photoUrl = data['photoUrl'] as String;
             }
 
             // Load phone number (only in users collection)
@@ -108,29 +97,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
           });
         }
       }
-
-      // For experts, also load from users collection to get profile fields
-      if (role == 'expert') {
-        final usersData = userDoc.data();
-        setState(() {
-          if (usersData.containsKey('phoneNumber') &&
-              usersData['phoneNumber'] != null) {
-            _phoneController.text = usersData['phoneNumber'] as String;
-          }
-          if (usersData.containsKey('gender') &&
-              usersData['gender'] != null) {
-            _gender = usersData['gender'] as String;
-          }
-          if (usersData.containsKey('dateOfBirth') &&
-              usersData['dateOfBirth'] != null) {
-            _dateOfBirth = (usersData['dateOfBirth'] as DateTime).toDate();
-          }
-          if (usersData.containsKey('photoBase64') &&
-              usersData['photoBase64'] != null) {
-            _photoUrl = usersData['photoBase64'] as String;
-          }
-        });
-            }
     } catch (e) {
       debugPrint('Error loading profile: $e');
       if (mounted) {
@@ -206,17 +172,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           .set(photoData, SetOptions(merge: true));
 
       // Update role-specific collections
-      if (role == 'expert') {
-        // For experts: Only update photoBase64 in expertUsers (it's in the model)
-        await FirebaseFirestore.instance
-            .collection('expertUsers')
-            .doc(user.uid)
-            .set({
-              'photoUrl':
-                  base64String, // ExpertUser uses 'photoUrl' not 'photoBase64'
-              'updatedAt': FieldValue.serverDateTime(),
-            }, SetOptions(merge: true));
-      } else if (role == 'user') {
+      if (role == 'user') {
         await FirebaseFirestore.instance
             .collection('profiles')
             .doc(user.uid)
@@ -307,20 +263,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             .set(profileData, SetOptions(merge: true));
 
         // Update role-specific collections
-        if (role == 'expert') {
-          // For experts: Only update basic fields in expertUsers
-          // (gender, dateOfBirth, phoneNumber stay in users collection only)
-          final expertData = {
-            'displayName': profileData['displayName'],
-            'email': profileData['email'],
-            'updatedAt': profileData['updatedAt'],
-          };
-
-          await FirebaseFirestore.instance
-              .collection('expertUsers')
-              .doc(user.uid)
-              .set(expertData, SetOptions(merge: true));
-        } else if (role == 'user') {
+        if (role == 'user') {
           // Update profiles collection (legacy for regular users)
           await FirebaseFirestore.instance
               .collection('profiles')

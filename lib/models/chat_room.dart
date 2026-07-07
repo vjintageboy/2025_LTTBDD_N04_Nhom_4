@@ -3,7 +3,6 @@ enum ChatRoomStatus { active, archived }
 
 class ChatRoom {
   final String id;
-  final String appointmentId;
   final List<String> participants;
   final ChatRoomStatus status;
   final DateTime createdAt;
@@ -15,11 +14,10 @@ class ChatRoom {
 
   ChatRoom({
     required this.id,
-    required this.appointmentId,
     required this.participants,
     required this.status,
     required this.createdAt,
-    this.roomType = 'appointment',
+    this.roomType = 'direct',
     this.directKey,
     this.lastMessage,
     this.lastMessageTime,
@@ -29,7 +27,6 @@ class ChatRoom {
   /// Chuyển object thành map để lưu Supabase
   Map<String, dynamic> toMap() {
     return {
-      'appointment_id': appointmentId.isEmpty ? null : appointmentId,
       'status': status.name,
       'room_type': roomType,
       'direct_key': directKey,
@@ -42,11 +39,10 @@ class ChatRoom {
   factory ChatRoom.fromMap(Map<String, dynamic> data) {
     return ChatRoom(
       id: data['id']?.toString() ?? '',
-      appointmentId: data['appointment_id']?.toString() ?? '',
       participants: _parseParticipants(data['participants']),
       status: _parseStatus(data['status']),
       createdAt: _parseDateTime(data['created_at']),
-      roomType: data['room_type']?.toString() ?? 'appointment',
+      roomType: data['room_type']?.toString() ?? 'direct',
       directKey: data['direct_key']?.toString(),
       lastMessage: data['last_message']?.toString(),
       lastMessageTime: _parseNullableDateTime(data['last_message_time']),

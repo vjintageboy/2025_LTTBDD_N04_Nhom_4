@@ -443,25 +443,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                                   color: Colors.grey.shade600,
                                 ),
                               ),
-                              if (post.authorRole == 'expert')
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primaryLight.withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: const Text(
-                                    'Expert',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.primaryLight,
-                                    ),
-                                  ),
-                                ),
+
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,

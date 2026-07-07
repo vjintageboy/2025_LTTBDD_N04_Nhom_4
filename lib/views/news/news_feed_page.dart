@@ -448,25 +448,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                if (post.authorRole == 'expert') ...[
-                                  const SizedBox(width: 6),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: _kPrimaryContainer,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      context.l10n.expert,
-                                      style: GoogleFonts.manrope(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
-                                        color: _kPrimary,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+
                               ],
                             ),
                             const SizedBox(height: 2),

@@ -202,10 +202,6 @@ class NotificationsPage extends StatelessWidget {
         iconData = Icons.cancel_outlined;
         color = Colors.red;
         break;
-      case 'appointment':
-        iconData = Icons.calendar_today;
-        color = Colors.blue;
-        break;
       default:
         iconData = Icons.notifications;
         color = Colors.grey;
