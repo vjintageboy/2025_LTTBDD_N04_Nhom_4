@@ -6,61 +6,11 @@ import 'dart:convert';
 
 import '../models/chat_room.dart';
 import '../models/chat_message.dart';
-import '../models/appointment.dart';
 import 'supabase_service.dart';
 import '../core/utils/stream_utils.dart';
 
 class ChatService {
   final SupabaseClient _supabase = SupabaseService.instance.client;
-
-  Future<int> syncAppointmentChatRoomsForUser(String userId) async {
-    // Room creation is now handled entirely by Edge Functions.
-    // Client-side sync is no longer needed.
-    return 0;
-  }
-
-  // Create or get existing appointment chat room via Edge Function (bypasses RLS)
-  Future<String> createOrGetChatRoom({
-    required String appointmentId,
-    required String userId,
-    required String expertId,
-  }) async {
-    try {
-      final supabaseUrl = dotenv.env['SUPABASE_URL'] ?? '';
-      final anonKey = dotenv.env['SUPABASE_ANON_KEY'] ?? '';
-      if (supabaseUrl.isEmpty || anonKey.isEmpty) {
-        throw Exception('Supabase not configured');
-      }
-      final edgeFunctionUrl = '$supabaseUrl/functions/v1/create-chat-room';
-
-      final response = await http.post(
-        Uri.parse(edgeFunctionUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': anonKey,
-          'Authorization': 'Bearer $anonKey',
-        },
-        body: jsonEncode({
-          'appointmentId': appointmentId,
-          'userId': userId,
-          'expertId': expertId,
-        }),
-      );
-
-      if (response.statusCode != 200) {
-        final errorBody = jsonDecode(response.body);
-        throw Exception(
-            'Edge Function failed: ${errorBody['error'] ?? response.body}');
-      }
-
-      final data = jsonDecode(response.body);
-      final roomId = data['roomId'] as String;
-      return roomId;
-    } catch (e) {
-      debugPrint('❌ Error creating/getting chat room via Edge Function: $e');
-      rethrow;
-    }
-  }
 
   Future<String> createOrGetDirectChatRoom({
     required String userA,
@@ -99,19 +49,6 @@ class ChatService {
           '❌ Error creating/getting direct chat room via Edge Function: $e');
       rethrow;
     }
-  }
-
-  // Wrapper for backward compatibility
-  Future<String> createChatRoom({
-    required String appointmentId,
-    required String userId,
-    required String expertId,
-  }) async {
-    return createOrGetChatRoom(
-      appointmentId: appointmentId,
-      userId: userId,
-      expertId: expertId,
-    );
   }
 
   // Send a message
@@ -349,56 +286,5 @@ class ChatService {
   }) async {
     // Typing feature is temporarily disabled.
     return;
-  }
-
-  // Check if user can send message based on appointment status and time
-  bool canSendMessage(Appointment appointment, bool isExpert) {
-    // If cancelled → No chat
-    if (appointment.status == AppointmentStatus.cancelled) {
-      return false;
-    }
-
-    // After consultation → unlimited chat
-    if (appointment.status == AppointmentStatus.completed) {
-      return true;
-    }
-
-    // Confirmed (before/during appointment)
-    if (appointment.status == AppointmentStatus.confirmed) {
-      final now = DateTime.now();
-      final start = appointment.appointmentDate;
-      final end = start.add(Duration(minutes: appointment.durationMinutes));
-
-      // During appointment
-      if (now.isAfter(start) && now.isBefore(end)) {
-        return true;
-      }
-
-      // Pre-appointment → allowed (UI sẽ hạn chế user nếu cần)
-      if (now.isBefore(start)) {
-        return true;
-      }
-
-      // After appointment but not updated
-      if (now.isAfter(end)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  // Check video call permission
-  bool canJoinVideoCall(Appointment appointment) {
-    if (appointment.status != AppointmentStatus.confirmed) return false;
-
-    final now = DateTime.now();
-    final start = appointment.appointmentDate;
-    final end = start.add(Duration(minutes: appointment.durationMinutes));
-
-    // Join allowed 10 minutes before start
-    final allowedStart = start.subtract(const Duration(minutes: 10));
-
-    return now.isAfter(allowedStart) && now.isBefore(end);
   }
 }

@@ -4,22 +4,17 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../models/chat_message.dart';
-import '../../models/appointment.dart';
 import '../../services/chat_service.dart';
-import '../../services/appointment_service.dart'; // To get appointment details
-import '../appointment/booking_page.dart';
 
 class ChatDetailPage extends StatefulWidget {
   final String roomId;
-  final String expertName;
-  final String expertId;
-  final String? targetAvatarUrl; // Added for avatar display
+  final String targetName;
+  final String? targetAvatarUrl;
 
   const ChatDetailPage({
     super.key,
     required this.roomId,
-    required this.expertName,
-    required this.expertId,
+    required this.targetName,
     this.targetAvatarUrl,
   });
 
@@ -30,58 +25,21 @@ class ChatDetailPage extends StatefulWidget {
 class _ChatDetailPageState extends State<ChatDetailPage> {
   final TextEditingController _messageController = TextEditingController();
   final ChatService _chatService = ChatService();
-  final AppointmentService _appointmentService = AppointmentService();
   final ImagePicker _imagePicker = ImagePicker();
   String get _currentUserId => Supabase.instance.client.auth.currentUser?.id ?? '';
 
-  Appointment? _appointment;
   String? _lastMarkedMessageId;
   bool _isSendingMessage = false;
 
   @override
   void initState() {
     super.initState();
-    _loadAppointment();
-  }
-
-  Future<void> _loadAppointment() async {
-    try {
-      final chatRoom = await _chatService.getChatRoom(widget.roomId);
-      if (chatRoom != null) {
-        final appointment = await _appointmentService.getAppointmentById(
-          chatRoom.appointmentId,
-        );
-        if (mounted) {
-          setState(() {
-            _appointment = appointment;
-          });
-        }
-      } else {
-        if (mounted) setState(() {});
-      }
-    } catch (e) {
-      debugPrint('Error loading appointment: $e');
-      if (mounted) setState(() {});
-    }
   }
 
   Future<void> _sendMessage() async {
     if (_isSendingMessage) return;
     final content = _messageController.text.trim();
     if (content.isEmpty) return;
-
-    if (_appointment != null) {
-      final isExpert = _currentUserId != _appointment!.userId;
-      final canSend = _chatService.canSendMessage(_appointment!, isExpert);
-      if (!canSend) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Bạn chưa thể gửi tin nhắn vào lúc này.'),
-          ),
-        );
-        return;
-      }
-    }
 
     setState(() => _isSendingMessage = true);
     try {
@@ -150,44 +108,15 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    bool canSend = false;
-    bool canVideo = false;
-    bool isPreSession = false;
-    bool isExpert = false;
-
-    if (_appointment != null) {
-      isExpert = _currentUserId != _appointment!.userId;
-      canSend = _chatService.canSendMessage(_appointment!, isExpert);
-      canVideo = _chatService.canJoinVideoCall(_appointment!);
-
-      isPreSession =
-          _appointment!.status == AppointmentStatus.confirmed &&
-          DateTime.now().isBefore(_appointment!.appointmentDate);
-    }
-
-    // App Colors (using context to access global theme if possible, but hardcoding for exact design match)
     final primaryColor = Theme.of(context).primaryColor;
-    final primaryLight = primaryColor.withValues(alpha: 0.1);
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // ============================================
-            // 1. HEADER
-            // ============================================
-            _buildHeader(canVideo),
+            _buildHeader(),
 
-            // ============================================
-            // 2. APPOINTMENT INFO BAR
-            // ============================================
-            if (_appointment != null)
-              _buildAppointmentInfoBar(primaryColor, primaryLight),
-
-            // ============================================
-            // 3. CHAT CONTENT
-            // ============================================
             Expanded(
               child: StreamBuilder<List<ChatMessage>>(
                 stream: _chatService.getChatStream(widget.roomId),
@@ -213,7 +142,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final message = messages[index];
-                      // Reverse index logic likely handled by reverse: true (item 0 matches bottom)
                       return _buildMessageItem(message, primaryColor);
                     },
                   );
@@ -221,32 +149,14 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
               ),
             ),
 
-            // ============================================
-            // 4. FOOTER / INPUT
-            // ============================================
-            if (canSend)
-              _buildModernInputFooter(primaryColor)
-            else if (isPreSession && !isExpert)
-              _buildRestrictedFooter()
-            else if (!isExpert)
-              Container(
-                padding: const EdgeInsets.all(16),
-                color: Colors.grey.shade50,
-                child: const Center(
-                  child: Text(
-                    'Chat đã bị khóa.',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ),
-              ),
+            _buildModernInputFooter(primaryColor),
           ],
         ),
       ),
     );
   }
 
-  // Helper: Header
-  Widget _buildHeader(bool canVideo) {
+  Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -263,7 +173,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
           ),
           const SizedBox(width: 16),
 
-          // Avatar
           Container(
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
@@ -291,13 +200,12 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
 
           const SizedBox(width: 12),
 
-          // Name & Status
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.expertName,
+                  widget.targetName,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
@@ -335,39 +243,11 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
             ),
           ),
 
-          // Actions
-          _buildHeaderAction(
-            icon: Icons.videocam_outlined,
-            tooltip: 'Bắt đầu cuộc gọi video',
-            onPressed: canVideo
-                ? () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Tính năng gọi video sắp ra mắt'),
-                      ),
-                    );
-                  }
-                : () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Cuộc gọi video chỉ mở 10 phút trước giờ hẹn.',
-                        ),
-                      ),
-                    );
-                  },
-            color: canVideo ? null : Colors.grey,
-          ),
           _buildHeaderAction(
             icon: Icons.error_outline_rounded,
             tooltip: 'Hỗ trợ khẩn cấp',
             color: Colors.red.shade400,
             onPressed: () => _showSOSDialog(context),
-          ),
-          _buildHeaderAction(
-            icon: Icons.more_vert_rounded,
-            tooltip: 'Thêm',
-            onPressed: _openAddAppointmentSheet,
           ),
         ],
       ),
@@ -388,68 +268,10 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     );
   }
 
-  // Helper: Info Bar
-  Widget _buildAppointmentInfoBar(Color primary, Color primaryLight) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-      color: primary.withValues(alpha: 0.05),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.calendar_today_rounded, size: 14, color: primary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: TextStyle(fontSize: 12, color: primary.withValues(alpha: 0.9)),
-                children: [
-                  const TextSpan(
-                    text: 'Lịch hẹn sắp tới: ',
-                    style: TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  TextSpan(
-                    text: DateFormat(
-                      'HH:mm - dd/MM/yyyy',
-                    ).format(_appointment!.appointmentDate),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              border: Border.all(color: primary.withValues(alpha: 0.2)),
-              borderRadius: BorderRadius.circular(4),
-              color: primary.withValues(alpha: 0.1),
-            ),
-            child: Text(
-              'ĐÃ XÁC NHẬN',
-              style: TextStyle(
-                fontSize: 10,
-                color: primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Helper: Message Item
   Widget _buildMessageItem(ChatMessage message, Color primaryColor) {
     final isMe = message.senderId == _currentUserId;
     final isSystem = message.type == MessageType.system;
 
-    // System Message
     if (isSystem) {
       return Center(
         child: Container(
@@ -472,7 +294,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     }
 
     if (message.type == MessageType.image && message.attachmentUrl != null) {
-      final isMe = message.senderId == _currentUserId;
       return Padding(
         padding: const EdgeInsets.only(bottom: 16),
         child: Row(
@@ -517,17 +338,15 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       );
     }
 
-    // User/Expert Message
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         mainAxisAlignment: isMe
             ? MainAxisAlignment.end
             : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end, // Align bottom for avatar
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) ...[
-            // Expert Avatar
             CircleAvatar(
               radius: 12,
               backgroundImage:
@@ -609,7 +428,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     );
   }
 
-  // Helper: Modern Input
   Widget _buildModernInputFooter(Color primaryColor) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -694,105 +512,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     );
   }
 
-  // Helper: Restricted Footer
-  Widget _buildRestrictedFooter() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.amber.shade50.withValues(alpha: 0.5),
-        border: Border(top: BorderSide(color: Colors.amber.shade100)),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.info_outline_rounded,
-            size: 16,
-            color: Colors.amber.shade600,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              "Chat đầy đủ sẽ mở sau buổi tham vấn.",
-              style: TextStyle(
-                color: Colors.amber.shade800.withValues(alpha: 0.7),
-                fontSize: 12,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: _openShortQuestionForm,
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.amber.shade100,
-              foregroundColor: Colors.amber.shade800,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text(
-              "Gửi câu hỏi",
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _openShortQuestionForm() {
-    final TextEditingController questionController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Gửi câu hỏi ngắn'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Bạn có thể gửi trước câu hỏi hoặc vấn đề cần tư vấn để chuyên gia chuẩn bị.',
-              style: TextStyle(fontSize: 13, color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: questionController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                hintText: 'Nhập câu hỏi của bạn...',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (questionController.text.trim().isNotEmpty) {
-                await _chatService.sendMessage(
-                  roomId: widget.roomId,
-                  senderId: _currentUserId,
-                  content:
-                      '[Câu hỏi trước buổi hẹn]: ${questionController.text.trim()}',
-                );
-                if (!context.mounted) return;
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Đã gửi câu hỏi thành công!')),
-                );
-              }
-            },
-            child: const Text('Gửi'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showSOSDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -820,70 +539,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
             child: const Text('Gọi 115', style: TextStyle(color: Colors.white)),
           ),
         ],
-      ),
-    );
-  }
-
-  void _openAddAppointmentSheet() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Thêm lịch hẹn mới',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Bạn sẽ đặt thêm một lịch hẹn mới với chuyên gia này. '
-                  'Lịch mới sẽ được gắn vào cuộc trò chuyện hiện tại.',
-                  style: TextStyle(fontSize: 13, color: Colors.grey),
-                ),
-                const SizedBox(height: 20),
-
-                ListTile(
-                  leading: const Icon(Icons.calendar_today_rounded),
-                  title: const Text('Đặt thêm lịch hẹn'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _navigateToBooking();
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _navigateToBooking() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BookingPage(
-          expertId: widget.expertId,
-          // Assuming BookingPage can accept chatRoomId to link back,
-          // but based on user snippet it seems it might use it to pre-fill or link.
-          // Since I haven't seen BookingPage content, I'll trust the user's snippet.
-          // If BookingPage doesn't have chatRoomId, this might fail analysis,
-          // but user explicitly asked for this: chatRoomId: widget.roomId
-          // Let's assume user knows BookingPage has this param or will add it.
-          // Wait, I saw BookingPage in file list but didn't read it.
-          // I should verify if it accepts chatRoomId to be safe, but user request
-          // implies I should just add this code. I will assume it's correct.
-          // Actually, strict following of user request:
-          chatRoomId: widget.roomId,
-        ),
       ),
     );
   }
