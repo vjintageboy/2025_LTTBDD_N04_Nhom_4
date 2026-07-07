@@ -1,6 +1,6 @@
-import 'package:n04_app/dummy_firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/notification_service.dart';
 
 class NotificationsPage extends StatelessWidget {
@@ -9,7 +9,7 @@ class NotificationsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final notificationService = NotificationService();
-    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final userId = Supabase.instance.client.auth.currentUser?.id ?? '';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -72,22 +72,7 @@ class NotificationsPage extends StatelessWidget {
               final notification = notifications[index];
               final isRead = notification['isRead'] ?? false;
               final timestamp =
-                  notification['createdAt'] as dynamic; // DateTime or null
-
-              DateTime? dateTime;
-              if (timestamp != null) {
-                // Handle Firestore DateTime
-                if (timestamp.toString().contains('DateTime')) {
-                  // Assuming it's a Firestore DateTime object, but since we get Map<String, dynamic>,
-                  // it might be dynamic. If we imported cloud_firestore, we could cast.
-                  // For safety, let's try to use it if it has toDate() or similar,
-                  // but since we are in a pure Dart file without cloud_firestore import in this snippet (wait, I should import it if needed, but service handles it).
-                  // Actually, the service returns Map<String, dynamic>.
-                  // If it's a DateTime, we can't easily use it without importing cloud_firestore.
-                  // Let's import cloud_firestore or handle it dynamically.
-                  // Better to import cloud_firestore to be safe.
-                }
-              }
+                  notification['created_at'];
 
               return Dismissible(
                 key: Key(notification['id']),
@@ -219,10 +204,15 @@ class NotificationsPage extends StatelessWidget {
 
   String _formatTime(dynamic timestamp) {
     if (timestamp == null) return '';
-    // Handle Firestore DateTime
     try {
-      // Use dynamic dispatch to call toDate() if it exists (Firestore DateTime)
-      final date = (timestamp as dynamic).toDate();
+      DateTime date;
+      if (timestamp is DateTime) {
+        date = timestamp;
+      } else if (timestamp is String) {
+        date = DateTime.parse(timestamp);
+      } else {
+        return '';
+      }
       return DateFormat('MMM d, h:mm a').format(date);
     } catch (e) {
       return '';

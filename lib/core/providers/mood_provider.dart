@@ -1,12 +1,12 @@
-import 'package:n04_app/dummy_firebase.dart';
 import 'package:flutter/foundation.dart';
 import '../../models/mood_entry.dart';
 import '../../services/config_service.dart';
+import '../../services/supabase_service.dart';
 
 enum MoodFilterLevel { all, veryPoor, poor, okay, good, excellent }
 
 class MoodProvider extends ChangeNotifier {
-  final FirestoreService _firestoreService = FirestoreService();
+  final SupabaseService _supabaseService = SupabaseService();
   final ConfigService _configService = ConfigService();
 
   List<MoodEntry> _moodEntries = [];
@@ -118,7 +118,7 @@ class MoodProvider extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      _moodEntries = await _firestoreService.getMoodEntriesForPeriod(
+      _moodEntries = await _supabaseService.getMoodEntriesForPeriod(
         userId: userId,
         start:
             startDate ?? DateTime(selectedMonth.year, selectedMonth.month, 1),
@@ -137,7 +137,7 @@ class MoodProvider extends ChangeNotifier {
 
   // Stream mood entries for real-time updates
   Stream<List<MoodEntry>> streamMoodEntries(String userId) {
-    return _firestoreService.streamMoodEntries(userId);
+    return _supabaseService.streamMoodEntries(userId);
   }
 
   // Create a new mood entry
@@ -163,7 +163,7 @@ class MoodProvider extends ChangeNotifier {
         tags: tags ?? [],
       );
 
-      await _firestoreService.createMoodEntry(entry);
+      await _supabaseService.createMoodEntry(entry);
 
       // Reload entries
       await loadMoodEntries(userId);
@@ -186,7 +186,7 @@ class MoodProvider extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      await _firestoreService.updateMoodEntry(entry.entryId, entry.toMap());
+      await _supabaseService.updateMoodEntry(entry.entryId, entry.toMap());
 
       // Update local list
       final index = _moodEntries.indexWhere((e) => e.entryId == entry.entryId);
@@ -212,7 +212,7 @@ class MoodProvider extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      await _firestoreService.deleteMoodEntry(entryId);
+      await _supabaseService.deleteMoodEntry(entryId);
 
       // Remove from local list
       _moodEntries.removeWhere((e) => e.entryId == entryId);

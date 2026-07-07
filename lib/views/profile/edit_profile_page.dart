@@ -1,9 +1,10 @@
-import 'package:n04_app/dummy_firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/services/localization_service.dart';
+import '../../services/supabase_service.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -18,19 +19,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
+  final SupabaseService _supabaseService = SupabaseService();
   bool _isSaving = false;
   bool _isUploadingPhoto = false;
   String? _photoUrl;
   File? _imageFile;
   DateTime? _dateOfBirth;
-  String? _gender; // 'male', 'female', 'other'
+  String? _gender;
 
   @override
   void initState() {
     super.initState();
-    final user = FirebaseAuth.instance.currentUser;
+    final user = Supabase.instance.client.auth.currentUser;
     if (user != null) {
-      _nameController.text = user.displayName ?? '';
+      _nameController.text = user.userMetadata?['full_name'] ?? '';
       _emailController.text = user.email ?? '';
       _loadProfileData();
     }
@@ -38,75 +40,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Future<void> _loadProfileData() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = Supabase.instance.client.auth.currentUser;
       if (user == null) return;
 
-      // First, get user role from users collection
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      final role = userDoc.data()['role'] as String? ?? 'user';
-
-      // Determine which collection to load from based on role
-      DocumentSnapshot? profileDoc;
-
-      if (role == 'user') {
-        // Load from profiles collection (legacy)
-        profileDoc = await FirebaseFirestore.instance
-            .collection('profiles')
-            .doc(user.uid)
-            .get();
-      }
-
-      // If no profile doc found, try to load from users collection
-      if (profileDoc == null || !profileDoc.exists) {
-        profileDoc = userDoc;
-      }
-
-      if (profileDoc.exists) {
-        final data = profileDoc.data() as Map<String, dynamic>?;
-        if (data != null) {
-          setState(() {
-            // Load photo
-            if (data.containsKey('photoBase64') &&
-                data['photoBase64'] != null) {
-              _photoUrl = data['photoBase64'] as String;
-            } else if (data.containsKey('photoUrl') &&
-                data['photoUrl'] != null) {
-              _photoUrl = data['photoUrl'] as String;
-            }
-
-            // Load phone number (only in users collection)
-            if (data.containsKey('phoneNumber') &&
-                data['phoneNumber'] != null) {
-              _phoneController.text = data['phoneNumber'] as String;
-            }
-
-            // Load gender (only in users collection)
-            if (data.containsKey('gender') && data['gender'] != null) {
-              _gender = data['gender'] as String;
-            }
-
-            // Load date of birth (only in users collection)
-            if (data.containsKey('dateOfBirth') &&
-                data['dateOfBirth'] != null) {
-              _dateOfBirth = (data['dateOfBirth'] as DateTime).toDate();
-            }
-          });
-        }
+      final profileData = await _supabaseService.getUserProfile(user.id);
+      if (profileData != null && mounted) {
+        setState(() {
+          _photoUrl = profileData['photo_url'] as String?;
+          _phoneController.text = profileData['phone_number'] ?? '';
+          _gender = profileData['gender'] as String?;
+          final dob = profileData['date_of_birth'];
+          if (dob != null) {
+            _dateOfBirth = DateTime.tryParse(dob.toString());
+          }
+        });
       }
     } catch (e) {
       debugPrint('Error loading profile: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading profile: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
     }
   }
 
@@ -143,41 +93,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
     setState(() => _isUploadingPhoto = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = Supabase.instance.client.auth.currentUser;
       if (user == null) return;
 
-      // Read image file as bytes
       final bytes = await _imageFile!.readAsBytes();
-
-      // Convert to Base64
       final base64String = base64Encode(bytes);
 
-      // Get user role to determine which collections to update
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      final role = userDoc.data()['role'] as String? ?? 'user';
-
-      final photoData = {
-        'photoBase64': base64String,
-        'updatedAt': FieldValue.serverDateTime(),
-      };
-
-      // Always update users collection
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .set(photoData, SetOptions(merge: true));
-
-      // Update role-specific collections
-      if (role == 'user') {
-        await FirebaseFirestore.instance
-            .collection('profiles')
-            .doc(user.uid)
-            .set(photoData, SetOptions(merge: true));
-      }
+      await _supabaseService.updateUser(user.id, {
+        'photo_url': base64String,
+      });
 
       setState(() {
         _photoUrl = base64String;
@@ -221,101 +145,35 @@ class _EditProfilePageState extends State<EditProfilePage> {
     setState(() => _isSaving = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        // Update display name in Firebase Auth
-        if (_nameController.text != user.displayName) {
-          await user.updateDisplayName(_nameController.text.trim());
-        }
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) return;
 
-        // Prepare data to save
-        final profileData = <String, dynamic>{
-          'displayName': _nameController.text.trim(),
-          'email': _emailController.text.trim(),
-          'updatedAt': FieldValue.serverDateTime(),
-        };
+      final profileData = <String, dynamic>{
+        'full_name': _nameController.text.trim(),
+      };
 
-        // Add optional fields only if they have values
-        if (_phoneController.text.isNotEmpty) {
-          profileData['phoneNumber'] = _phoneController.text.trim();
-        }
-
-        if (_gender != null) {
-          profileData['gender'] = _gender;
-        }
-
-        if (_dateOfBirth != null) {
-          profileData['dateOfBirth'] = (_dateOfBirth!);
-        }
-
-        // Get user role to determine which collections to update
-        final userDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
-
-        final role = userDoc.data()['role'] as String? ?? 'user';
-
-        // Always update users collection (for admin system)
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .set(profileData, SetOptions(merge: true));
-
-        // Update role-specific collections
-        if (role == 'user') {
-          // Update profiles collection (legacy for regular users)
-          await FirebaseFirestore.instance
-              .collection('profiles')
-              .doc(user.uid)
-              .set(profileData, SetOptions(merge: true));
-        }
-        // Admin doesn't need extra collection, only 'users' is enough
-
-        // Update email if changed
-        if (_emailController.text != user.email) {
-          await user.verifyBeforeUpdateEmail(_emailController.text.trim());
-
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Verification email sent. Please check your inbox.',
-                ),
-                backgroundColor: Colors.orange,
-                duration: Duration(seconds: 4),
-              ),
-            );
-          }
-        }
-
-        // Reload user to get updated data
-        await user.reload();
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Profile updated successfully!'),
-              backgroundColor: Color(0xFF8BC34A),
-            ),
-          );
-          Navigator.pop(context, true); // Return true to indicate update
-        }
+      if (_phoneController.text.isNotEmpty) {
+        profileData['phone_number'] = _phoneController.text.trim();
       }
-    } on FirebaseAuthException catch (e) {
-      if (mounted) {
-        String message = 'Error updating profile';
-        if (e.code == 'requires-recent-login') {
-          message = 'Please login again to change email';
-        } else if (e.code == 'email-already-in-use') {
-          message = 'This email is already in use';
-        } else if (e.code == 'invalid-email') {
-          message = 'Invalid email address';
-        }
 
+      if (_gender != null) {
+        profileData['gender'] = _gender;
+      }
+
+      if (_dateOfBirth != null) {
+        profileData['date_of_birth'] = _dateOfBirth!.toIso8601String();
+      }
+
+      await _supabaseService.updateUser(user.id, profileData);
+
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.red),
+          const SnackBar(
+            content: Text('Profile updated successfully!'),
+            backgroundColor: Color(0xFF8BC34A),
+          ),
         );
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
@@ -335,7 +193,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = Supabase.instance.client.auth.currentUser;
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -365,7 +223,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
               children: [
                 const SizedBox(height: 20),
 
-                // Avatar with Camera
                 Stack(
                   alignment: Alignment.center,
                   children: [
@@ -419,8 +276,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                         _nameController.text.isNotEmpty
                                             ? _nameController.text[0]
                                                   .toUpperCase()
-                                            : user?.displayName
-                                                      ?.substring(0, 1)
+                                            : user?.userMetadata?['full_name']
+                                                      ?.toString()
+                                                      .substring(0, 1)
                                                       .toUpperCase() ??
                                                   'U',
                                         style: const TextStyle(
@@ -458,7 +316,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                 const SizedBox(height: 40),
 
-                // Full Name Field
                 TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(
@@ -493,13 +350,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     return null;
                   },
                   onChanged: (value) {
-                    setState(() {}); // Update avatar initial
+                    setState(() {});
                   },
                 ),
 
                 const SizedBox(height: 20),
 
-                // Email Field
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
@@ -540,7 +396,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                 const SizedBox(height: 20),
 
-                // Phone Number Field
                 TextFormField(
                   controller: _phoneController,
                   decoration: InputDecoration(
@@ -578,7 +433,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                 const SizedBox(height: 20),
 
-                // Date of Birth Field
                 InkWell(
                   onTap: () async {
                     final picked = await showDatePicker(
@@ -642,7 +496,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                 const SizedBox(height: 20),
 
-                // Gender Field
                 DropdownButtonFormField<String>(
                   initialValue: _gender,
                   decoration: InputDecoration(
@@ -679,7 +532,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                 const SizedBox(height: 20),
 
-                // User ID (Read-only)
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -705,7 +557,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              user?.uid ?? 'N/A',
+                              user?.id ?? 'N/A',
                               style: const TextStyle(
                                 fontSize: 13,
                                 color: Colors.black87,
@@ -723,7 +575,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                 const SizedBox(height: 32),
 
-                // Save Button
                 SizedBox(
                   width: double.infinity,
                   height: 56,
@@ -759,7 +610,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
                 const SizedBox(height: 16),
 
-                // Change Password Link
                 TextButton(
                   onPressed: () {
                     _showChangePasswordDialog();
@@ -807,11 +657,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
             onPressed: () async {
               Navigator.pop(context);
               try {
-                final user = FirebaseAuth.instance.currentUser;
+                final user = Supabase.instance.client.auth.currentUser;
                 if (user?.email != null) {
-                  await FirebaseAuth.instance.sendPasswordResetEmail(
-                    email: user!.email!,
-                  );
+                  await Supabase.instance.client.auth
+                      .resetPasswordForEmail(user!.email!);
                   if (parentContext.mounted) {
                     ScaffoldMessenger.of(parentContext).showSnackBar(
                       const SnackBar(
