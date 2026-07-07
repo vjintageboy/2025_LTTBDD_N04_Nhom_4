@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'admin_dashboard_page.dart';
 import 'admin_user_management_page.dart';
-import 'admin_expert_management_page.dart';
 import 'meditation_management_page.dart';
 import '../news/news_manager_page.dart';
 import '../profile/profile_page.dart';
 import '../../core/services/localization_service.dart';
 
 /// Main navigation page for admins with specialized dashboard
-/// Shows: Dashboard, Users, Experts, Meditations, Profile
+/// Shows: Dashboard, Users, Meditations, Profile
 class AdminMainPage extends StatefulWidget {
   const AdminMainPage({super.key});
 
@@ -37,15 +36,12 @@ class _AdminMainPageState extends State<AdminMainPage> {
         currentTab = const AdminUserManagementPage();
         break;
       case 2:
-        currentTab = const AdminExpertManagementPage();
-        break;
-      case 3:
         currentTab = const NewsManagerPage();
         break;
-      case 4:
+      case 3:
         currentTab = const MeditationManagementPage();
         break;
-      case 5:
+      case 4:
         currentTab = const ProfilePage();
         break;
       default:
@@ -86,14 +82,6 @@ class _AdminMainPageState extends State<AdminMainPage> {
                 Expanded(
                   child: _buildNavItem(
                     2,
-                    Icons.psychology_outlined,
-                    Icons.psychology,
-                    'Experts',
-                  ),
-                ),
-                Expanded(
-                  child: _buildNavItem(
-                    3,
                     Icons.article_outlined,
                     Icons.article,
                     'News',
@@ -101,7 +89,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                 ),
                 Expanded(
                   child: _buildNavItem(
-                    4,
+                    3,
                     Icons.spa_outlined,
                     Icons.spa,
                     'Meditations',
@@ -109,7 +97,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                 ),
                 Expanded(
                   child: _buildNavItem(
-                    5,
+                    4,
                     Icons.person_outline,
                     Icons.person,
                     context.l10n.profile,
