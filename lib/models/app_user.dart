@@ -67,7 +67,6 @@ class AppUser {
 
 enum UserRole {
   admin('admin'),
-  expert('expert'),
   user('user');
 
   final String value;
@@ -85,6 +84,5 @@ enum UserRole {
 
   // Helper getters
   bool get isAdmin => this == UserRole.admin;
-  bool get isExpert => this == UserRole.expert;
   bool get isUser => this == UserRole.user;
 }

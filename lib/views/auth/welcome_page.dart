@@ -7,7 +7,6 @@ import '../../core/constants/app_colors.dart';
 import '../../core/services/localization_service.dart';
 import 'login_page.dart';
 import 'signup_page.dart';
-import 'expert_signup_page.dart'; // ⭐ NEW - Expert signup
 
 // ============================================================================
 // WELCOME PAGE - CEO MODERN DESIGN
@@ -413,40 +412,6 @@ class _WelcomePageState extends State<WelcomePage>
                           onPressed: () => _navigateToPage(const LoginPage()),
                         ),
 
-                        const SizedBox(height: 20),
-
-                        // ⭐ NEW - Expert Sign Up Link
-                        TextButton(
-                          onPressed: () =>
-                              _navigateToPage(const ExpertSignupPage()),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.medical_services_outlined,
-                                size: 18,
-                                color: AppColors.osPrimary,
-                              ),
-                              const SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
-                                  context.l10n.joinAsExpert,
-                                  softWrap: true,
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.manrope(
-                                    color: AppColors.osOnSurfaceVariant,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: AppColors.osOnSurfaceVariant,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // (debug button removed — use long-press on logo to trigger onboarding in debug builds)
                         const SizedBox(height: 16),
 
                         // Terms link

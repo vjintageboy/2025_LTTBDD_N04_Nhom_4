@@ -41,7 +41,7 @@ void main() {
         'email': 'user@email.com',
         'full_name': 'Tran Thi B',
         'avatar_url': 'https://example.com/avatar.png',
-        'role': 'expert',
+        'role': 'user',
         'streak_count': 14,
         'created_at': '2024-01-01T00:00:00.000',
       };
@@ -51,7 +51,7 @@ void main() {
       expect(user.email, 'user@email.com');
       expect(user.displayName, 'Tran Thi B');
       expect(user.photoUrl, 'https://example.com/avatar.png');
-      expect(user.role, UserRole.expert);
+      expect(user.role, UserRole.user);
       expect(user.streakCount, 14);
       expect(user.createdAt, isA<DateTime>());
     });
@@ -111,19 +111,17 @@ void main() {
   });
 
   group('UserRole enum', () {
-    test('has three values', () {
-      expect(UserRole.values.length, 3);
+    test('has two values', () {
+      expect(UserRole.values.length, 2);
     });
 
     test('value strings are correct', () {
       expect(UserRole.admin.value, 'admin');
-      expect(UserRole.expert.value, 'expert');
       expect(UserRole.user.value, 'user');
     });
 
     test('fromString parses correctly', () {
       expect(UserRole.fromString('admin'), UserRole.admin);
-      expect(UserRole.fromString('expert'), UserRole.expert);
       expect(UserRole.fromString('user'), UserRole.user);
     });
 
@@ -133,21 +131,14 @@ void main() {
 
     test('helper getters work', () {
       expect(UserRole.admin.isAdmin, isTrue);
-      expect(UserRole.admin.isExpert, isFalse);
       expect(UserRole.admin.isUser, isFalse);
-
-      expect(UserRole.expert.isExpert, isTrue);
-      expect(UserRole.expert.isAdmin, isFalse);
-      expect(UserRole.expert.isUser, isFalse);
 
       expect(UserRole.user.isUser, isTrue);
       expect(UserRole.user.isAdmin, isFalse);
-      expect(UserRole.user.isExpert, isFalse);
     });
 
     test('toString returns value string', () {
       expect(UserRole.admin.toString(), 'admin');
-      expect(UserRole.expert.toString(), 'expert');
       expect(UserRole.user.toString(), 'user');
     });
   });

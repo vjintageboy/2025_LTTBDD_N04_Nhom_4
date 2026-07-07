@@ -13,7 +13,7 @@ class AdminUserManagementPage extends StatefulWidget {
 class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
   final _supabase = Supabase.instance.client;
   String _searchQuery = '';
-  String _filterRole = 'all'; // all, user, expert, admin
+  String _filterRole = 'all'; // all, user, admin
   List<Map<String, dynamic>>? _allUsers;
   bool _isLoading = true;
 
@@ -107,8 +107,6 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                       _buildFilterChip('All', 'all'),
                       const SizedBox(width: 8),
                       _buildFilterChip('Users', 'user'),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('Experts', 'expert'),
                       const SizedBox(width: 8),
                       _buildFilterChip('Admins', 'admin'),
                     ],
@@ -383,10 +381,6 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
         color = Colors.purple;
         label = 'ADMIN';
         break;
-      case UserRole.expert:
-        color = Colors.teal;
-        label = 'EXPERT';
-        break;
       case UserRole.user:
         color = Colors.blue;
         label = 'USER';
@@ -414,8 +408,6 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
     switch (role) {
       case UserRole.admin:
         return Colors.purple;
-      case UserRole.expert:
-        return Colors.teal;
       case UserRole.user:
         return Colors.blue;
     }

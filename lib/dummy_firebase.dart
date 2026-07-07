@@ -16,8 +16,7 @@ class FirestoreService {
   Future<void> updateMeditation(String id, Map<String, dynamic> data) async {}
   Future<void> addMeditation(dynamic m) async {}
   Future<void> deleteMeditation(String id) async {}
-  Stream<dynamic> getExpertAppointments(String doctorId) =>
-      const Stream.empty();
+
   
   // Streak Methods
   Future<void> recalculateStreak(String uid) async {}

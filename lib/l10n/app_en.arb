@@ -1,26 +1,21 @@
 {
   "@@locale": "en",
-  
   "appTitle": "Moodiki",
   "@appTitle": {
     "description": "The application title"
   },
-  
   "appTagline": "Track your emotions, elevate your mindset",
   "@appTagline": {
     "description": "Main tagline on welcome screen"
   },
-  
   "appSubTagline": "Your journey to mental wellness starts here",
   "@appSubTagline": {
     "description": "Sub tagline on welcome screen"
   },
-  
   "emotionalJourney": "Emotional care journey",
   "@emotionalJourney": {
     "description": "Journey subtitle in splash screen"
   },
-  
   "home": "Home",
   "meditation": "Meditation",
   "mood": "Mood",
@@ -29,7 +24,7 @@
   "search": "Search",
   "notifications": "Notifications",
   "all": "All",
-  "sortBy": "Sort",
+  "sortBy": "Sort by:",
   "latest": "Latest",
   "hottest": "Hottest",
   "mostLiked": "Most Liked",
@@ -38,26 +33,31 @@
   "tryAgain": "Try Again",
   "noPostsYet": "No posts yet",
   "beFirstToShare": "Be the first to share!",
-  "expert": "Expert",
   "edit": "Edit",
   "delete": "Delete",
   "justNow": "just now",
   "minutesAgo": "{minutes}m ago",
   "@minutesAgo": {
     "placeholders": {
-      "minutes": {"type": "int"}
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "hoursAgo": "{hours}h ago",
   "@hoursAgo": {
     "placeholders": {
-      "hours": {"type": "int"}
+      "hours": {
+        "type": "int"
+      }
     }
   },
   "daysAgo": "{days}d ago",
   "@daysAgo": {
     "placeholders": {
-      "days": {"type": "int"}
+      "days": {
+        "type": "int"
+      }
     }
   },
   "errorPrefix": "Error",
@@ -105,9 +105,7 @@
   "postUpdated": "Post updated successfully",
   "postCreated": "Post created successfully",
   "errorCreatingPost": "Error creating post",
-  "experts": "Experts",
   "profile": "Profile",
-  
   "signIn": "Sign In",
   "signUp": "Sign Up",
   "createAccount": "Create Account",
@@ -119,14 +117,11 @@
   "dontHaveAccount": "Don't have an account? ",
   "forgotPassword": "Forgot Password?",
   "or": "OR",
-  
   "fullNameHint": "John Doe",
   "emailHint": "your.email@company.com",
   "passwordHint": "••••••••",
-  
   "signUpSubtitle": "Join us and start your journey today",
   "signInSubtitle": "Welcome back! Please sign in to continue",
-  
   "emailRequired": "Email is required",
   "emailInvalid": "Please enter a valid email",
   "passwordRequired": "Password is required",
@@ -134,23 +129,18 @@
   "passwordsDoNotMatch": "Passwords do not match",
   "nameRequired": "Name is required",
   "nameTooShort": "Name must be at least 2 characters",
-  
   "skip": "Skip",
   "quote1": "\"In the middle of a cold winter, I finally realized that within me lay an invincible summer.\"",
   "quote1Author": "ALBERT CAMUS",
   "quote2": "\"Feelings are just visitors. Let them come and go.\"",
   "quote2Author": "MOOJI",
-  
   "currentStreak": "Current Streak",
   "longestStreak": "Longest Streak",
   "editProfile": "Edit Profile",
   "editProfileSubtitle": "Update your personal information",
-  "notifications": "Notifications",
   "notificationsSubtitle": "Manage notification preferences",
   "statistics": "Statistics",
   "statisticsSubtitle": "View your mood analytics",
-  "myAppointments": "My Appointments",
-  "myAppointmentsSubtitle": "View and manage your bookings",
   "privacySecurity": "Privacy & Security",
   "privacySecuritySubtitle": "Control your privacy settings",
   "helpSupport": "Help & Support",
@@ -158,8 +148,6 @@
   "logout": "Logout",
   "logoutConfirmTitle": "Logout",
   "logoutConfirmMessage": "Are you sure you want to logout?",
-  "cancel": "Cancel",
-  
   "howAreYouFeeling": "How are you feeling today?",
   "selectYourMood": "Select your mood",
   "addNote": "Add a note (optional)",
@@ -184,7 +172,6 @@
   "@moodNotePlaceholder": {
     "description": "Placeholder for mood note text field"
   },
-  
   "meditationLibrary": "Meditation Library",
   "findYourPeace": "Find your peace",
   "searchMeditations": "Search meditations...",
@@ -203,14 +190,9 @@
   "play": "Play",
   "pause": "Pause",
   "stop": "Stop",
-  
-  "findExpert": "Find Expert",
-  "searchExperts": "Search experts by name or specialization...",
   "yearsExperience": "yrs exp",
-  "bookAppointment": "Book Appointment",
   "about": "About",
   "specializations": "Specializations",
-  "availability": "Availability",
   "selectDateTime": "Select Date & Time",
   "selectCallType": "Select Call Type",
   "videoCall": "Video Call",
@@ -219,7 +201,6 @@
   "confirm": "Confirm",
   "payment": "Payment",
   "proceedToPayment": "Proceed to Payment",
-  
   "admin": "Admin",
   "manageMeditations": "Manage Meditations",
   "manageUsers": "Manage Users",
@@ -228,27 +209,21 @@
   "title": "Title",
   "description": "Description",
   "duration": "Duration",
-  "category": "Category",
   "level": "Level",
   "audioFile": "Audio File",
   "imageUrl": "Image URL",
   "save": "Save",
   "saveChanges": "Save Changes",
-  "delete": "Delete",
   "createMeditation": "Create Meditation",
-  
   "loading": "Loading...",
   "error": "Error",
   "success": "Success",
-  "tryAgain": "Try Again",
   "close": "Close",
-  "search": "Search",
   "filter": "Filter",
   "sort": "Sort",
   "apply": "Apply",
   "reset": "Reset",
   "userNotLoggedIn": "User not logged in",
-  
   "daysStreak": "{count} days",
   "@daysStreak": {
     "description": "Display days in streak",
@@ -259,18 +234,6 @@
       }
     }
   },
-  
-  "errorLoadingExperts": "Error loading experts: {error}",
-  "@errorLoadingExperts": {
-    "description": "Error message when loading experts fails",
-    "placeholders": {
-      "error": {
-        "type": "String",
-        "example": "Network error"
-      }
-    }
-  },
-  
   "errorLogout": "Logout error: {error}",
   "@errorLogout": {
     "description": "Error message when logout fails",
@@ -281,17 +244,13 @@
       }
     }
   },
-  
   "chatbot": "Chatbot",
   "askMeAnything": "Ask me anything...",
   "sendMessage": "Send",
-  
-  "appointmentBooked": "Appointment booked successfully",
   "date": "Date",
   "time": "Time",
   "amount": "Amount",
   "callType": "Call Type",
-  
   "yourAccountBanned": "Your account has been banned.",
   "banReason": "Reason: {reason}",
   "@banReason": {
@@ -302,11 +261,9 @@
     }
   },
   "contactSupport": "Please contact support.",
-  
   "day": "day",
   "days": "days",
   "settings": "Settings",
-  
   "goodMorning": "Good Morning",
   "goodAfternoon": "Good Afternoon",
   "goodEvening": "Good Evening",
@@ -317,7 +274,6 @@
   "calm": "Calm",
   "trackMood": "Track Mood",
   "streak": "Streak",
-  
   "moodLog": "Mood Log",
   "howAreYouFeelingToday": "How are you feeling\ntoday?",
   "notes": "Notes",
@@ -336,153 +292,84 @@
   "errorSavingMood": "Error saving mood: {error}",
   "@errorSavingMood": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
-  
   "moodHistory": "Mood History",
-  "filter": "Filter",
   "allMoods": "All Moods",
   "thisWeek": "This Week",
   "thisMonth": "This Month",
   "noMoodEntries": "No mood entries yet",
   "startTrackingMood": "Start tracking your mood to see your history",
   "errorLoadingMoods": "Error loading moods",
-  
   "moodDetails": "Mood Details",
-  "delete": "Delete",
-  "edit": "Edit",
   "factors": "Factors",
   "noFactors": "No factors recorded",
   "deleteMoodConfirm": "Delete this mood entry?",
   "deleteMoodMessage": "This action cannot be undone.",
   "moodDeletedSuccess": "Mood entry deleted",
   "errorDeletingMood": "Error deleting mood",
-  
   "grouped": "Grouped",
   "calendar": "Calendar",
-  "all": "All",
   "avg": "Avg",
   "entry": "entry",
   "entries": "entries",
   "today": "Today",
   "yesterday": "Yesterday",
   "legend": "Legend",
-  
   "moodEntry": "Mood Entry",
-  "save": "Save",
   "howWereYouFeeling": "How were you feeling?",
   "whatInfluencedMood": "What influenced your mood?",
   "moodUpdatedSuccess": "Mood entry updated successfully! 🎉",
   "errorUpdatingMood": "Error updating mood",
-  
-  "findAnExpert": "Find an Expert",
-  "myAppointments": "My Appointments",
-  "expert": "Expert",
   "available": "available",
-  "noExpertsFound": "No experts found",
   "tryAnotherFilter": "Try selecting a different specialization",
-  "errorLoadingExperts": "Error loading experts",
   "depression": "Depression",
   "from": "From",
   "yrs": "yrs",
   "rating": "Rating",
   "experience": "Experience",
   "reviews": "Reviews",
-  "about": "About",
-  "availableDays": "Available Days",
-  "availableTimeSlots": "Available Time Slots",
-  "bookAppointment": "Book Appointment",
-  "selectDate": "Select Date",
-  "selectDateToView": "Select a date to view available time slots",
-  "chooseDateFromCalendar": "Choose a date from the calendar above",
   "notesOptional": "Notes (Optional)",
-  "selectCallType": "Select Call Type",
-  "voiceCall": "Voice Call",
   "audioOnlyConsultation": "Audio only consultation",
-  "videoCall": "Video Call",
   "faceToFaceConsultation": "Face-to-face video consultation",
   "recommended": "Recommended",
-  "duration": "Duration",
   "min": "min",
-  "myAppointments": "My Appointments",
   "upcoming": "Upcoming",
   "history": "History",
-  "noUpcomingAppointments": "No Upcoming Appointments",
-  "bookAppointmentToGetStarted": "Book an appointment with an expert to get started",
-  "noAppointmentHistory": "No Appointment History",
-  "pastAppointmentsWillAppear": "Your past appointments will appear here",
-  "date": "Date",
-  "time": "Time",
-  "callType": "Call Type",
-  "notes": "Notes",
-  "cancelAppointment": "Cancel Appointment",
   "confirmed": "Confirmed",
   "cancelled": "Cancelled",
   "completed": "Completed",
-  "cancelAppointmentQuestion": "Cancel Appointment?",
-  "payment": "Payment",
-  "selectPaymentMethod": "Select Payment Method",
-  "confirmPayment": "Confirm Payment",
-  "paymentSuccessful": "Payment Successful!",
-  "meditationLibrary": "Meditation Library",
-  "searchMeditations": "Search meditations...",
-  "all": "All",
-  "stress": "Stress",
-  "anxiety": "Anxiety",
-  "sleep": "Sleep",
-  "focus": "Focus",
-  "beginner": "Beginner",
-  "intermediate": "Intermediate",
-  "advanced": "Advanced",
-  "sortBy": "Sort by:",
   "ratingSort": "⭐ Rating",
   "durationSort": "⏱️ Duration",
   "nameSort": "🔤 Name",
   "meditationsFound": "meditations found",
   "meditationFound": "meditation found",
-  "noMeditationsFound": "No meditations found",
   "tryDifferentSearch": "Try a different search or filter",
-  "play": "Play",
-  "pause": "Pause",
-  "stop": "Stop",
-  "description": "Description",
   "benefits": "Benefits",
   "instructions": "Instructions",
-  "level": "Level",
   "aiAssistant": "AI Assistant",
   "alwaysReadyToHelp": "Always ready to help you",
   "clearChatHistory": "Clear chat history?",
   "clearChatConfirmation": "Are you sure you want to clear all chat history?",
-  "cancel": "Cancel",
-  "delete": "Delete",
   "typeMessage": "Type a message...",
   "welcomeTagline": "Professional wellbeing platform",
   "aiPoweredInsights": "AI-powered insights",
   "trackProgress": "Track progress over time",
   "privateSecure": "Private and secure",
   "getStarted": "Get Started",
-  "signIn": "Sign In",
   "termsAgreement": "By continuing, you agree to our ",
   "termsPrivacy": "Terms & Privacy",
   "signInToModiki": "Sign in to MOODIKI",
   "signInToContinue": "Sign in to continue your journey",
-  "createAccount": "Create Account",
   "joinUsToday": "Join us and start your journey today",
-  "fullName": "Full Name",
-  "emailAddress": "Email Address",
-  "password": "Password",
-  "confirmPassword": "Confirm Password",
-  "forgotPassword": "Forgot Password?",
-  "alreadyHaveAccount": "Already have an account? ",
-  "dontHaveAccount": "Don't have an account? ",
   "orContinueWith": "Or continue with",
-  "signUp": "Sign Up",
   "email": "Email",
   "adminSetup": "Admin Setup",
   "howAreYouFeelingShort": "How are you feeling?",
   "quickActions": "Quick Actions",
-  "expertConsultation": "Expert Consultation",
   "allMeditations": "All Meditations",
   "featuredMeditation": "Featured Meditation",
   "dailyInspiration": "Daily Inspiration",
@@ -498,18 +385,18 @@
   "logsUnit": "logs",
   "daysUnit": "days",
   "logMood": "Log mood",
-
   "streakHistoryTitle": "Streak History",
   "totalActivities": "{count} total activities",
   "@totalActivities": {
     "description": "Total activities count in streak stats",
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "keepItUp": "Keep it up! Come back tomorrow",
   "startYourStreak": "Start your streak today!",
-  "legend": "Legend",
   "hasActivity": "Activity",
   "noActivity": "No Activity",
   "future": "Future",
@@ -518,7 +405,6 @@
   "tipMeditation": "Complete meditation sessions regularly",
   "tipDailyReminder": "Set daily reminders to check in with yourself",
   "tipStreakReset": "Streak resets if you miss a day",
-
   "moodTrackerTitle": "Mood Tracker",
   "howAreYouFeelingHero": "Hey there, how are you feeling?",
   "moodHeroSubtitle": "Take a moment to listen to yourself.",
@@ -532,7 +418,6 @@
   "notesPlaceholder": "Anything special about your day?...",
   "dailyInspirationQuote": "Each day is a new beginning. Take a deep breath and smile at the world.",
   "quoteInspirationLabel": "Inspiration for a new day",
-
   "moodAnalyticsTitle": "Mood Analytics",
   "week": "Week",
   "month": "Month",
@@ -550,92 +435,20 @@
   "errorLoadingMoodData": "Error loading mood data: {error}",
   "@errorLoadingMoodData": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "noDataToDisplay": "No data to display",
   "data": "Data",
   "flow": "Flow",
   "growth": "Growth",
-  "currentStreak": "Current Streak",
   "keyInfluencers": "Key Influencers",
   "moodTrends": "Mood Trends",
   "distribution": "Distribution",
   "monthlyHighlights": "Monthly Highlights",
-
-  "joinAsExpert": "Join as Mental Health Expert",
-  "@joinAsExpert": {
-    "description": "Button text for mental health experts to sign up"
-  },
-  "couldNotLoadExpertInfo": "Could not load expert info: {error}",
-  "@couldNotLoadExpertInfo": {
-    "placeholders": {
-      "error": {"type": "String"}
-    }
-  },
-  "errorLoadingSlots": "Error loading slots: {error}",
-  "@errorLoadingSlots": {
-    "placeholders": {
-      "error": {"type": "String"}
-    }
-  },
-  "expertNotAvailableOnDay": "{expertName} is not available on {day}",
-  "@expertNotAvailableOnDay": {
-    "placeholders": {
-      "expertName": {"type": "String"},
-      "day": {"type": "String"}
-    }
-  },
   "pleaseSelectDateAndTime": "Please select date and time",
   "pleaseLoginFirst": "Please login first",
-  "bookingConflictAlreadyHaveAppointment": "You already have an appointment at this time. Please choose another time slot.",
-  "bookingConflictExpertNotAvailable": "This expert is not available at the selected time. Please choose another time slot.",
-  "bookingInvalidCallTypeConfig": "Call type configuration is invalid in database. Please contact admin.",
-  "bookingInvalidData": "Booking data is invalid (expert/user not found). Please reopen this page and try again.",
-  "bookingNoPermission": "You do not have permission to create this appointment. Please sign in again.",
-  "bookingFailedWithReason": "Booking failed: {reason}",
-  "@bookingFailedWithReason": {
-    "placeholders": {
-      "reason": {"type": "String"}
-    }
-  },
-  "bookingFailedGeneric": "Failed to book appointment. Please try again.",
-  "expertNotFound": "Expert not found",
-  "availableTimeSlotsOnDate": "Available Time Slots - {date}",
-  "@availableTimeSlotsOnDate": {
-    "placeholders": {
-      "date": {"type": "String"}
-    }
-  },
-  "noAvailableSlotsForThisDay": "No available slots for this day",
-  "allSlotsAreFullyBooked": "All slots are fully booked",
-  "expertIsNotAvailableOnSelectedDay": "Expert is not available on {day}",
-  "@expertIsNotAvailableOnSelectedDay": {
-    "placeholders": {
-      "day": {"type": "String"}
-    }
-  },
-  "anyNotesForExpert": "Any notes for the expert?",
-  "cancelUpTo4HoursBeforeAppointment": "You can cancel up to 4 hours before your appointment",
-  "appointmentSummary": "Appointment Summary",
-  "sessionFee": "Session Fee",
-  "serviceFee": "Service Fee",
-  "mockCreditCard": "Mock Credit Card",
-  "simulateCardPayment": "Simulate card payment",
-  "mockMomo": "Mock MoMo",
-  "simulateMomoEwallet": "Simulate MoMo e-wallet",
-  "mockBanking": "Mock Banking",
-  "simulateBankTransfer": "Simulate bank transfer",
-  "viewMyAppointments": "View My Appointments",
-  "yourAppointmentHasBeenConfirmed": "Your appointment has been confirmed",
-  "at": "at",
-  "momoOpenFailed": "Cannot open MoMo",
-  "momoCreateFailed": "Failed to create MoMo transaction",
-  "paymentInfoSaveError": "Error saving payment information: {error}",
-  "@paymentInfoSaveError": {
-    "placeholders": {
-      "error": {"type": "String"}
-    }
-  },
-  "paymentConfirmTimeout": "Payment confirmation timed out. Please check transaction status again."
+  "at": "at"
 }

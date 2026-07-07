@@ -86,7 +86,6 @@ void main() {
       final prompt = SystemPromptTemplate.build();
       expect(prompt.contains('Meditation'), isTrue);
       expect(prompt.contains('Mood tracking'), isTrue);
-      expect(prompt.contains('Expert'), isTrue);
       expect(prompt.contains('Streak'), isTrue);
     });
   });

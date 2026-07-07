@@ -14,7 +14,7 @@ class NotificationService {
     required String userId,
     required String title,
     required String message,
-    String type = 'general', // general, refund, appointment, etc.
+    String type = 'general', // general, refund, etc.
   }) async {
     try {
       await _supabase.from('notifications').insert({

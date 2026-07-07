@@ -4,8 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:n04_app/ai/tools/tool_dispatcher.dart';
 import 'package:n04_app/ai/tools/tool_loop_controller.dart';
-import 'package:n04_app/models/appointment.dart';
-import 'package:n04_app/models/availability.dart';
 
 // ---------------------------------------------------------------------------
 // SDK helpers
@@ -66,32 +64,16 @@ GenerateContentResponse _emptyTextResponse() {
 
 const _userId = 'user-test';
 
-ExpertAvailability _mondaySlot() => ExpertAvailability(
-  id: 'slot-1',
-  expertId: 'expert-1',
-  dayOfWeek: 1,
-  startTime: '09:00',
-  endTime: '17:00',
-);
-
 /// Returns a ToolDispatcher wired with passthrough no-op defaults.
-/// Override individual callbacks for targeted testing.
 ToolDispatcher _makeDispatcher() {
   return ToolDispatcher(
-    listExperts: ({specialization}) async => [],
-    getAvailability: (_) async => [_mondaySlot()],
-    getBookedTimeSlots: (_, __) async => [],
     generateTimeSlots:
         ({
           required String startTime,
           required String endTime,
           required int intervalMinutes,
         }) => ['09:00'],
-    createAppointment: (_) async => 'appt-1',
-    getUserAppointments: (_) async => [],
     getMoodEntries: (_, __, ___) async => [],
-    getExpertPrice: (_) async => {'hourly_rate': '100'},
-    checkExistingAppointment: (_, __, ___) async => null,
     userId: _userId,
   );
 }
@@ -103,20 +85,13 @@ class _FixedDispatcher extends ToolDispatcher {
 
   _FixedDispatcher({required this.fixedResult})
     : super(
-        listExperts: ({specialization}) async => [],
-        getAvailability: (_) async => [],
-        getBookedTimeSlots: (_, __) async => [],
         generateTimeSlots:
             ({
               required startTime,
               required endTime,
               required intervalMinutes,
             }) => [],
-        createAppointment: (_) async => null,
-        getUserAppointments: (_) async => [],
         getMoodEntries: (_, __, ___) async => [],
-        getExpertPrice: (_) async => null,
-        checkExistingAppointment: (_, __, ___) async => null,
         userId: _userId,
       );
 
@@ -147,25 +122,24 @@ void main() {
       final responses = [
         _functionCallResponse([
           (
-            name: 'check_expert_availability',
+            name: 'generate_monthly_report',
             args: {
-              'expert_id': 'e1',
-              'date': '2024-04-01',
-              'duration_minutes': 60,
+              'month': 4,
+              'year': 2024,
             },
           ),
         ]),
-        _textResponse('Chuyên gia rảnh lúc 09:00'),
+        _textResponse('Báo cáo đã sẵn sàng'),
       ];
 
       final result = await controller.execute(
-        userMessage: 'Kiểm tra lịch',
+        userMessage: 'Tạo báo cáo tháng 4',
         sendMessage: (content) async => responses[callIndex++],
       );
 
-      expect(result, 'Chuyên gia rảnh lúc 09:00');
+      expect(result, 'Báo cáo đã sẵn sàng');
       expect(dispatcherSpy.calls.length, 1);
-      expect(dispatcherSpy.calls.first.name, 'check_expert_availability');
+      expect(dispatcherSpy.calls.first.name, 'generate_monthly_report');
     });
 
     // -----------------------------------------------------------------------
@@ -179,19 +153,17 @@ void main() {
       final responses = [
         _functionCallResponse([
           (
-            name: 'check_expert_availability',
+            name: 'generate_monthly_report',
             args: {
-              'expert_id': 'e1',
-              'date': '2024-04-01',
-              'duration_minutes': 30,
+              'month': 3,
+              'year': 2024,
             },
           ),
           (
-            name: 'check_expert_availability',
+            name: 'generate_monthly_report',
             args: {
-              'expert_id': 'e2',
-              'date': '2024-04-01',
-              'duration_minutes': 60,
+              'month': 4,
+              'year': 2024,
             },
           ),
         ]),
@@ -199,7 +171,7 @@ void main() {
       ];
 
       final result = await controller.execute(
-        userMessage: 'check two experts',
+        userMessage: 'check two months',
         sendMessage: (content) async => responses[callIndex++],
       );
 
@@ -245,11 +217,10 @@ void main() {
             callIndex++;
             return _functionCallResponse([
               (
-                name: 'check_expert_availability',
+                name: 'generate_monthly_report',
                 args: {
-                  'expert_id': 'e1',
-                  'date': '2024-04-01',
-                  'duration_minutes': 60,
+                  'month': callIndex,
+                  'year': 2024,
                 },
               ),
             ]);
@@ -316,10 +287,6 @@ void main() {
     test('empty candidates: returns empty string safely', () async {
       final controller = ToolLoopController(dispatcher: _makeDispatcher());
 
-      // When candidates is empty, response.text returns null (no candidates),
-      // but we guard with ?? '' so no throw.
-      // NOTE: The SDK's text getter with empty candidates returns null when
-      // promptFeedback is also null.
       final result = await controller.execute(
         userMessage: 'empty',
         sendMessage: (_) async => _emptyCandidatesResponse(),
@@ -336,19 +303,18 @@ void main() {
       final controller = ToolLoopController(dispatcher: dispatcherSpy);
 
       final expectedArgs = {
-        'expert_id': 'expert-xyz',
-        'date': '2024-06-15',
-        'duration_minutes': 60,
+        'month': 6,
+        'year': 2024,
       };
 
       int callIndex = 0;
       await controller.execute(
-        userMessage: 'check availability',
+        userMessage: 'generate report',
         sendMessage: (c) async {
           if (callIndex == 0) {
             callIndex++;
             return _functionCallResponse([
-              (name: 'check_expert_availability', args: expectedArgs),
+              (name: 'generate_monthly_report', args: expectedArgs),
             ]);
           }
           return _textResponse('Done');
@@ -356,7 +322,7 @@ void main() {
       );
 
       expect(dispatcherSpy.calls.length, 1);
-      expect(dispatcherSpy.calls.first.name, 'check_expert_availability');
+      expect(dispatcherSpy.calls.first.name, 'generate_monthly_report');
       expect(dispatcherSpy.calls.first.args, expectedArgs);
     });
 
@@ -386,19 +352,17 @@ void main() {
               sendIndex++;
               return _functionCallResponse([
                 (
-                  name: 'check_expert_availability',
+                  name: 'generate_monthly_report',
                   args: {
-                    'expert_id': 'e1',
-                    'date': '2024-04-01',
-                    'duration_minutes': 60,
+                    'month': 1,
+                    'year': 2024,
                   },
                 ),
                 (
-                  name: 'check_expert_availability',
+                  name: 'generate_monthly_report',
                   args: {
-                    'expert_id': 'e2',
-                    'date': '2024-04-01',
-                    'duration_minutes': 60,
+                    'month': 2,
+                    'year': 2024,
                   },
                 ),
               ]);
@@ -437,11 +401,10 @@ void main() {
               // Calls 1–5: return a FunctionCall to keep the loop going.
               return _functionCallResponse([
                 (
-                  name: 'check_expert_availability',
+                  name: 'generate_monthly_report',
                   args: {
-                    'expert_id': 'e1',
-                    'date': '2024-04-01',
-                    'duration_minutes': 60,
+                    'month': callCount,
+                    'year': 2024,
                   },
                 ),
               ]);
@@ -471,20 +434,13 @@ class _TrackingDispatcher extends ToolDispatcher {
 
   _TrackingDispatcher({required this.onDispatch})
     : super(
-        listExperts: ({specialization}) async => [],
-        getAvailability: (_) async => [],
-        getBookedTimeSlots: (_, __) async => [],
         generateTimeSlots:
             ({
               required startTime,
               required endTime,
               required intervalMinutes,
             }) => [],
-        createAppointment: (_) async => null,
-        getUserAppointments: (_) async => [],
         getMoodEntries: (_, __, ___) async => [],
-        getExpertPrice: (_) async => null,
-        checkExistingAppointment: (_, __, ___) async => null,
         userId: _userId,
       );
 

@@ -155,13 +155,12 @@ void main() {
     test('creates with required fields', () {
       final room = ChatRoom(
         id: 'room-1',
-        appointmentId: 'appt-1',
-        participants: ['user-1', 'expert-1'],
+        participants: ['user-1', 'user-2'],
         status: ChatRoomStatus.active,
         createdAt: DateTime(2024, 4, 1),
       );
 
-      expect(room.roomType, 'appointment'); // default
+      expect(room.roomType, 'direct'); // default
       expect(room.directKey, isNull);
       expect(room.lastMessage, isNull);
       expect(room.lastMessageTime, isNull);
@@ -171,8 +170,7 @@ void main() {
     test('toMap produces correct keys', () {
       final room = ChatRoom(
         id: 'room-1',
-        appointmentId: 'appt-1',
-        participants: ['user-1', 'expert-1'],
+        participants: ['user-1', 'user-2'],
         status: ChatRoomStatus.active,
         createdAt: DateTime(2024, 4, 1, 10, 0),
         lastMessage: 'Hello',
@@ -180,32 +178,29 @@ void main() {
       );
 
       final map = room.toMap();
-      expect(map['appointment_id'], 'appt-1');
       expect(map['status'], 'active');
-      expect(map['room_type'], 'appointment');
+      expect(map['room_type'], 'direct');
       expect(map['last_message'], 'Hello');
     });
 
     test('toMap handles empty appointmentId', () {
       final room = ChatRoom(
         id: 'room-1',
-        appointmentId: '',
         participants: ['user-1'],
         status: ChatRoomStatus.active,
         createdAt: DateTime(2024, 4, 1),
       );
 
       final map = room.toMap();
-      expect(map['appointment_id'], isNull);
+      expect(map.containsKey('appointment_id'), isFalse);
     });
 
     test('fromMap parses room correctly', () {
       final data = {
         'id': 'room-1',
-        'appointment_id': 'appt-1',
-        'participants': ['user-1', 'expert-1'],
+        'participants': ['user-1', 'user-2'],
         'status': 'active',
-        'room_type': 'appointment',
+        'room_type': 'direct',
         'created_at': '2024-04-01T10:00:00.000',
         'last_message': 'Hi',
         'last_message_time': '2024-04-01T10:05:00.000',
@@ -214,8 +209,7 @@ void main() {
 
       final room = ChatRoom.fromMap(data);
       expect(room.id, 'room-1');
-      expect(room.appointmentId, 'appt-1');
-      expect(room.participants, ['user-1', 'expert-1']);
+      expect(room.participants, ['user-1', 'user-2']);
       expect(room.status, ChatRoomStatus.active);
       expect(room.lastMessage, 'Hi');
       expect(room.unreadCount, 2);
@@ -224,7 +218,6 @@ void main() {
     test('fromMap handles archived status', () {
       final data = {
         'id': 'room-1',
-        'appointment_id': 'appt-1',
         'participants': ['user-1'],
         'status': 'archived',
         'created_at': '2024-04-01T10:00:00.000',
@@ -237,7 +230,6 @@ void main() {
     test('fromMap handles unknown status gracefully', () {
       final data = {
         'id': 'room-1',
-        'appointment_id': 'appt-1',
         'participants': ['user-1'],
         'status': 'nonexistent',
         'created_at': '2024-04-01T10:00:00.000',
@@ -250,7 +242,6 @@ void main() {
     test('fromMap handles missing participants', () {
       final data = {
         'id': 'room-1',
-        'appointment_id': 'appt-1',
         'participants': null,
         'status': 'active',
         'created_at': '2024-04-01T10:00:00.000',
@@ -263,23 +254,21 @@ void main() {
     test('fromMap handles direct_key', () {
       final data = {
         'id': 'room-1',
-        'appointment_id': 'appt-1',
-        'participants': ['user-1', 'expert-1'],
+        'participants': ['user-1', 'user-2'],
         'status': 'active',
         'room_type': 'direct',
-        'direct_key': 'user-1_expert-1',
+        'direct_key': 'user-1_user-2',
         'created_at': '2024-04-01T10:00:00.000',
       };
 
       final room = ChatRoom.fromMap(data);
       expect(room.roomType, 'direct');
-      expect(room.directKey, 'user-1_expert-1');
+      expect(room.directKey, 'user-1_user-2');
     });
 
     test('fromMap handles missing fields gracefully', () {
       final data = {
         'id': null,
-        'appointment_id': null,
         'participants': null,
         'status': null,
         'created_at': null,
@@ -287,7 +276,6 @@ void main() {
 
       final room = ChatRoom.fromMap(data);
       expect(room.id, '');
-      expect(room.appointmentId, '');
       expect(room.participants, isEmpty);
       expect(room.status, ChatRoomStatus.active);
     });

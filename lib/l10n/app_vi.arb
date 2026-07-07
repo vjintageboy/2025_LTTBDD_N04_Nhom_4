@@ -1,26 +1,21 @@
 {
   "@@locale": "vi",
-  
   "appTitle": "Moodiki",
   "@appTitle": {
     "description": "Tên ứng dụng"
   },
-  
   "appTagline": "Theo dõi cảm xúc, nâng tầm tâm trí",
   "@appTagline": {
     "description": "Slogan chính trên màn hình chào mừng"
   },
-  
   "appSubTagline": "Hành trình chăm sóc sức khỏe tinh thần bắt đầu từ đây",
   "@appSubTagline": {
     "description": "Slogan phụ trên màn hình chào mừng"
   },
-  
   "emotionalJourney": "Hành trình chăm sóc cảm xúc",
   "@emotionalJourney": {
     "description": "Phụ đề trong màn hình splash"
   },
-  
   "home": "Trang chủ",
   "meditation": "Thiền định",
   "mood": "Tâm trạng",
@@ -29,7 +24,7 @@
   "search": "Tìm kiếm",
   "notifications": "Thông báo",
   "all": "Tất cả",
-  "sortBy": "Sắp xếp",
+  "sortBy": "Sắp xếp:",
   "latest": "Mới nhất",
   "hottest": "Hot nhất",
   "mostLiked": "Nhiều like nhất",
@@ -38,26 +33,31 @@
   "tryAgain": "Thử lại",
   "noPostsYet": "Chưa có bài viết nào",
   "beFirstToShare": "Hãy là người đầu tiên chia sẻ!",
-  "expert": "Expert",
   "edit": "Chỉnh sửa",
   "delete": "Xóa",
   "justNow": "vừa xong",
   "minutesAgo": "{minutes} phút trước",
   "@minutesAgo": {
     "placeholders": {
-      "minutes": {"type": "int"}
+      "minutes": {
+        "type": "int"
+      }
     }
   },
   "hoursAgo": "{hours} giờ trước",
   "@hoursAgo": {
     "placeholders": {
-      "hours": {"type": "int"}
+      "hours": {
+        "type": "int"
+      }
     }
   },
   "daysAgo": "{days} ngày trước",
   "@daysAgo": {
     "placeholders": {
-      "days": {"type": "int"}
+      "days": {
+        "type": "int"
+      }
     }
   },
   "errorPrefix": "Lỗi",
@@ -105,28 +105,23 @@
   "postUpdated": "Đã cập nhật bài viết thành công",
   "postCreated": "Đã tạo bài viết thành công",
   "errorCreatingPost": "Lỗi khi tạo bài viết",
-  "experts": "Chuyên gia",
   "profile": "Hồ sơ",
-  
   "signIn": "Đăng nhập",
   "signUp": "Đăng ký",
   "createAccount": "Tạo tài khoản",
   "fullName": "Họ và tên",
-  "emailAddress": "Địa chỉ email",
+  "emailAddress": "Địa chỉ Email",
   "password": "Mật khẩu",
   "confirmPassword": "Xác nhận mật khẩu",
   "alreadyHaveAccount": "Đã có tài khoản? ",
   "dontHaveAccount": "Chưa có tài khoản? ",
   "forgotPassword": "Quên mật khẩu?",
   "or": "HOẶC",
-  
   "fullNameHint": "Nguyễn Văn A",
   "emailHint": "email.cua.ban@company.com",
   "passwordHint": "••••••••",
-  
   "signUpSubtitle": "Tham gia cùng chúng tôi và bắt đầu hành trình ngày hôm nay",
   "signInSubtitle": "Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục",
-  
   "emailRequired": "Email là bắt buộc",
   "emailInvalid": "Vui lòng nhập email hợp lệ",
   "passwordRequired": "Mật khẩu là bắt buộc",
@@ -134,23 +129,18 @@
   "passwordsDoNotMatch": "Mật khẩu không khớp",
   "nameRequired": "Tên là bắt buộc",
   "nameTooShort": "Tên phải có ít nhất 2 ký tự",
-  
   "skip": "Bỏ qua",
   "quote1": "\"Giữa mùa đông giá lạnh, tôi nhận ra bên trong mình vẫn có một mùa hè bất khuất.\"",
   "quote1Author": "ALBERT CAMUS",
   "quote2": "\"Cảm xúc chỉ là những vị khách. Hãy để chúng đến rồi đi.\"",
   "quote2Author": "MOOJI",
-  
   "currentStreak": "Chuỗi hiện tại",
   "longestStreak": "Chuỗi dài nhất",
   "editProfile": "Chỉnh sửa hồ sơ",
   "editProfileSubtitle": "Cập nhật thông tin cá nhân của bạn",
-  "notifications": "Thông báo",
   "notificationsSubtitle": "Quản lý tùy chọn thông báo",
   "statistics": "Thống kê",
   "statisticsSubtitle": "Xem phân tích tâm trạng của bạn",
-  "myAppointments": "Lịch hẹn của tôi",
-  "myAppointmentsSubtitle": "Xem và quản lý các đặt chỗ của bạn",
   "privacySecurity": "Quyền riêng tư & Bảo mật",
   "privacySecuritySubtitle": "Kiểm soát cài đặt quyền riêng tư",
   "helpSupport": "Trợ giúp & Hỗ trợ",
@@ -158,8 +148,6 @@
   "logout": "Đăng xuất",
   "logoutConfirmTitle": "Đăng xuất",
   "logoutConfirmMessage": "Bạn có chắc chắn muốn đăng xuất khỏi ứng dụng?",
-  "cancel": "Hủy",
-  
   "howAreYouFeeling": "Hôm nay bạn cảm thấy thế nào?",
   "selectYourMood": "Chọn tâm trạng của bạn",
   "addNote": "Thêm ghi chú (tùy chọn)",
@@ -184,33 +172,27 @@
   "@moodNotePlaceholder": {
     "description": "Placeholder cho ô nhập ghi chú tâm trạng"
   },
-  
   "meditationLibrary": "Thư viện thiền định",
   "findYourPeace": "Tìm sự bình yên của bạn",
-  "searchMeditations": "Tìm kiếm thiền định...",
+  "searchMeditations": "Tìm kiếm bài thiền...",
   "allCategories": "Tất cả danh mục",
   "stress": "Căng thẳng",
   "stressRelief": "Giảm căng thẳng",
   "anxiety": "Lo âu",
   "sleep": "Giấc ngủ",
   "focus": "Tập trung",
-  "beginner": "Người mới bắt đầu",
+  "beginner": "Cơ bản",
   "intermediate": "Trung cấp",
   "advanced": "Nâng cao",
   "minutes": "phút",
-  "noMeditationsFound": "Không tìm thấy thiền định nào",
+  "noMeditationsFound": "Không tìm thấy bài thiền",
   "tryAdjustingFilters": "Thử điều chỉnh bộ lọc của bạn",
   "play": "Phát",
   "pause": "Tạm dừng",
   "stop": "Dừng",
-  
-  "findExpert": "Tìm chuyên gia",
-  "searchExperts": "Tìm kiếm chuyên gia theo tên hoặc chuyên môn...",
   "yearsExperience": "năm kinh nghiệm",
-  "bookAppointment": "Đặt lịch hẹn",
   "about": "Giới thiệu",
   "specializations": "Chuyên môn",
-  "availability": "Lịch trống",
   "selectDateTime": "Chọn ngày & giờ",
   "selectCallType": "Chọn loại cuộc gọi",
   "videoCall": "Gọi video",
@@ -219,7 +201,6 @@
   "confirm": "Xác nhận",
   "payment": "Thanh toán",
   "proceedToPayment": "Tiến hành thanh toán",
-  
   "admin": "Quản trị",
   "manageMeditations": "Quản lý thiền định",
   "manageUsers": "Quản lý người dùng",
@@ -228,27 +209,21 @@
   "title": "Tiêu đề",
   "description": "Mô tả",
   "duration": "Thời lượng",
-  "category": "Danh mục",
   "level": "Cấp độ",
   "audioFile": "File âm thanh",
   "imageUrl": "URL hình ảnh",
   "save": "Lưu",
   "saveChanges": "Lưu thay đổi",
-  "delete": "Xóa",
   "createMeditation": "Tạo thiền định",
-  
   "loading": "Đang tải...",
   "error": "Lỗi",
   "success": "Thành công",
-  "tryAgain": "Thử lại",
   "close": "Đóng",
-  "search": "Tìm kiếm",
-  "filter": "Bộ lọc",
+  "filter": "Lọc",
   "sort": "Sắp xếp",
   "apply": "Áp dụng",
   "reset": "Đặt lại",
   "userNotLoggedIn": "Người dùng chưa đăng nhập",
-  
   "daysStreak": "{count} ngày",
   "@daysStreak": {
     "description": "Hiển thị số ngày trong chuỗi",
@@ -259,18 +234,6 @@
       }
     }
   },
-  
-  "errorLoadingExperts": "Lỗi tải chuyên gia: {error}",
-  "@errorLoadingExperts": {
-    "description": "Thông báo lỗi khi tải chuyên gia thất bại",
-    "placeholders": {
-      "error": {
-        "type": "String",
-        "example": "Lỗi mạng"
-      }
-    }
-  },
-  
   "errorLogout": "Lỗi đăng xuất: {error}",
   "@errorLogout": {
     "description": "Thông báo lỗi khi đăng xuất thất bại",
@@ -281,17 +244,13 @@
       }
     }
   },
-  
   "chatbot": "Trợ lý AI",
   "askMeAnything": "Hỏi tôi bất cứ điều gì...",
   "sendMessage": "Gửi",
-  
-  "appointmentBooked": "Đã đặt lịch hẹn thành công",
   "date": "Ngày",
   "time": "Giờ",
   "amount": "Số tiền",
   "callType": "Loại cuộc gọi",
-  
   "yourAccountBanned": "Tài khoản của bạn đã bị cấm.",
   "banReason": "Lý do: {reason}",
   "@banReason": {
@@ -302,11 +261,9 @@
     }
   },
   "contactSupport": "Vui lòng liên hệ hỗ trợ.",
-  
   "day": "ngày",
   "days": "ngày",
   "settings": "Cài đặt",
-  
   "goodMorning": "Chào buổi sáng",
   "goodAfternoon": "Chào buổi chiều",
   "goodEvening": "Chào buổi tối",
@@ -317,7 +274,6 @@
   "calm": "Bình tĩnh",
   "trackMood": "Ghi nhận tâm trạng",
   "streak": "Chuỗi",
-  
   "moodLog": "Ghi nhật ký tâm trạng",
   "howAreYouFeelingToday": "Hôm nay bạn cảm thấy\nthế nào?",
   "notes": "Ghi chú",
@@ -336,153 +292,84 @@
   "errorSavingMood": "Lỗi lưu tâm trạng: {error}",
   "@errorSavingMood": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
-  
   "moodHistory": "Lịch sử tâm trạng",
-  "filter": "Lọc",
   "allMoods": "Tất cả",
   "thisWeek": "Tuần này",
   "thisMonth": "Tháng này",
   "noMoodEntries": "Chưa có ghi nhận nào",
   "startTrackingMood": "Bắt đầu ghi nhận tâm trạng để xem lịch sử",
   "errorLoadingMoods": "Lỗi tải tâm trạng",
-  
   "moodDetails": "Chi tiết tâm trạng",
-  "delete": "Xóa",
-  "edit": "Chỉnh sửa",
   "factors": "Yếu tố",
   "noFactors": "Không có yếu tố nào",
   "deleteMoodConfirm": "Xóa ghi nhận này?",
   "deleteMoodMessage": "Hành động này không thể hoàn tác.",
   "moodDeletedSuccess": "Đã xóa ghi nhận",
   "errorDeletingMood": "Lỗi khi xóa",
-  
   "grouped": "Theo nhóm",
   "calendar": "Lịch",
-  "all": "Tất cả",
   "avg": "TB",
   "entry": "mục",
   "entries": "mục",
   "today": "Hôm nay",
   "yesterday": "Hôm qua",
   "legend": "Chú giải",
-  
   "moodEntry": "Nhật ký tâm trạng",
-  "save": "Lưu",
   "howWereYouFeeling": "Bạn cảm thấy thế nào?",
   "whatInfluencedMood": "Điều gì ảnh hưởng đến tâm trạng của bạn?",
   "moodUpdatedSuccess": "Đã cập nhật nhật ký tâm trạng! 🎉",
   "errorUpdatingMood": "Lỗi khi cập nhật",
-  
-  "findAnExpert": "Tìm chuyên gia",
-  "myAppointments": "Lịch hẹn của tôi",
-  "expert": "Chuyên gia",
   "available": "có sẵn",
-  "noExpertsFound": "Không tìm thấy chuyên gia",
   "tryAnotherFilter": "Thử chọn chuyên môn khác",
-  "errorLoadingExperts": "Lỗi khi tải chuyên gia",
   "depression": "Trầm cảm",
   "from": "Từ",
   "yrs": "năm",
   "rating": "Đánh giá",
   "experience": "Kinh nghiệm",
   "reviews": "Lượt đánh giá",
-  "about": "Giới thiệu",
-  "availableDays": "Ngày có lịch",
-  "availableTimeSlots": "Khung giờ có lịch",
-  "bookAppointment": "Đặt lịch hẹn",
-  "selectDate": "Chọn ngày",
-  "selectDateToView": "Chọn một ngày để xem khung giờ có sẵn",
-  "chooseDateFromCalendar": "Chọn một ngày từ lịch bên trên",
   "notesOptional": "Ghi chú (Tùy chọn)",
-  "selectCallType": "Chọn loại cuộc gọi",
-  "voiceCall": "Gọi thoại",
   "audioOnlyConsultation": "Tư vấn qua âm thanh",
-  "videoCall": "Gọi video",
   "faceToFaceConsultation": "Tư vấn trực tiếp qua video",
   "recommended": "Đề xuất",
-  "duration": "Thời lượng",
   "min": "phút",
-  "myAppointments": "Lịch hẹn của tôi",
   "upcoming": "Sắp tới",
   "history": "Lịch sử",
-  "noUpcomingAppointments": "Không có lịch hẹn sắp tới",
-  "bookAppointmentToGetStarted": "Đặt lịch hẹn với chuyên gia để bắt đầu",
-  "noAppointmentHistory": "Chưa có lịch sử",
-  "pastAppointmentsWillAppear": "Các lịch hẹn đã qua sẽ xuất hiện ở đây",
-  "date": "Ngày",
-  "time": "Giờ",
-  "callType": "Loại cuộc gọi",
-  "notes": "Ghi chú",
-  "cancelAppointment": "Hủy lịch hẹn",
   "confirmed": "Đã xác nhận",
   "cancelled": "Đã hủy",
   "completed": "Hoàn thành",
-  "cancelAppointmentQuestion": "Hủy lịch hẹn?",
-  "payment": "Thanh toán",
-  "selectPaymentMethod": "Chọn phương thức thanh toán",
-  "confirmPayment": "Xác nhận thanh toán",
-  "paymentSuccessful": "Thanh toán thành công!",
-  "meditationLibrary": "Thư viện thiền định",
-  "searchMeditations": "Tìm kiếm bài thiền...",
-  "all": "Tất cả",
-  "stress": "Căng thẳng",
-  "anxiety": "Lo âu",
-  "sleep": "Giấc ngủ",
-  "focus": "Tập trung",
-  "beginner": "Cơ bản",
-  "intermediate": "Trung cấp",
-  "advanced": "Nâng cao",
-  "sortBy": "Sắp xếp:",
   "ratingSort": "⭐ Đánh giá",
   "durationSort": "⏱️ Thời lượng",
   "nameSort": "🔤 Tên",
   "meditationsFound": "bài thiền",
   "meditationFound": "bài thiền",
-  "noMeditationsFound": "Không tìm thấy bài thiền",
   "tryDifferentSearch": "Thử tìm kiếm hoặc lọc khác",
-  "play": "Phát",
-  "pause": "Tạm dừng",
-  "stop": "Dừng",
-  "description": "Mô tả",
   "benefits": "Lợi ích",
   "instructions": "Hướng dẫn",
-  "level": "Cấp độ",
   "aiAssistant": "Trợ lý AI",
   "alwaysReadyToHelp": "Luôn sẵn sàng hỗ trợ bạn",
   "clearChatHistory": "Xóa lịch sử chat?",
   "clearChatConfirmation": "Bạn có chắc muốn xóa toàn bộ lịch sử trò chuyện không?",
-  "cancel": "Hủy",
-  "delete": "Xóa",
   "typeMessage": "Nhập tin nhắn...",
   "welcomeTagline": "Nền tảng chăm sóc sức khỏe tinh thần chuyên nghiệp",
   "aiPoweredInsights": "Phân tích bằng AI",
   "trackProgress": "Theo dõi tiến trình theo thời gian",
   "privateSecure": "Riêng tư và bảo mật",
   "getStarted": "Bắt đầu",
-  "signIn": "Đăng nhập",
   "termsAgreement": "Bằng việc tiếp tục, bạn đồng ý với ",
   "termsPrivacy": "Điều khoản & Quyền riêng tư",
   "signInToModiki": "Đăng nhập vào MOODIKI",
   "signInToContinue": "Đăng nhập để tiếp tục hành trình của bạn",
-  "createAccount": "Tạo tài khoản",
   "joinUsToday": "Tham gia với chúng tôi và bắt đầu hành trình ngay hôm nay",
-  "fullName": "Họ và tên",
-  "emailAddress": "Địa chỉ Email",
-  "password": "Mật khẩu",
-  "confirmPassword": "Xác nhận mật khẩu",
-  "forgotPassword": "Quên mật khẩu?",
-  "alreadyHaveAccount": "Đã có tài khoản? ",
-  "dontHaveAccount": "Chưa có tài khoản? ",
   "orContinueWith": "Hoặc tiếp tục với",
-  "signUp": "Đăng ký",
   "email": "Email",
   "adminSetup": "Thiết lập Admin",
   "howAreYouFeelingShort": "Bạn cảm thấy thế nào?",
   "quickActions": "Thao tác nhanh",
-  "expertConsultation": "Tư vấn chuyên gia",
   "allMeditations": "Tất cả bài thiền",
   "featuredMeditation": "Thiền nổi bật",
   "dailyInspiration": "Cảm hứng hàng ngày",
@@ -498,18 +385,18 @@
   "logsUnit": "lần",
   "daysUnit": "ngày",
   "logMood": "Ghi lại",
-
   "streakHistoryTitle": "Lịch Sử Chuỗi",
   "totalActivities": "Tổng {count} hoạt động",
   "@totalActivities": {
     "description": "Tổng số hoạt động trong thống kê chuỗi",
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "keepItUp": "Phát huy nhé! Quay lại vào ngày mai",
   "startYourStreak": "Bắt đầu chuỗi của bạn hôm nay!",
-  "legend": "Chú giải",
   "hasActivity": "Có hoạt động",
   "noActivity": "Không hoạt động",
   "future": "Tương lai",
@@ -518,7 +405,6 @@
   "tipMeditation": "Hoàn thành các buổi thiền định thường xuyên",
   "tipDailyReminder": "Đặt nhắc nhở hàng ngày để tự kiểm tra",
   "tipStreakReset": "Chuỗi sẽ reset nếu bạn bỏ lỡ một ngày",
-
   "moodTrackerTitle": "Theo Dõi Tâm Trạng",
   "howAreYouFeelingHero": "Chào bạn, tâm trạng bạn thế nào?",
   "moodHeroSubtitle": "Hãy dành một phút để lắng nghe bản thân mình.",
@@ -532,7 +418,6 @@
   "notesPlaceholder": "Hôm nay của bạn có gì đặc biệt không?...",
   "dailyInspirationQuote": "\"Mỗi ngày là một khởi đầu mới. Hãy hít một hơi thật sâu và mỉm cười với thế giới.\"",
   "quoteInspirationLabel": "Cảm hứng cho ngày mới",
-
   "moodAnalyticsTitle": "Phân tích tâm trạng",
   "week": "Tuần",
   "month": "Tháng",
@@ -550,92 +435,20 @@
   "errorLoadingMoodData": "Lỗi tải dữ liệu tâm trạng: {error}",
   "@errorLoadingMoodData": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "noDataToDisplay": "Không có dữ liệu để hiển thị",
   "data": "Dữ liệu",
   "flow": "Dòng chảy",
   "growth": "Tăng trưởng",
-  "currentStreak": "Chuỗi hiện tại",
   "keyInfluencers": "Yếu tố ảnh hưởng chính",
   "moodTrends": "Xu hướng tâm trạng",
   "distribution": "Phân bố",
   "monthlyHighlights": "Nổi bật tháng này",
-
-  "joinAsExpert": "Tham gia với vai trò Chuyên gia Tâm lý",
-  "@joinAsExpert": {
-    "description": "Văn bản nút đăng ký cho chuyên gia sức khỏe tâm thần"
-  },
-  "couldNotLoadExpertInfo": "Không thể tải thông tin chuyên gia: {error}",
-  "@couldNotLoadExpertInfo": {
-    "placeholders": {
-      "error": {"type": "String"}
-    }
-  },
-  "errorLoadingSlots": "Lỗi tải khung giờ: {error}",
-  "@errorLoadingSlots": {
-    "placeholders": {
-      "error": {"type": "String"}
-    }
-  },
-  "expertNotAvailableOnDay": "{expertName} không có lịch vào {day}",
-  "@expertNotAvailableOnDay": {
-    "placeholders": {
-      "expertName": {"type": "String"},
-      "day": {"type": "String"}
-    }
-  },
   "pleaseSelectDateAndTime": "Vui lòng chọn ngày và giờ",
   "pleaseLoginFirst": "Vui lòng đăng nhập trước",
-  "bookingConflictAlreadyHaveAppointment": "Bạn đã có lịch hẹn vào thời điểm này. Vui lòng chọn khung giờ khác.",
-  "bookingConflictExpertNotAvailable": "Chuyên gia không rảnh vào thời điểm đã chọn. Vui lòng chọn khung giờ khác.",
-  "bookingInvalidCallTypeConfig": "Cấu hình loại cuộc gọi trong cơ sở dữ liệu không hợp lệ. Vui lòng liên hệ quản trị viên.",
-  "bookingInvalidData": "Dữ liệu đặt lịch không hợp lệ (không tìm thấy chuyên gia/người dùng). Vui lòng mở lại trang và thử lại.",
-  "bookingNoPermission": "Bạn không có quyền tạo lịch hẹn này. Vui lòng đăng nhập lại.",
-  "bookingFailedWithReason": "Đặt lịch thất bại: {reason}",
-  "@bookingFailedWithReason": {
-    "placeholders": {
-      "reason": {"type": "String"}
-    }
-  },
-  "bookingFailedGeneric": "Đặt lịch thất bại. Vui lòng thử lại.",
-  "expertNotFound": "Không tìm thấy chuyên gia",
-  "availableTimeSlotsOnDate": "Khung giờ trống - {date}",
-  "@availableTimeSlotsOnDate": {
-    "placeholders": {
-      "date": {"type": "String"}
-    }
-  },
-  "noAvailableSlotsForThisDay": "Không có khung giờ trống trong ngày này",
-  "allSlotsAreFullyBooked": "Tất cả khung giờ đã được đặt",
-  "expertIsNotAvailableOnSelectedDay": "Chuyên gia không có lịch vào {day}",
-  "@expertIsNotAvailableOnSelectedDay": {
-    "placeholders": {
-      "day": {"type": "String"}
-    }
-  },
-  "anyNotesForExpert": "Bạn có ghi chú gì cho chuyên gia không?",
-  "cancelUpTo4HoursBeforeAppointment": "Bạn có thể hủy tối đa 4 giờ trước lịch hẹn",
-  "appointmentSummary": "Tóm tắt lịch hẹn",
-  "sessionFee": "Phí buổi tư vấn",
-  "serviceFee": "Phí dịch vụ",
-  "mockCreditCard": "Thẻ tín dụng mô phỏng",
-  "simulateCardPayment": "Mô phỏng thanh toán thẻ",
-  "mockMomo": "MoMo mô phỏng",
-  "simulateMomoEwallet": "Mô phỏng ví điện tử MoMo",
-  "mockBanking": "Chuyển khoản mô phỏng",
-  "simulateBankTransfer": "Mô phỏng chuyển khoản ngân hàng",
-  "viewMyAppointments": "Xem lịch hẹn của tôi",
-  "yourAppointmentHasBeenConfirmed": "Lịch hẹn của bạn đã được xác nhận",
-  "at": "lúc",
-  "momoOpenFailed": "Không thể mở MoMo",
-  "momoCreateFailed": "Tạo giao dịch MoMo thất bại",
-  "paymentInfoSaveError": "Lỗi lưu thông tin thanh toán: {error}",
-  "@paymentInfoSaveError": {
-    "placeholders": {
-      "error": {"type": "String"}
-    }
-  },
-  "paymentConfirmTimeout": "Đã quá thời gian chờ xác nhận thanh toán. Vui lòng kiểm tra lại trạng thái giao dịch."
+  "at": "lúc"
 }

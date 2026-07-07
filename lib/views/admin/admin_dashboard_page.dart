@@ -17,11 +17,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
   // Stats
   int _totalUsers = 0;
-  int _totalExperts = 0;
   int _totalMeditations = 0;
-  int _totalAppointments = 0;
-  int _pendingExpertApplications = 0;
-  int _todayAppointments = 0;
 
   String get _currentUserName =>
       _supabase.auth.currentUser?.userMetadata?['full_name'] as String? ??
@@ -38,42 +34,19 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     setState(() => _isLoading = true);
 
     try {
-      final now = DateTime.now();
-      final todayStart = DateTime(now.year, now.month, now.day).toIso8601String();
-      final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59).toIso8601String();
-
       final results = await Future.wait([
         _supabase.from('users').select('role'),
         _supabase.from('meditations').select('id'),
-        _supabase.from('appointments').select('id, appointment_date'),
-        _supabase.from('experts').select('id, is_approved'),
       ]);
 
       final users = results[0] as List;
       final meditations = results[1] as List;
-      final appointments = results[2] as List;
-      final experts = results[3] as List;
 
       final regularUsersCount = users.where((u) => u['role'] == 'user').length;
-      final expertUsersCount = users.where((u) => u['role'] == 'expert').length;
-      final pendingExpertsCount = experts.where((e) => e['is_approved'] == false).length;
-
-      final todayAppts = appointments.where((a) {
-        final dateStr = a['appointment_date'] as String?;
-        if (dateStr == null) return false;
-        final date = DateTime.tryParse(dateStr);
-        if (date == null) return false;
-        return date.isAfter(DateTime.parse(todayStart)) &&
-            date.isBefore(DateTime.parse(todayEnd));
-      }).length;
 
       setState(() {
         _totalUsers = regularUsersCount;
-        _totalExperts = expertUsersCount;
         _totalMeditations = meditations.length;
-        _totalAppointments = appointments.length;
-        _pendingExpertApplications = pendingExpertsCount;
-        _todayAppointments = todayAppts;
         _isLoading = false;
       });
     } catch (e) {
@@ -136,69 +109,13 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: _buildStatCard(
-                                  'Experts',
-                                  '$_totalExperts',
-                                  Icons.psychology_outlined,
-                                  Colors.purple,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildStatCard(
                                   'Meditations',
                                   '$_totalMeditations',
                                   Icons.spa_outlined,
                                   Colors.green,
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _buildStatCard(
-                                  'Appointments',
-                                  '$_totalAppointments',
-                                  Icons.calendar_month_outlined,
-                                  Colors.orange,
-                                ),
-                              ),
                             ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Pending Actions
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Pending Actions',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          _buildActionCard(
-                            'Expert Applications',
-                            '$_pendingExpertApplications pending review',
-                            Icons.person_add_outlined,
-                            Colors.amber,
-                            _pendingExpertApplications,
-                          ),
-                          const SizedBox(height: 12),
-                          _buildActionCard(
-                            "Today's Appointments",
-                            '$_todayAppointments scheduled today',
-                            Icons.event_outlined,
-                            Colors.teal,
-                            _todayAppointments,
                           ),
                         ],
                       ),
@@ -234,11 +151,11 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: _buildQuickActionButton(
-                                  'Manage Experts',
-                                  Icons.psychology,
-                                  Colors.purple,
+                                  'Meditations',
+                                  Icons.spa,
+                                  Colors.green,
                                   () {
-                                    widget.onNavigate?.call(2);
+                                    widget.onNavigate?.call(3);
                                   },
                                 ),
                               ),
@@ -247,17 +164,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                           const SizedBox(height: 12),
                           Row(
                             children: [
-                              Expanded(
-                                child: _buildQuickActionButton(
-                                  'Meditations',
-                                  Icons.spa,
-                                  Colors.green,
-                                  () {
-                                    widget.onNavigate?.call(4);
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 12),
                               Expanded(
                                 child: _buildQuickActionButton(
                                   'Analytics',
@@ -440,78 +346,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
               fontWeight: FontWeight.w500,
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionCard(
-    String title,
-    String subtitle,
-    IconData icon,
-    Color color,
-    int count,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-                ),
-              ],
-            ),
-          ),
-          if (count > 0)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                '$count',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
         ],
       ),
     );

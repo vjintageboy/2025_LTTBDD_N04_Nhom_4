@@ -3,7 +3,6 @@ import '../../services/supabase_service.dart';
 import 'package:flutter/material.dart';
 import '../auth/welcome_page.dart';
 import '../mood/mood_analytics_page.dart';
-import '../appointment/my_appointments_page.dart';
 import 'edit_profile_page.dart';
 import '../../models/streak.dart';
 import '../../shared/widgets/language_switcher.dart';
@@ -255,21 +254,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const MoodAnalyticsPage(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 12),
-
-                  _buildProfileOption(
-                    icon: Icons.calendar_month_outlined,
-                    title: context.l10n.myAppointments,
-                    subtitle: context.l10n.myAppointmentsSubtitle,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const MyAppointmentsPage(),
                         ),
                       );
                     },
