@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'login_page.dart';
@@ -151,7 +153,7 @@ class _SignUpPageState extends State<SignUpPage>
                           onTap: () => Navigator.pop(context),
                           borderRadius: BorderRadius.circular(14),
                           child: const Icon(
-                            Icons.arrow_back,
+                            IconsaxPlusLinear.arrow_left,
                             color: AppColors.osOnSurface,
                             size: 20,
                           ),
@@ -233,7 +235,7 @@ class _SignUpPageState extends State<SignUpPage>
                       controller: _nameController,
                       label: context.l10n.fullName,
                       hint: context.l10n.fullName,
-                      icon: Icons.person_outline,
+                      icon: IconsaxPlusLinear.user,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return context.l10n.fullName;
@@ -249,7 +251,7 @@ class _SignUpPageState extends State<SignUpPage>
                       controller: _emailController,
                       label: context.l10n.emailAddress,
                       hint: context.l10n.email,
-                      icon: Icons.mail_outline,
+                      icon: IconsaxPlusLinear.sms,
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -269,13 +271,13 @@ class _SignUpPageState extends State<SignUpPage>
                       controller: _passwordController,
                       label: context.l10n.password,
                       hint: context.l10n.password,
-                      icon: Icons.lock_outline,
+                      icon: IconsaxPlusLinear.lock_1,
                       obscureText: _obscurePassword,
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
+                              ? IconsaxPlusLinear.eye
+                              : IconsaxPlusLinear.eye_slash,
                           color: AppColors.osOnSurfaceVariant,
                           size: 20,
                         ),
@@ -301,13 +303,13 @@ class _SignUpPageState extends State<SignUpPage>
                       controller: _confirmPasswordController,
                       label: context.l10n.confirmPassword,
                       hint: context.l10n.password,
-                      icon: Icons.lock_outline,
+                      icon: IconsaxPlusLinear.lock_1,
                       obscureText: _obscureConfirmPassword,
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscureConfirmPassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
+                              ? IconsaxPlusLinear.eye
+                              : IconsaxPlusLinear.eye_slash,
                           color: AppColors.osOnSurfaceVariant,
                           size: 20,
                         ),
@@ -334,7 +336,7 @@ class _SignUpPageState extends State<SignUpPage>
                       builder: (context, authProvider, child) {
                         return PrimaryButton(
                           text: context.l10n.createAccount,
-                          icon: Icons.arrow_forward,
+                          icon: IconsaxPlusLinear.arrow_right_3,
                           isLoading: authProvider.isLoading,
                           onPressed: _signUp,
                         );
@@ -359,7 +361,7 @@ class _SignUpPageState extends State<SignUpPage>
 
                     // Google signup button
                     SocialButton(
-                      icon: Icons.g_mobiledata,
+                      icon: PhosphorIconsRegular.googleLogo,
                       label: 'Google',
                       onPressed: _handleGoogleSignIn,
                     ),

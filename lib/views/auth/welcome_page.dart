@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../main.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/services/localization_service.dart';
@@ -104,7 +106,7 @@ class _WelcomePageState extends State<WelcomePage>
         ),
         title: Row(
           children: const [
-            Icon(Icons.admin_panel_settings, color: Color(0xFF4CAF50)),
+            Icon(IconsaxPlusLinear.user_tick, color: Color(0xFF4CAF50)),
             SizedBox(width: 12),
             Text(
               'Admin Setup',
@@ -372,17 +374,17 @@ class _WelcomePageState extends State<WelcomePage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _FeatureItem(
-                        icon: Icons.psychology_outlined,
+                        icon: PhosphorIconsRegular.brain,
                         text: context.l10n.aiPoweredInsights,
                       ),
                       const SizedBox(height: 14),
                       _FeatureItem(
-                        icon: Icons.trending_up,
+                        icon: IconsaxPlusLinear.trend_up,
                         text: context.l10n.trackProgress,
                       ),
                       const SizedBox(height: 14),
                       _FeatureItem(
-                        icon: Icons.shield_outlined,
+                        icon: IconsaxPlusLinear.shield,
                         text: context.l10n.privateSecure,
                       ),
                     ],
@@ -597,7 +599,7 @@ class _PrimaryButtonState extends State<_PrimaryButton>
                     ),
                     const SizedBox(width: 8),
                     const Icon(
-                      Icons.arrow_forward,
+                      IconsaxPlusLinear.arrow_right_3,
                       color: AppColors.osOnPrimary,
                       size: 20,
                     ),

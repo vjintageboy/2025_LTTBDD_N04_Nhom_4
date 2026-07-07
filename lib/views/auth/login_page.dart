@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -248,7 +250,7 @@ class _LoginPageState extends State<LoginPage>
                             controller: _forgotPasswordController,
                             label: context.l10n.emailAddress,
                             hint: context.l10n.email,
-                            icon: Icons.mail_outline,
+                            icon: IconsaxPlusLinear.sms,
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -356,7 +358,7 @@ class _LoginPageState extends State<LoginPage>
                           onTap: () => Navigator.pop(context),
                           borderRadius: BorderRadius.circular(14),
                           child: const Icon(
-                            Icons.arrow_back,
+                            IconsaxPlusLinear.arrow_left,
                             color: AppColors.osOnSurface,
                             size: 20,
                           ),
@@ -438,7 +440,7 @@ class _LoginPageState extends State<LoginPage>
                       controller: _emailController,
                       label: context.l10n.emailAddress,
                       hint: context.l10n.email,
-                      icon: Icons.mail_outline,
+                      icon: IconsaxPlusLinear.sms,
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -458,13 +460,13 @@ class _LoginPageState extends State<LoginPage>
                       controller: _passwordController,
                       label: context.l10n.password,
                       hint: context.l10n.password,
-                      icon: Icons.lock_outline,
+                      icon: IconsaxPlusLinear.lock_1,
                       obscureText: _obscurePassword,
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
+                              ? IconsaxPlusLinear.eye
+                              : IconsaxPlusLinear.eye_slash,
                           color: AppColors.osOnSurfaceVariant,
                           size: 20,
                         ),
@@ -514,7 +516,7 @@ class _LoginPageState extends State<LoginPage>
                       builder: (context, authProvider, child) {
                         return PrimaryButton(
                           text: context.l10n.signIn,
-                          icon: Icons.arrow_forward,
+                          icon: IconsaxPlusLinear.arrow_right_3,
                           isLoading: authProvider.isLoading,
                           onPressed: _login,
                         );
@@ -539,7 +541,7 @@ class _LoginPageState extends State<LoginPage>
 
                     // Google login button
                     SocialButton(
-                      icon: Icons.g_mobiledata,
+                      icon: PhosphorIconsRegular.googleLogo,
                       label: 'Google',
                       onPressed: _handleGoogleSignIn,
                     ),
