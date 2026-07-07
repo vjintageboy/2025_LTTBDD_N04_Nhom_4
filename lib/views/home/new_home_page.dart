@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/services/localization_service.dart';
 import '../../models/streak.dart';
@@ -273,7 +275,7 @@ class _NewHomePageState extends State<NewHomePage>
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
-                            Icons.notifications_outlined,
+                            IconsaxPlusLinear.notification,
                             color: AppColors.osPrimary,
                             size: 20,
                           ),
@@ -539,21 +541,21 @@ class _NewHomePageState extends State<NewHomePage>
     final actions = [
       _QuickAction(
         label: context.l10n.aiAssistant,
-        icon: Icons.smart_toy_outlined,
+        icon: PhosphorIconsRegular.robot,
         bg: const Color(0xFFE3F0FF),
         iconColor: const Color(0xFF1565C0),
         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatbotPage())),
       ),
       _QuickAction(
         label: context.l10n.moodHistory,
-        icon: Icons.insights_outlined,
+        icon: IconsaxPlusLinear.chart_success,
         bg: const Color(0xFFFFF3E0),
         iconColor: const Color(0xFFE65100),
         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MoodHistoryPage())),
       ),
       _QuickAction(
         label: context.l10n.allMeditations,
-        icon: Icons.self_improvement_outlined,
+        icon: PhosphorIconsRegular.personSimpleTaiChi,
         bg: const Color(0xFFF3E5F5),
         iconColor: const Color(0xFF7B1FA2),
         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MeditationLibraryPage())),
@@ -654,9 +656,9 @@ class _NewHomePageState extends State<NewHomePage>
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(color: AppColors.osSurfaceContainerHigh),
                         )
-                      : Container(
+                          : Container(
                           color: AppColors.osSurfaceContainerHigh,
-                          child: const Icon(Icons.self_improvement, size: 48, color: AppColors.osPrimary),
+                          child: const Icon(PhosphorIconsRegular.personSimpleTaiChi, size: 48, color: AppColors.osPrimary),
                         ),
                 ),
                 // Info row
@@ -682,7 +684,7 @@ class _NewHomePageState extends State<NewHomePage>
                             const SizedBox(height: 6),
                             Row(
                               children: [
-                                const Icon(Icons.schedule_outlined, size: 14, color: AppColors.osOnSurfaceVariant),
+                                const Icon(IconsaxPlusLinear.clock, size: 14, color: AppColors.osOnSurfaceVariant),
                                 const SizedBox(width: 4),
                                 Text(
                                   '${meditation.duration} min',
@@ -706,7 +708,7 @@ class _NewHomePageState extends State<NewHomePage>
                           color: AppColors.osPrimary,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.play_arrow_rounded, color: AppColors.osOnPrimary, size: 30),
+                        child: const Icon(IconsaxPlusBold.play, color: AppColors.osOnPrimary, size: 30),
                       ),
                     ],
                   ),
@@ -795,7 +797,7 @@ class _NewHomePageState extends State<NewHomePage>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.error_outline_rounded,
+                IconsaxPlusLinear.danger,
                 size: 56,
                 color: AppColors.osError.withValues(alpha: 0.6),
               ),

@@ -1,5 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../mood/mood_history_page.dart';
@@ -115,7 +117,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           backgroundColor: AppColors.osPrimary,
           elevation: 0,
           shape: const CircleBorder(),
-          child: const Icon(Icons.smart_toy_outlined, color: AppColors.osOnPrimary, size: 26),
+          child: const Icon(PhosphorIconsRegular.robot, color: AppColors.osOnPrimary, size: 26),
         ),
       ),
     );
@@ -135,10 +137,10 @@ class _OsBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final items = [
-      _NavItem(icon: Icons.home_outlined,        filledIcon: Icons.home_rounded,        label: context.l10n.home),
-      _NavItem(icon: Icons.mood_outlined,         filledIcon: Icons.mood_rounded,         label: context.l10n.mood),
-      _NavItem(icon: Icons.article_outlined,      filledIcon: Icons.article_rounded,      label: context.l10n.news),
-      _NavItem(icon: Icons.person_outline_rounded,filledIcon: Icons.person_rounded,       label: context.l10n.profile),
+      _NavItem(icon: IconsaxPlusLinear.home,        filledIcon: IconsaxPlusBold.home,        label: context.l10n.home),
+      _NavItem(icon: PhosphorIconsRegular.smiley,         filledIcon: PhosphorIconsRegular.smiley,         label: context.l10n.mood),
+      _NavItem(icon: IconsaxPlusLinear.document_text,      filledIcon: IconsaxPlusLinear.document_text,      label: context.l10n.news),
+      _NavItem(icon: IconsaxPlusLinear.user,filledIcon: IconsaxPlusBold.user,       label: context.l10n.profile),
     ];
 
     return ClipRect(
