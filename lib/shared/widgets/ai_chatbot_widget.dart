@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../core/providers/chatbot_provider.dart';
 import '../../services/ai_chatbot_service.dart';
@@ -44,7 +46,7 @@ class _ChatbotFAB extends StatelessWidget {
           child: Stack(
             children: [
               const Icon(
-                Icons.chat_bubble_outline,
+                IconsaxPlusLinear.message,
                 color: Colors.white,
                 size: 28,
               ),
@@ -144,7 +146,7 @@ class _ChatHeader extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.smart_toy, color: Colors.white, size: 24),
+            child: const Icon(PhosphorIconsRegular.robot, color: Colors.white, size: 24),
           ),
           const SizedBox(width: 12),
           const Expanded(
@@ -167,7 +169,7 @@ class _ChatHeader extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.history, color: Colors.white),
+            icon: const Icon(PhosphorIconsRegular.clockCounterClockwise, color: Colors.white),
             onPressed: () {
               showModalBottomSheet(
                 context: context,
@@ -201,7 +203,7 @@ class _ChatHeader extends StatelessWidget {
 
                             return ListTile(
                               selected: c.id == chatbot.activeConversationId,
-                              leading: const Icon(Icons.forum_outlined),
+                              leading: const Icon(IconsaxPlusLinear.messages),
                               title: Text(
                                 title,
                                 maxLines: 1,
@@ -214,7 +216,7 @@ class _ChatHeader extends StatelessWidget {
                               ),
                               trailing: IconButton(
                                 icon: const Icon(
-                                  Icons.delete_outline,
+                                  IconsaxPlusLinear.trash,
                                   color: Colors.redAccent,
                                 ),
                                 onPressed: () async {
@@ -261,18 +263,18 @@ class _ChatHeader extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.add_comment_outlined, color: Colors.white),
+            icon: const Icon(IconsaxPlusLinear.message_add_1, color: Colors.white),
             onPressed: () => chatbot.startNewConversation(),
           ),
           IconButton(
             icon: Icon(
-              chatbot.isMinimized ? Icons.maximize : Icons.minimize,
+              chatbot.isMinimized ? IconsaxPlusLinear.maximize : IconsaxPlusLinear.maximize,
               color: Colors.white,
             ),
             onPressed: () => chatbot.toggleMinimize(),
           ),
           IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
+            icon: const Icon(IconsaxPlusLinear.close_circle, color: Colors.white),
             onPressed: () => chatbot.closeChatbot(),
           ),
         ],
@@ -335,7 +337,7 @@ class _MessageBubble extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.smart_toy,
+                PhosphorIconsRegular.robot,
                 size: 20,
                 color: Color(0xFF7B2BB0),
               ),
@@ -343,7 +345,7 @@ class _MessageBubble extends StatelessWidget {
             const SizedBox(width: 8),
           ],
           Flexible(
-            child: Container(
+              child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: message.isUser ? const Color(0xFF7B2BB0) : Colors.white,
@@ -375,7 +377,7 @@ class _MessageBubble extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.person,
+                IconsaxPlusBold.user,
                 size: 20,
                 color: Color(0xFF7B2BB0),
               ),
@@ -402,7 +404,7 @@ class _TypingIndicator extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              Icons.smart_toy,
+              PhosphorIconsRegular.robot,
               size: 20,
               color: Color(0xFF7B2BB0),
             ),
@@ -600,7 +602,7 @@ class _InputField extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
                 child: Container(
                   padding: const EdgeInsets.all(12),
-                  child: const Icon(Icons.send, color: Colors.white, size: 24),
+                  child: const Icon(IconsaxPlusBold.send_2, color: Colors.white, size: 24),
                 ),
               ),
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:provider/provider.dart';
 import '../../core/services/localization_service.dart';
 
@@ -26,7 +27,7 @@ class LanguageSwitcher extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.language,
+              IconsaxPlusLinear.global,
               size: 18,
               color: Colors.white.withValues(alpha: 0.9),
             ),
@@ -41,7 +42,7 @@ class LanguageSwitcher extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Icon(
-              Icons.swap_horiz,
+              IconsaxPlusLinear.arrow_swap_horizontal,
               size: 16,
               color: Colors.white.withValues(alpha: 0.7),
             ),
@@ -77,7 +78,7 @@ class LanguageDropdown extends StatelessWidget {
       child: DropdownButton<Locale>(
         value: localeProvider.locale,
         underline: const SizedBox(),
-        icon: const Icon(Icons.arrow_drop_down),
+        icon: const Icon(IconsaxPlusLinear.arrow_down_1),
         isExpanded: true,
         items: const [
           DropdownMenuItem(
@@ -134,7 +135,7 @@ class LanguageSettingsTile extends StatelessWidget {
           color: const Color(0xFF7B2BB0).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: const Icon(Icons.language, color: Color(0xFF7B2BB0), size: 24),
+        child: const Icon(IconsaxPlusLinear.global, color: Color(0xFF7B2BB0), size: 24),
       ),
       title: const Text(
         'Language / Ngôn ngữ',

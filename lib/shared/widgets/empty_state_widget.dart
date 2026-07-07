@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../core/constants/app_colors.dart';
 
 class EmptyStateWidget extends StatelessWidget {
@@ -109,7 +111,7 @@ class NoMoodEntriesEmpty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return EmptyStateWidget(
-      icon: Icons.mood,
+      icon: PhosphorIconsRegular.smiley,
       title: 'No Mood Entries',
       message:
           'You haven\'t logged any moods yet.\nStart tracking your emotions today!',
@@ -128,7 +130,7 @@ class NoMeditationsEmpty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return EmptyStateWidget(
-      icon: Icons.self_improvement,
+      icon: PhosphorIconsRegular.personSimpleTaiChi,
       title: 'No Meditations',
       message: 'Explore our collection of guided\nmeditations to get started.',
       actionText: 'Explore Meditations',
@@ -146,7 +148,7 @@ class NoSearchResultsEmpty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return EmptyStateWidget(
-      icon: Icons.search_off,
+      icon: IconsaxPlusLinear.search_zoom_out,
       title: 'No Results Found',
       message: 'We couldn\'t find anything matching\n"$searchQuery"',
       iconColor: AppColors.textSecondary,
@@ -167,7 +169,7 @@ class NoDataEmpty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return EmptyStateWidget(
-      icon: Icons.inbox,
+      icon: PhosphorIconsRegular.tray,
       title: title,
       message: message,
       iconColor: AppColors.textSecondary,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import '../../core/constants/app_colors.dart';
 
 class ErrorWidget extends StatelessWidget {
@@ -14,7 +15,7 @@ class ErrorWidget extends StatelessWidget {
     required this.message,
     this.actionText,
     this.onRetry,
-    this.icon = Icons.error_outline,
+    this.icon = IconsaxPlusLinear.danger,
   });
 
   @override
@@ -66,7 +67,7 @@ class ErrorWidget extends StatelessWidget {
               const SizedBox(height: 32),
               ElevatedButton.icon(
                 onPressed: onRetry,
-                icon: const Icon(Icons.refresh, size: 20),
+                icon: const Icon(IconsaxPlusLinear.refresh, size: 20),
                 label: Text(
                   actionText!,
                   style: const TextStyle(
@@ -107,7 +108,7 @@ class NetworkErrorWidget extends StatelessWidget {
       message: 'Please check your internet connection\nand try again.',
       actionText: 'Retry',
       onRetry: onRetry,
-      icon: Icons.wifi_off,
+      icon: IconsaxPlusLinear.wifi,
     );
   }
 }
@@ -127,7 +128,7 @@ class NotFoundErrorWidget extends StatelessWidget {
           : 'The page you\'re looking for\ndoesn\'t exist.',
       actionText: onGoBack != null ? 'Go Back' : null,
       onRetry: onGoBack,
-      icon: Icons.search_off,
+      icon: IconsaxPlusLinear.search_zoom_out,
     );
   }
 }
@@ -149,7 +150,7 @@ class PermissionErrorWidget extends StatelessWidget {
       message: 'We need $permission permission\nto continue.',
       actionText: 'Grant Permission',
       onRetry: onRequestPermission,
-      icon: Icons.lock_outline,
+      icon: IconsaxPlusLinear.lock_1,
     );
   }
 }

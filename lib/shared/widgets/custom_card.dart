@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import '../../core/constants/app_colors.dart';
 
 class CustomCard extends StatelessWidget {
@@ -187,7 +188,7 @@ class FeatureCard extends StatelessWidget {
           ),
           if (onTap != null)
             const Icon(
-              Icons.arrow_forward_ios,
+              IconsaxPlusLinear.arrow_right_3,
               size: 16,
               color: AppColors.textSecondary,
             ),
