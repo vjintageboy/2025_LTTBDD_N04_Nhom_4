@@ -1,0 +1,303 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// CUSTOM TYPES
+// ==========================================
+
+enum UserRole {
+  user
+  expert
+  admin
+}
+
+enum AppointmentStatus {
+  pending
+  confirmed
+  completed
+  cancelled
+}
+
+enum CallType {
+  chat
+  video
+  phone
+}
+
+// ==========================================
+// MODELS
+// ==========================================
+
+model User {
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String    @unique @db.VarChar(255)
+  fullName        String    @map("full_name") @db.VarChar(255)
+  avatarUrl       String?   @map("avatar_url") @db.Text
+  role            UserRole  @default(user)
+  streakCount     Int       @default(0) @map("streak_count")
+  longestStreak   Int       @default(0) @map("longest_streak")
+  totalActivities Int       @default(0) @map("total_activities")
+  lastLogin       DateTime? @map("last_login") @db.Timestamptz
+  dateOfBirth     DateTime? @map("date_of_birth") @db.Timestamptz
+  gender          String?   @db.VarChar(50)
+  goals           String[]
+  preferences     Json?
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  moodEntries      MoodEntry[]
+  expert           Expert?
+  appointments     Appointment[]
+  chatParticipants ChatParticipant[]
+  posts            Post[]
+  postLikes        PostLike[]
+  postComments     PostComment[]
+  notifications    Notification[]
+  messages         Message[]
+
+  @@map("users")
+}
+
+model MoodEntry {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  moodScore      Int      @map("mood_score")
+  note           String?  @db.Text
+  emotionFactors String[] @map("emotion_factors")
+  tags           String[]
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("mood_entries")
+}
+
+model Meditation {
+  id              String   @id @default(uuid()) @db.Uuid
+  title           String   @db.VarChar(255)
+  description     String?  @db.Text
+  category        String?  @db.VarChar(100)
+  durationMinutes Int      @map("duration_minutes")
+  audioUrl        String   @map("audio_url") @db.Text
+  thumbnailUrl    String?  @map("thumbnail_url") @db.Text
+  level           String   @default("beginner") @db.VarChar(50)
+  rating          Decimal  @default(0)
+  totalReviews    Int      @default(0) @map("total_reviews")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("meditations")
+}
+
+model Expert {
+  id              String   @id @db.Uuid
+  bio             String?  @db.Text
+  specialization  String?  @db.VarChar(255)
+  hourlyRate      Int      @default(0) @map("hourly_rate")
+  rating          Decimal  @default(0)
+  isApproved      Boolean  @default(false) @map("is_approved")
+  title           String?  @db.VarChar(255)
+  totalReviews    Int      @default(0) @map("total_reviews")
+  yearsExperience Int      @default(0) @map("years_experience")
+  licenseNumber   String?  @map("license_number") @db.VarChar(255)
+  licenseUrl      String?  @map("license_url") @db.Text
+  certificateUrls String[]
+  education       String?  @db.VarChar(255)
+  university      String?  @db.VarChar(255)
+  graduationYear  Int?     @map("graduation_year")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  user         User                 @relation(fields: [id], references: [id])
+  availability ExpertAvailability[]
+  appointments Appointment[]
+
+  @@map("experts")
+}
+
+model ExpertAvailability {
+  id        String   @id @default(uuid()) @db.Uuid
+  expertId  String   @map("expert_id") @db.Uuid
+  dayOfWeek Int      @map("day_of_week")
+  startTime DateTime @map("start_time") @db.Time()
+  endTime   DateTime @map("end_time") @db.Time()
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  expert Expert @relation(fields: [expertId], references: [id])
+
+  @@index([expertId])
+  @@map("expert_availability")
+}
+
+model Appointment {
+  id                 String            @id @default(uuid()) @db.Uuid
+  userId             String            @map("user_id") @db.Uuid
+  expertId           String            @map("expert_id") @db.Uuid
+  appointmentDate    DateTime          @map("appointment_date") @db.Timestamptz
+  durationMinutes    Int               @default(60) @map("duration_minutes")
+  callType           CallType          @default(chat) @map("call_type")
+  status             AppointmentStatus @default(pending)
+  paymentStatus      String            @default("unpaid") @map("payment_status") @db.VarChar(50)
+  userNotes          String?           @map("user_notes") @db.Text
+  expertBasePrice    Int?              @map("expert_base_price")
+  paymentId          String?           @map("payment_id") @db.VarChar(255)
+  paymentTransId     String?           @map("payment_trans_id") @db.VarChar(255)
+  cancelledAt        DateTime?         @map("cancelled_at") @db.Timestamptz
+  cancelledBy        String?           @map("cancelled_by") @db.Uuid
+  cancellationReason String?           @map("cancellation_reason") @db.Text
+  refundStatus       String?           @default("none") @map("refund_status") @db.VarChar(50)
+  cancelledRole      String?           @map("cancelled_role") @db.VarChar(50)
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime          @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id])
+  expert Expert @relation(fields: [expertId], references: [id])
+
+  @@index([userId])
+  @@index([expertId])
+  @@map("appointments")
+}
+
+model ChatRoom {
+  id              String    @id @default(uuid()) @db.Uuid
+  lastMessage     String?   @map("last_message") @db.Text
+  status          String    @default("active") @db.VarChar(50)
+  lastMessageTime DateTime? @map("last_message_time") @db.Timestamptz
+  roomType        String    @default("direct") @map("room_type") @db.VarChar(50)
+  directKey       String?   @map("direct_key") @db.Text
+  createdBy       String?   @map("created_by") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  participants ChatParticipant[]
+  messages     Message[]
+
+  @@map("chat_rooms")
+}
+
+model ChatParticipant {
+  roomId            String    @map("room_id") @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  unreadCount       Int       @default(0) @map("unread_count")
+  lastReadAt        DateTime? @map("last_read_at") @db.Timestamptz
+  lastReadMessageId String?   @map("last_read_message_id") @db.Uuid
+
+  // Relations
+  room ChatRoom @relation(fields: [roomId], references: [id])
+  user User     @relation(fields: [userId], references: [id])
+
+  @@id([roomId, userId])
+  @@map("chat_participants")
+}
+
+model Message {
+  id                  String    @id @default(uuid()) @db.Uuid
+  roomId              String    @map("room_id") @db.Uuid
+  senderId            String    @map("sender_id") @db.Uuid
+  content             String    @db.Text
+  type                String    @default("text") @db.VarChar(50)
+  isPinned            Boolean   @default(false) @map("is_pinned")
+  attachmentUrl       String?   @map("attachment_url") @db.Text
+  attachmentName      String?   @map("attachment_name") @db.Text
+  attachmentSizeBytes Int?      @map("attachment_size_bytes")
+  deliveredAt         DateTime? @map("delivered_at") @db.Timestamptz
+  readAt              DateTime? @map("read_at") @db.Timestamptz
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  room   ChatRoom @relation(fields: [roomId], references: [id])
+  sender User     @relation(fields: [senderId], references: [id])
+
+  @@index([roomId])
+  @@index([senderId])
+  @@map("messages")
+}
+
+model Post {
+  id           String   @id @default(uuid()) @db.Uuid
+  authorId     String?  @map("author_id") @db.Uuid
+  title        String   @db.VarChar(255)
+  content      String   @db.Text
+  imageUrl     String?  @map("image_url") @db.Text
+  likesCount   Int      @default(0) @map("likes_count")
+  commentCount Int      @default(0) @map("comment_count")
+  category     String   @default("community") @db.VarChar(100)
+  isAnonymous  Boolean  @default(false) @map("is_anonymous")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  author   User?         @relation(fields: [authorId], references: [id])
+  likes    PostLike[]
+  comments PostComment[]
+
+  @@index([authorId])
+  @@map("posts")
+}
+
+model PostLike {
+  id        String   @id @default(uuid()) @db.Uuid
+  postId    String   @map("post_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId])
+  @@map("post_likes")
+}
+
+model PostComment {
+  id              String   @id @default(uuid()) @db.Uuid
+  postId          String   @map("post_id") @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  content         String   @db.Text
+  isAnonymous     Boolean  @default(false) @map("is_anonymous")
+  parentCommentId String?  @map("parent_comment_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  post          Post          @relation(fields: [postId], references: [id])
+  user          User          @relation(fields: [userId], references: [id])
+  parentComment PostComment?  @relation("CommentReplies", fields: [parentCommentId], references: [id])
+  replies       PostComment[] @relation("CommentReplies")
+
+  @@index([postId])
+  @@index([parentCommentId])
+  @@map("post_comments")
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  title     String   @db.VarChar(255)
+  message   String   @db.Text
+  type      String   @db.VarChar(50)
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("notifications")
+}

@@ -47,6 +47,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Prisma
+prisma/.env
+prisma/node_modules/
+
 # API Keys & Secrets (IMPORTANT: Never commit these!)
 lib/core/config/gemini_config.local.dart
 lib/core/config/*_secrets.dart
