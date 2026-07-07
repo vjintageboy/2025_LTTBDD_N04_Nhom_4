@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/app_user.dart';
@@ -211,7 +213,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
           elevation: 0,
           foregroundColor: AppColors.osOnSurface,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(IconsaxPlusLinear.arrow_left),
             onPressed: () => Navigator.pop(context, _dirty),
           ),
           title: Text(
@@ -316,7 +318,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
                       child: InputDecorator(
                         decoration: _fieldDecoration(null).copyWith(
                           suffixIcon: const Icon(
-                            Icons.calendar_today_rounded,
+                            IconsaxPlusLinear.calendar,
                             size: 18,
                             color: AppColors.osPrimary,
                           ),
@@ -324,7 +326,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
                         child: Row(
                           children: [
                             const Icon(
-                              Icons.cake_rounded,
+                              PhosphorIconsRegular.cake,
                               size: 18,
                               color: AppColors.osOnSurfaceVariant,
                             ),
@@ -355,22 +357,22 @@ class _UserDetailPageState extends State<UserDetailPage> {
             _card(
               child: Column(
                 children: [
-                  _infoRow(Icons.local_fire_department_outlined, 'Streak',
+                  _infoRow(PhosphorIconsRegular.fire, 'Streak',
                       '${_user.streakCount} ngày'),
                   _infoRow(
-                    Icons.event_outlined,
+                    IconsaxPlusLinear.calendar_1,
                     'Tham gia',
                     _user.createdAt != null
                         ? _formatDate(_user.createdAt!)
                         : 'N/A',
                   ),
                   _infoRow(
-                    Icons.login_outlined,
+                    IconsaxPlusLinear.login,
                     'Đăng nhập gần nhất',
                     _lastLogin != null ? _formatDate(_lastLogin!) : 'Chưa có',
                   ),
                   if (_isBanned && _banReason != null && _banReason!.isNotEmpty)
-                    _infoRow(Icons.warning_amber_rounded, 'Lý do khóa',
+                    _infoRow(IconsaxPlusLinear.warning_2, 'Lý do khóa',
                         _banReason!),
                 ],
               ),
@@ -411,7 +413,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
                   child: OutlinedButton.icon(
                     onPressed: _toggleBan,
                     icon: Icon(
-                      _isBanned ? Icons.check_circle_outline : Icons.block,
+                      _isBanned ? IconsaxPlusLinear.tick_circle : IconsaxPlusLinear.forbidden_2,
                       size: 18,
                       color: _isBanned
                           ? AppColors.osPrimary
@@ -438,7 +440,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
                 Expanded(
                   child: FilledButton.icon(
                     onPressed: _delete,
-                    icon: const Icon(Icons.delete_outline, size: 18),
+                    icon: const Icon(IconsaxPlusLinear.trash, size: 18),
                     label: const Text('Xóa'),
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.red.shade600,
@@ -617,7 +619,7 @@ class _DobPickerSheetState extends State<_DobPickerSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.45,
+      height: MediaQuery.of(context).size.height * 0.5,
       decoration: const BoxDecoration(
         color: _kBg,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -664,7 +666,7 @@ class _DobPickerSheetState extends State<_DobPickerSheet> {
             ),
             IconButton(
               onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.close_rounded, color: _kTextSecondary),
+              icon: const Icon(IconsaxPlusLinear.close_circle, color: _kTextSecondary),
             ),
           ],
         ),
@@ -775,7 +777,7 @@ class _WheelColumn extends StatelessWidget {
     required this.onChanged,
   });
 
-  static const double _itemExtent = 40.0;
+  static const double _itemExtent = 32.0;
 
   @override
   Widget build(BuildContext context) {
@@ -794,7 +796,7 @@ class _WheelColumn extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         SizedBox(
-          height: _itemExtent * 5,
+          height: _itemExtent * 3,
           child: ListWheelScrollView.useDelegate(
             controller: FixedExtentScrollController(initialItem: index),
             itemExtent: _itemExtent,

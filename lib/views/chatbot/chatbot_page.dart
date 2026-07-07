@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/providers/chatbot_provider.dart';
@@ -65,7 +67,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
         children: [
           // Back button
           IconButton(
-            icon: Icon(Icons.arrow_back, color: AppColors.osPrimary, size: 24),
+            icon: Icon(IconsaxPlusLinear.arrow_left, color: AppColors.osPrimary, size: 24),
             onPressed: () {
               if (Navigator.of(context).canPop()) {
                 Navigator.of(context).pop();
@@ -92,7 +94,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   child: Container(
                     color: AppColors.osSurfaceContainer,
                     child: const Icon(
-                      Icons.smart_toy,
+                      PhosphorIconsRegular.robot,
                       color: AppColors.osPrimary,
                       size: 24,
                     ),
@@ -152,7 +154,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 color: AppColors.osPrimaryContainer.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(Icons.more_horiz, color: AppColors.osPrimary, size: 20),
+              child: Icon(IconsaxPlusLinear.more, color: AppColors.osPrimary, size: 20),
             ),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             elevation: 4,
@@ -174,20 +176,20 @@ class _ChatbotPageState extends State<ChatbotPage> {
             },
             itemBuilder: (context) => [
               _buildMenuItem(
-                Icons.add_comment_outlined,
+                IconsaxPlusLinear.message_add_1,
                 'Chat mới',
                 AppColors.osPrimary,
                 'new_chat',
               ),
               _buildMenuItem(
-                Icons.history_rounded,
+                PhosphorIconsRegular.clockCounterClockwise,
                 'Lịch sử cuộc trò chuyện',
                 AppColors.osPrimary,
                 'history',
               ),
               const PopupMenuDivider(height: 8),
               _buildMenuItem(
-                Icons.delete_outline,
+                IconsaxPlusLinear.trash,
                 context.l10n.clearChatHistory,
                 Colors.red,
                 'clear_chat',
@@ -215,8 +217,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildNavItem(Icons.chat, 'Chat', true),
-          _buildNavItem(Icons.history, 'History', false, onTap: _showConversationHistory),
+          _buildNavItem(IconsaxPlusLinear.messages_2, 'Chat', true),
+          _buildNavItem(PhosphorIconsRegular.clockCounterClockwise, 'History', false, onTap: _showConversationHistory),
         ],
       ),
     );
@@ -362,7 +364,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
-                                Icons.history,
+                                PhosphorIconsRegular.clockCounterClockwise,
                                 color: AppColors.osOnPrimaryContainer,
                                 size: 22,
                               ),
@@ -391,7 +393,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.close, color: AppColors.osOnSurface),
+                              icon: const Icon(IconsaxPlusLinear.close_circle, color: AppColors.osOnSurface),
                               onPressed: () => Navigator.pop(context),
                             ),
                           ],
@@ -406,7 +408,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
-                                      Icons.chat_bubble_outline,
+                                      IconsaxPlusLinear.message,
                                       size: 64,
                                       color: AppColors.osOutlineVariant.withValues(alpha: 0.5),
                                     ),
@@ -483,8 +485,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                                 ),
                                                 child: Icon(
                                                   isActive
-                                                      ? Icons.chat_bubble_rounded
-                                                      : Icons.forum_outlined,
+                                                      ? IconsaxPlusBold.message
+                                                      : IconsaxPlusLinear.messages,
                                                   color: isActive
                                                       ? AppColors.osPrimary
                                                       : AppColors.osOnPrimaryContainer,
@@ -550,7 +552,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                                     borderRadius: BorderRadius.circular(8),
                                                   ),
                                                   child: Icon(
-                                                    Icons.more_horiz,
+                                                    IconsaxPlusLinear.more,
                                                     color: AppColors.osOnSurfaceVariant,
                                                     size: 18,
                                                   ),
@@ -611,7 +613,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                                             borderRadius: BorderRadius.circular(8),
                                                           ),
                                                           child: const Icon(
-                                                            Icons.delete_outline,
+                                                            IconsaxPlusLinear.trash,
                                                             color: Colors.red,
                                                             size: 18,
                                                           ),
@@ -749,7 +751,7 @@ class _MessageBubble extends StatelessWidget {
                 ),
               ),
               child: const Icon(
-                Icons.smart_toy,
+                PhosphorIconsRegular.robot,
                 size: 18,
                 color: AppColors.osOnPrimaryContainer,
               ),
@@ -757,7 +759,7 @@ class _MessageBubble extends StatelessWidget {
             const SizedBox(width: 12),
           ],
           Flexible(
-            child: Column(
+              child: Column(
               crossAxisAlignment:
                   message.isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
@@ -868,7 +870,7 @@ class _TypingIndicator extends StatelessWidget {
               ),
             ),
             child: const Icon(
-              Icons.smart_toy,
+              PhosphorIconsRegular.robot,
               size: 18,
               color: AppColors.osOnPrimaryContainer,
             ),
@@ -1082,7 +1084,7 @@ class _InputField extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           child: const Icon(
-                            Icons.send,
+                            IconsaxPlusBold.send_2,
                             color: AppColors.osOnPrimary,
                             size: 20,
                           ),

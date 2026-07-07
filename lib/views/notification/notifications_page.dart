@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/notification_service.dart';
@@ -24,7 +26,7 @@ class NotificationsPage extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A1A)),
+          icon: const Icon(IconsaxPlusLinear.arrow_left, color: Color(0xFF1A1A1A)),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -47,7 +49,7 @@ class NotificationsPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.notifications_off_outlined,
+                    PhosphorIconsRegular.bellSlash,
                     size: 64,
                     color: Colors.grey.shade400,
                   ),
@@ -80,7 +82,7 @@ class NotificationsPage extends StatelessWidget {
                   color: Colors.red,
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: 20),
-                  child: const Icon(Icons.delete, color: Colors.white),
+                  child: const Icon(IconsaxPlusLinear.trash, color: Colors.white),
                 ),
                 onDismissed: (direction) {
                   // TODO: Implement delete notification
@@ -176,19 +178,19 @@ class NotificationsPage extends StatelessWidget {
 
     switch (type) {
       case 'refund':
-        iconData = Icons.monetization_on;
+        iconData = IconsaxPlusBold.dollar_circle;
         color = Colors.orange;
         break;
       case 'refund_error':
-        iconData = Icons.error_outline;
+        iconData = IconsaxPlusLinear.danger;
         color = Colors.red;
         break;
       case 'cancellation':
-        iconData = Icons.cancel_outlined;
+        iconData = IconsaxPlusLinear.close_circle;
         color = Colors.red;
         break;
       default:
-        iconData = Icons.notifications;
+        iconData = IconsaxPlusLinear.notification;
         color = Colors.grey;
     }
 

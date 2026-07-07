@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:audioplayers/audioplayers.dart' as ap;
 import '../../core/services/localization_service.dart';
 import '../../models/meditation.dart';
@@ -264,7 +265,7 @@ class _MeditationDetailPageState extends State<MeditationDetailPage>
                   children: [
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.arrow_back),
+                      icon: const Icon(IconsaxPlusLinear.arrow_left),
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.white,
                         padding: const EdgeInsets.all(12),
@@ -275,7 +276,7 @@ class _MeditationDetailPageState extends State<MeditationDetailPage>
                       onPressed: () {
                         // TODO: Add to favorites
                       },
-                      icon: const Icon(Icons.favorite_border),
+                      icon: const Icon(IconsaxPlusLinear.heart),
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.white,
                         padding: const EdgeInsets.all(12),
@@ -358,7 +359,7 @@ class _MeditationDetailPageState extends State<MeditationDetailPage>
                           Row(
                             children: [
                               Icon(
-                                Icons.access_time,
+                                IconsaxPlusLinear.clock,
                                 size: 20,
                                 color: Colors.black54,
                               ),
@@ -377,7 +378,7 @@ class _MeditationDetailPageState extends State<MeditationDetailPage>
                           Row(
                             children: [
                               const Icon(
-                                Icons.star,
+                                IconsaxPlusBold.star,
                                 size: 20,
                                 color: Colors.amber,
                               ),
@@ -615,7 +616,7 @@ class _MeditationDetailPageState extends State<MeditationDetailPage>
                                           : newPosition,
                                     );
                                   },
-                                  icon: const Icon(Icons.replay_10),
+                                  icon: const Icon(IconsaxPlusLinear.backward_10_seconds),
                                   iconSize: 32,
                                   color: categoryDarkColor,
                                 ),
@@ -648,8 +649,8 @@ class _MeditationDetailPageState extends State<MeditationDetailPage>
                                     onPressed: _playPause,
                                     icon: Icon(
                                       _isPlaying
-                                          ? Icons.pause
-                                          : Icons.play_arrow,
+                                          ? IconsaxPlusBold.pause
+                                          : IconsaxPlusBold.play,
                                       size: 40,
                                     ),
                                     iconSize: 40,
@@ -671,7 +672,7 @@ class _MeditationDetailPageState extends State<MeditationDetailPage>
                                           : newPosition,
                                     );
                                   },
-                                  icon: const Icon(Icons.forward_10),
+                                  icon: const Icon(IconsaxPlusLinear.forward_10_seconds),
                                   iconSize: 32,
                                   color: categoryDarkColor,
                                 ),
@@ -684,7 +685,7 @@ class _MeditationDetailPageState extends State<MeditationDetailPage>
                             if (_isPlaying || _position > Duration.zero)
                               TextButton.icon(
                                 onPressed: _stop,
-                                icon: const Icon(Icons.stop),
+                                icon: const Icon(IconsaxPlusBold.stop),
                                 label: Text(context.l10n.stop),
                                 style: TextButton.styleFrom(
                                   foregroundColor: categoryDarkColor,

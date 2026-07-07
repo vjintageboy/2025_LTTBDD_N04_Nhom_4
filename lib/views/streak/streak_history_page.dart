@@ -1,5 +1,7 @@
 import '../../services/supabase_service.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../core/services/localization_service.dart';
 import '../../core/constants/app_colors.dart';
@@ -60,7 +62,7 @@ class _StreakHistoryPageState extends State<StreakHistoryPage> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: Colors.grey.shade700),
+          icon: Icon(IconsaxPlusLinear.arrow_left, color: Colors.grey.shade700),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -161,8 +163,8 @@ class _StreakHistoryPageState extends State<StreakHistoryPage> {
               children: [
                 Icon(
                   currentStreak > 0
-                      ? Icons.local_fire_department_rounded
-                      : Icons.auto_fix_high_rounded,
+                      ? PhosphorIconsRegular.fire
+                      : IconsaxPlusLinear.magicpen,
                   color: Colors.white,
                   size: 20,
                 ),
@@ -249,7 +251,7 @@ class _StreakHistoryPageState extends State<StreakHistoryPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: Icon(Icons.chevron_left_rounded, color: Colors.grey.shade600),
+                  icon: Icon(IconsaxPlusLinear.arrow_left_2, color: Colors.grey.shade600),
                   onPressed: () {
                     setState(() {
                       _selectedMonth = DateTime(
@@ -269,7 +271,7 @@ class _StreakHistoryPageState extends State<StreakHistoryPage> {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade600),
+                  icon: Icon(IconsaxPlusLinear.arrow_right_3, color: Colors.grey.shade600),
                   onPressed: () {
                     final now = DateTime.now();
                     final nextMonth = DateTime(
@@ -523,7 +525,7 @@ class _StreakHistoryPageState extends State<StreakHistoryPage> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Icon(
-                  Icons.lightbulb_outline_rounded,
+                  IconsaxPlusLinear.lamp_on,
                   color: AppColors.osPrimary,
                   size: 22,
                 ),

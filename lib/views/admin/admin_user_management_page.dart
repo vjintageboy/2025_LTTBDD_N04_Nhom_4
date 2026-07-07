@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/app_user.dart';
@@ -86,7 +87,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                   color: AppColors.osOnSurfaceVariant,
                 ),
                 prefixIcon: const Icon(
-                  Icons.search,
+                  IconsaxPlusLinear.search_normal_1,
                   color: AppColors.osOnSurfaceVariant,
                 ),
                 contentPadding:
@@ -126,7 +127,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       const Icon(
-                                        Icons.people_outline,
+                                        IconsaxPlusLinear.profile_2user,
                                         size: 64,
                                         color: AppColors.osOutlineVariant,
                                       ),
@@ -182,7 +183,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
               ),
               IconButton(
                 icon: const Icon(
-                  Icons.refresh,
+                  IconsaxPlusLinear.refresh,
                   color: AppColors.osOnSurface,
                 ),
                 onPressed: _loadUsers,
@@ -278,7 +279,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                   ),
                 const SizedBox(width: 4),
                 const Icon(
-                  Icons.chevron_right,
+                  IconsaxPlusLinear.arrow_right_3,
                   color: AppColors.osOnSurfaceVariant,
                 ),
               ],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../core/services/localization_service.dart';
 import '../../models/meditation.dart';
 import '../../services/supabase_service.dart';
@@ -131,7 +133,7 @@ class _MeditationLibraryPageState extends State<MeditationLibraryPage> {
                 TextField(
                   decoration: InputDecoration(
                     hintText: context.l10n.searchMeditations,
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: Icon(IconsaxPlusLinear.search_normal_1),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -151,7 +153,7 @@ class _MeditationLibraryPageState extends State<MeditationLibraryPage> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      const Icon(Icons.sort, size: 20, color: Colors.grey),
+                      Icon(IconsaxPlusLinear.sort, size: 20, color: Colors.grey),
                       const SizedBox(width: 8),
                       Text(
                         context.l10n.sortBy,
@@ -370,7 +372,7 @@ class _MeditationLibraryPageState extends State<MeditationLibraryPage> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.star, color: Colors.white, size: 14),
+                        Icon(IconsaxPlusBold.star, color: Colors.white, size: 14),
                         const SizedBox(width: 4),
                         Text(
                           meditation.rating.toStringAsFixed(1),
@@ -426,7 +428,7 @@ class _MeditationLibraryPageState extends State<MeditationLibraryPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.spa_outlined, size: 64, color: Colors.grey.shade400),
+          Icon(PhosphorIconsRegular.flowerLotus, size: 64, color: Colors.grey.shade400),
           const SizedBox(height: 16),
           Text(
             context.l10n.noMeditationsFound,
