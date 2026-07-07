@@ -1,33 +1,16 @@
 import 'dart:developer' as developer;
 
-import '../../models/appointment.dart';
-import '../../models/availability.dart';
-
 /// Routes Gemini FunctionCall names to actual service calls.
 ///
 /// All service operations are injected as function callbacks so the dispatcher
 /// remains fully testable without a live Supabase connection.
 class ToolDispatcher {
-  /// Returns all availability slots for an expert.
-  final Future<List<ExpertAvailability>> Function(String expertId)
-      getAvailability;
-
-  /// Returns booked time slots ("HH:mm") for an expert on a given date.
-  final Future<List<String>> Function(String expertId, DateTime date)
-      getBookedTimeSlots;
-
   /// Generates all candidate time slots between start/end at the given interval.
   final List<String> Function({
     required String startTime,
     required String endTime,
     required int intervalMinutes,
   }) generateTimeSlots;
-
-  /// Creates an appointment and returns its new ID, or throws on conflict.
-  final Future<String?> Function(Appointment) createAppointment;
-
-  /// Returns all appointments for a user.
-  final Future<List<Appointment>> Function(String userId) getUserAppointments;
 
   /// Returns mood entries for a user within a date range.
   final Future<List<Map<String, dynamic>>> Function(
@@ -36,40 +19,14 @@ class ToolDispatcher {
     DateTime end,
   ) getMoodEntries;
 
-  /// Returns all approved experts with name, specialization, rating, price.
-  final Future<List<Map<String, dynamic>>> Function({String? specialization})
-      listExperts;
-
-  /// Returns the expert row (needs `hourly_rate`), or null if not found.
-  final Future<Map<String, dynamic>?> Function(String expertId) getExpertPrice;
-
-  /// Returns existing non-cancelled appointments matching (userId, expertId, date).
-  final Future<List<Map<String, dynamic>>?> Function(
-    String userId,
-    String expertId,
-    DateTime date,
-  ) checkExistingAppointment;
-
   /// The authenticated user's ID.
   final String userId;
 
   static const int _maxRetries = 2;
 
-  // AppointmentService throws exceptions with these message patterns for conflicts.
-  // If the service layer is refactored to use typed exceptions, update these constants.
-  static const _expertConflictMsg = 'không rảnh';
-  static const _userConflictMsg = 'đã có lịch';
-
   const ToolDispatcher({
-    required this.listExperts,
-    required this.getAvailability,
-    required this.getBookedTimeSlots,
     required this.generateTimeSlots,
-    required this.createAppointment,
-    required this.getUserAppointments,
     required this.getMoodEntries,
-    required this.getExpertPrice,
-    required this.checkExistingAppointment,
     required this.userId,
   });
 
@@ -113,219 +70,10 @@ class ToolDispatcher {
     Map<String, Object?> args,
   ) {
     final Future<Map<String, Object?>> future = switch (toolName) {
-      'list_experts' => _listExperts(args),
-      'check_expert_availability' => _checkAvailability(args),
-      'book_session' => _bookSession(args),
       'generate_monthly_report' => _generateReport(args),
       _ => throw ArgumentError('Unknown tool: $toolName'),
     };
     return future.timeout(const Duration(seconds: 10));
-  }
-
-  // ---------------------------------------------------------------------------
-  // Handler: list_experts
-  // ---------------------------------------------------------------------------
-
-  Future<Map<String, Object?>> _listExperts(
-    Map<String, Object?> args,
-  ) async {
-    final specialization = args['specialization'] as String?;
-    final experts = await listExperts(specialization: specialization);
-
-    if (experts.isEmpty) {
-      return {
-        'experts': <Map<String, Object?>>[],
-        'message': 'Hiện tại không có chuyên gia nào hoạt động',
-      };
-    }
-
-    final result = experts.map((e) {
-      final user = e['users'] as Map<String, dynamic>?;
-      return <String, Object?>{
-        'expert_id': e['id']?.toString() ?? '',
-        'name': user?['full_name']?.toString() ?? 'Chuyên gia',
-        'specialization': e['specialization']?.toString() ?? '',
-        'rating': e['rating'],
-        'hourly_rate': e['hourly_rate'],
-        'is_available': e['is_available'] ?? false,
-      };
-    }).toList();
-
-    return {
-      'experts': result,
-      'total': result.length,
-    };
-  }
-
-  // ---------------------------------------------------------------------------
-  // Handler: check_expert_availability
-  // ---------------------------------------------------------------------------
-
-  Future<Map<String, Object?>> _checkAvailability(
-    Map<String, Object?> args,
-  ) async {
-    final expertId = args['expert_id'] as String?;
-    if (expertId == null || expertId.isEmpty) {
-      return {'error': 'MISSING_ARG', 'arg': 'expert_id'};
-    }
-    final dateStr = args['date'] as String?;
-    if (dateStr == null || dateStr.isEmpty) {
-      return {'error': 'MISSING_ARG', 'arg': 'date'};
-    }
-    final durationMinutes = (args['duration_minutes'] as num?)?.toInt() ?? 60;
-
-    final parsedDate = DateTime.parse(dateStr);
-
-    final allSlots = await getAvailability(expertId);
-    final matchingSlots = allSlots
-        .where((slot) => slot.dartWeekday == parsedDate.weekday)
-        .toList();
-
-    if (matchingSlots.isEmpty) {
-      return {
-        'available_slots': <String>[],
-        'message': 'Chuyên gia không có lịch làm việc ngày này',
-        'expert_id': expertId,
-        'date': dateStr,
-        'duration_minutes': durationMinutes,
-      };
-    }
-
-    // Generate all candidate slots from availability windows.
-    final candidateSlots = <String>[];
-    for (final slot in matchingSlots) {
-      final generated = generateTimeSlots(
-        startTime: slot.startTime,
-        endTime: slot.endTime,
-        intervalMinutes: durationMinutes,
-      );
-      candidateSlots.addAll(generated);
-    }
-
-    // Remove already-booked slots.
-    final bookedSlots = await getBookedTimeSlots(expertId, parsedDate);
-    final available = candidateSlots
-        .where((s) => !bookedSlots.contains(s))
-        .toList();
-
-    return {
-      'available_slots': available,
-      'expert_id': expertId,
-      'date': dateStr,
-      'duration_minutes': durationMinutes,
-    };
-  }
-
-  // ---------------------------------------------------------------------------
-  // Handler: book_session (with idempotency)
-  // ---------------------------------------------------------------------------
-
-  Future<Map<String, Object?>> _bookSession(
-    Map<String, Object?> args,
-  ) async {
-    final expertId = args['expert_id'] as String?;
-    if (expertId == null || expertId.isEmpty) {
-      return {'error': 'MISSING_ARG', 'arg': 'expert_id'};
-    }
-    final appointmentDateStr = args['appointment_date'] as String?;
-    if (appointmentDateStr == null || appointmentDateStr.isEmpty) {
-      return {'error': 'MISSING_ARG', 'arg': 'appointment_date'};
-    }
-    final durationMinutesRaw = args['duration_minutes'] as num?;
-    if (durationMinutesRaw == null) {
-      return {'error': 'MISSING_ARG', 'arg': 'duration_minutes'};
-    }
-    final durationMinutes = durationMinutesRaw.toInt();
-    final callTypeStr = args['call_type'] as String?;
-    if (callTypeStr == null || callTypeStr.isEmpty) {
-      return {'error': 'MISSING_ARG', 'arg': 'call_type'};
-    }
-    final userNotes = args['user_notes'] as String?;
-
-    // Validate duration
-    if (durationMinutes != 30 && durationMinutes != 60) {
-      return {
-        'error': 'INVALID_DURATION',
-        'message':
-            'Thời lượng không hợp lệ. Chỉ chấp nhận 30 hoặc 60 phút.',
-      };
-    }
-
-    // Validate call type
-    if (callTypeStr != 'voice' && callTypeStr != 'video') {
-      return {
-        'error': 'INVALID_CALL_TYPE',
-        'message': 'Loại cuộc gọi không hợp lệ. Chỉ chấp nhận voice hoặc video.',
-      };
-    }
-
-    final appointmentDate = DateTime.parse(appointmentDateStr);
-
-    // Idempotency check
-    final existing =
-        await checkExistingAppointment(userId, expertId, appointmentDate);
-    if (existing != null && existing.isNotEmpty) {
-      final first = existing.first;
-      return {
-        'success': true,
-        'appointment_id': first['id']?.toString(),
-        'status': first['status']?.toString(),
-        'idempotent': true,
-      };
-    }
-
-    // Fetch expert price
-    final expertRow = await getExpertPrice(expertId);
-    if (expertRow == null) {
-      return {'error': 'EXPERT_NOT_FOUND'};
-    }
-
-    final expertBasePrice =
-        double.tryParse(expertRow['hourly_rate']?.toString() ?? '') ?? 0.0;
-
-    // Map call type
-    final callType =
-        callTypeStr == 'voice' ? CallType.voice : CallType.video;
-
-    // Calculate price
-    final price = Appointment.calculatePrice(
-      expertBasePrice: expertBasePrice,
-      callType: callType,
-      duration: durationMinutes,
-    );
-
-    // Build appointment
-    final appointment = Appointment(
-      appointmentId: '',
-      userId: userId,
-      expertId: expertId,
-      expertName: '',
-      expertBasePrice: expertBasePrice,
-      callType: callType,
-      appointmentDate: appointmentDate,
-      durationMinutes: durationMinutes,
-      status: AppointmentStatus.pending,
-      userNotes: userNotes,
-    );
-
-    try {
-      final appointmentId = await createAppointment(appointment);
-      return {
-        'success': true,
-        'appointment_id': appointmentId,
-        'status': 'pending',
-        'price': price,
-      };
-    } catch (e) {
-      final message = e.toString();
-      if (message.contains(_expertConflictMsg) || message.contains(_userConflictMsg)) {
-        return {
-          'error': 'TIME_CONFLICT',
-          'message': 'Khung giờ này đã được đặt',
-        };
-      }
-      rethrow;
-    }
   }
 
   // ---------------------------------------------------------------------------
@@ -400,35 +148,12 @@ class ToolDispatcher {
     final mostCommonFactors =
         sortedFactors.take(3).map((e) => e.key).toList();
 
-    // Appointments
-    final allAppointments = await getUserAppointments(userId);
-    final monthAppointments = allAppointments.where((apt) {
-      return !apt.appointmentDate.isBefore(start) &&
-          !apt.appointmentDate.isAfter(end);
-    }).toList();
-
-    final now = DateTime.now();
-    final appointmentsCompleted = monthAppointments
-        .where((a) => a.status == AppointmentStatus.completed)
-        .length;
-    final appointmentsUpcoming = monthAppointments
-        .where(
-          (a) =>
-              (a.status == AppointmentStatus.confirmed ||
-                  a.status == AppointmentStatus.pending) &&
-              a.appointmentDate.isAfter(now),
-        )
-        .length;
-
     return {
       'period': '$year-${month.toString().padLeft(2, '0')}',
       'entries_count': entries.length,
       'average_mood_score': averageMoodScore,
       'trend': trend,
       'most_common_factors': mostCommonFactors,
-      'appointments_total': monthAppointments.length,
-      'appointments_completed': appointmentsCompleted,
-      'appointments_upcoming': appointmentsUpcoming,
     };
   }
 

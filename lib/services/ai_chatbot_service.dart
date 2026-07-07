@@ -8,10 +8,7 @@ import '../core/config/gemini_config.dart';
 import '../core/config/system_prompt.dart';
 import '../ai/safety_filter.dart';
 import '../ai/disclaimer.dart';
-import '../services/appointment_service.dart';
-import '../services/availability_service.dart';
 import '../services/rag_service.dart';
-import '../services/supabase_service.dart';
 
 /// AI Chatbot Service - Xử lý logic chatbot và AI responses
 class AIChatbotService {
@@ -65,22 +62,9 @@ class AIChatbotService {
       tools: [ToolDefinitions.allTools],
     );
 
-    final supabaseService = SupabaseService.instance;
     final dispatcher = ToolDispatcher(
       userId: userId,
-      listExperts: ({String? specialization}) async {
-        final experts = await supabaseService.getApprovedExperts();
-        if (specialization == null || specialization.isEmpty) return experts;
-        return experts.where((e) {
-          final spec = e['specialization']?.toString().toLowerCase() ?? '';
-          return spec.contains(specialization.toLowerCase());
-        }).toList();
-      },
-      getAvailability: AvailabilityService().getAvailability,
-      getBookedTimeSlots: AppointmentService().getBookedTimeSlots,
-      generateTimeSlots: AppointmentService().generateTimeSlots,
-      createAppointment: AppointmentService().createAppointment,
-      getUserAppointments: AppointmentService().getUserAppointments,
+      generateTimeSlots: _generateTimeSlots,
       getMoodEntries: (String uid, DateTime start, DateTime end) async {
         final response = await Supabase.instance.client
             .from('mood_entries')
@@ -88,25 +72,6 @@ class AIChatbotService {
             .eq('user_id', uid)
             .gte('created_at', start.toIso8601String())
             .lte('created_at', end.toIso8601String());
-        return List<Map<String, dynamic>>.from(response);
-      },
-      getExpertPrice: (String expertId) async {
-        final response = await Supabase.instance.client
-            .from('experts')
-            .select('hourly_rate')
-            .eq('id', expertId)
-            .maybeSingle();
-        return response;
-      },
-      checkExistingAppointment:
-          (String uid, String expertId, DateTime date) async {
-        final response = await Supabase.instance.client
-            .from('appointments')
-            .select('id, status')
-            .eq('user_id', uid)
-            .eq('expert_id', expertId)
-            .eq('appointment_date', date.toIso8601String())
-            .neq('status', 'cancelled');
         return List<Map<String, dynamic>>.from(response);
       },
     );
@@ -635,6 +600,29 @@ $userMessage
           }
         })
         .toList();
+  }
+
+  /// Generate candidate time slots between start and end at the given interval.
+  static List<String> _generateTimeSlots({
+    required String startTime,
+    required String endTime,
+    required int intervalMinutes,
+  }) {
+    final slots = <String>[];
+    final startParts = startTime.split(':');
+    final endParts = endTime.split(':');
+    var current = int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
+    final endMinutes =
+        int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+
+    while (current + intervalMinutes <= endMinutes) {
+      final h = current ~/ 60;
+      final m = current % 60;
+      slots.add(
+          '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}');
+      current += intervalMinutes;
+    }
+    return slots;
   }
 
   /// Check if user is admin
