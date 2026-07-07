@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/meditation.dart';
@@ -85,8 +86,8 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Meditation updated successfully!'),
-            backgroundColor: Colors.green,
+            content: Text('Đã lưu thay đổi!'),
+            backgroundColor: AppColors.osPrimary,
           ),
         );
         Navigator.pop(context, true);
@@ -94,7 +95,10 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Lỗi: $e'),
+            backgroundColor: AppColors.osError,
+          ),
         );
       }
     } finally {
@@ -110,26 +114,17 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
       backgroundColor: AppColors.osSurface,
       appBar: AppBar(
         title: Text(
-          'Edit meditation',
+          'Chỉnh sửa bài thiền',
           style: GoogleFonts.plusJakartaSans(
-            color: Colors.white,
+            color: AppColors.osOnSurface,
             fontSize: 20,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.4,
           ),
         ),
-        backgroundColor: AppColors.osPrimary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.osSurface,
+        foregroundColor: AppColors.osOnSurface,
         elevation: 0,
-        flexibleSpace: const DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.osPrimary, AppColors.osPrimaryDim],
-            ),
-          ),
-        ),
       ),
       body: Form(
         key: _formKey,
@@ -146,7 +141,7 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
               child: Row(
                 children: [
                   const Icon(
-                    Icons.info_outline,
+                    IconsaxPlusLinear.info_circle,
                     color: AppColors.osOnPrimaryContainer,
                   ),
                   const SizedBox(width: 12),
@@ -155,7 +150,7 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Meditation ID: ${widget.meditation.meditationId}',
+                          'Mã bài thiền: ${widget.meditation.meditationId}',
                           style: GoogleFonts.manrope(
                             fontSize: 12,
                             color: AppColors.osOnSurface,
@@ -164,7 +159,7 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Rating: ${widget.meditation.rating.toStringAsFixed(1)} ★ (${widget.meditation.totalReviews} reviews)',
+                          'Đánh giá: ${widget.meditation.rating.toStringAsFixed(1)} ★ (${widget.meditation.totalReviews} lượt)',
                           style: GoogleFonts.manrope(
                             fontSize: 12,
                             color: AppColors.osOnSurfaceVariant,
@@ -183,13 +178,13 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
               controller: _titleController,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Title *',
-                hint: 'e.g., Morning Gratitude',
-                icon: Icons.title,
+                label: 'Tiêu đề *',
+                hint: 'VD: Biết ơn buổi sáng',
+                icon: IconsaxPlusLinear.text,
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a title';
+                  return 'Vui lòng nhập tiêu đề';
                 }
                 return null;
               },
@@ -201,14 +196,14 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
               controller: _descriptionController,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Description *',
-                hint: 'Describe this meditation...',
-                icon: Icons.description,
+                label: 'Mô tả *',
+                hint: 'Mô tả bài thiền này...',
+                icon: IconsaxPlusLinear.document,
               ),
               maxLines: 4,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a description';
+                  return 'Vui lòng nhập mô tả';
                 }
                 return null;
               },
@@ -220,17 +215,17 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
               controller: _durationController,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Duration (minutes) *',
-                hint: 'e.g., 10',
-                icon: Icons.schedule,
+                label: 'Thời lượng (phút) *',
+                hint: 'VD: 10',
+                icon: IconsaxPlusLinear.clock,
               ),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter duration';
+                  return 'Vui lòng nhập thời lượng';
                 }
                 if (int.tryParse(value) == null) {
-                  return 'Please enter a valid number';
+                  return 'Vui lòng nhập số hợp lệ';
                 }
                 return null;
               },
@@ -242,8 +237,8 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
               initialValue: _selectedCategory,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Category *',
-                icon: Icons.category,
+                label: 'Danh mục *',
+                icon: IconsaxPlusLinear.category,
               ),
               items: MeditationCategory.values.map((category) {
                 return DropdownMenuItem(
@@ -264,8 +259,8 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
               initialValue: _selectedLevel,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Level *',
-                icon: Icons.bar_chart,
+                label: 'Cấp độ *',
+                icon: IconsaxPlusLinear.chart_2,
               ),
               items: MeditationLevel.values.map((level) {
                 return DropdownMenuItem(
@@ -286,9 +281,9 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
               controller: _audioUrlController,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Audio URL (optional)',
+                label: 'Đường dẫn âm thanh (tùy chọn)',
                 hint: 'https://example.com/audio.mp3',
-                icon: Icons.audiotrack,
+                icon: IconsaxPlusLinear.music,
               ),
             ),
             const SizedBox(height: 16),
@@ -298,9 +293,9 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
               controller: _thumbnailUrlController,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Thumbnail URL (optional)',
+                label: 'Đường dẫn ảnh bìa (tùy chọn)',
                 hint: 'https://example.com/image.jpg',
-                icon: Icons.image,
+                icon: IconsaxPlusLinear.gallery,
               ),
             ),
             const SizedBox(height: 32),
@@ -327,7 +322,7 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
                       ),
                     )
                   : Text(
-                      'Save changes',
+                      'Lưu thay đổi',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
@@ -343,24 +338,24 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
   String _getCategoryLabel(MeditationCategory category) {
     switch (category) {
       case MeditationCategory.stress:
-        return 'Stress Relief';
+        return 'Căng thẳng';
       case MeditationCategory.anxiety:
-        return 'Anxiety';
+        return 'Lo âu';
       case MeditationCategory.sleep:
-        return 'Sleep';
+        return 'Giấc ngủ';
       case MeditationCategory.focus:
-        return 'Focus';
+        return 'Tập trung';
     }
   }
 
   String _getLevelLabel(MeditationLevel level) {
     switch (level) {
       case MeditationLevel.beginner:
-        return 'Beginner';
+        return 'Cơ bản';
       case MeditationLevel.intermediate:
-        return 'Intermediate';
+        return 'Trung cấp';
       case MeditationLevel.advanced:
-        return 'Advanced';
+        return 'Nâng cao';
     }
   }
 }

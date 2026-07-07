@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/meditation.dart';
@@ -58,8 +59,8 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Meditation created successfully!'),
-            backgroundColor: Colors.green,
+            content: Text('Đã tạo bài thiền mới!'),
+            backgroundColor: AppColors.osPrimary,
           ),
         );
         Navigator.pop(context, true);
@@ -67,7 +68,10 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Lỗi: $e'),
+            backgroundColor: AppColors.osError,
+          ),
         );
       }
     } finally {
@@ -83,26 +87,17 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
       backgroundColor: AppColors.osSurface,
       appBar: AppBar(
         title: Text(
-          'Add new meditation',
+          'Thêm bài thiền mới',
           style: GoogleFonts.plusJakartaSans(
-            color: Colors.white,
+            color: AppColors.osOnSurface,
             fontSize: 20,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.4,
           ),
         ),
-        backgroundColor: AppColors.osPrimary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.osSurface,
+        foregroundColor: AppColors.osOnSurface,
         elevation: 0,
-        flexibleSpace: const DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.osPrimary, AppColors.osPrimaryDim],
-            ),
-          ),
-        ),
       ),
       body: Form(
         key: _formKey,
@@ -114,13 +109,13 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
               controller: _titleController,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Title *',
-                hint: 'e.g., Morning Gratitude',
-                icon: Icons.title,
+                label: 'Tiêu đề *',
+                hint: 'VD: Biết ơn buổi sáng',
+                icon: IconsaxPlusLinear.text,
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a title';
+                  return 'Vui lòng nhập tiêu đề';
                 }
                 return null;
               },
@@ -132,14 +127,14 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
               controller: _descriptionController,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Description *',
-                hint: 'Describe this meditation...',
-                icon: Icons.description,
+                label: 'Mô tả *',
+                hint: 'Mô tả bài thiền này...',
+                icon: IconsaxPlusLinear.document,
               ),
               maxLines: 4,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a description';
+                  return 'Vui lòng nhập mô tả';
                 }
                 return null;
               },
@@ -151,17 +146,17 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
               controller: _durationController,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Duration (minutes) *',
-                hint: 'e.g., 10',
-                icon: Icons.schedule,
+                label: 'Thời lượng (phút) *',
+                hint: 'VD: 10',
+                icon: IconsaxPlusLinear.clock,
               ),
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter duration';
+                  return 'Vui lòng nhập thời lượng';
                 }
                 if (int.tryParse(value) == null) {
-                  return 'Please enter a valid number';
+                  return 'Vui lòng nhập số hợp lệ';
                 }
                 return null;
               },
@@ -173,8 +168,8 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
               initialValue: _selectedCategory,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Category *',
-                icon: Icons.category,
+                label: 'Danh mục *',
+                icon: IconsaxPlusLinear.category,
               ),
               items: MeditationCategory.values.map((category) {
                 return DropdownMenuItem(
@@ -195,8 +190,8 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
               initialValue: _selectedLevel,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Level *',
-                icon: Icons.bar_chart,
+                label: 'Cấp độ *',
+                icon: IconsaxPlusLinear.chart_2,
               ),
               items: MeditationLevel.values.map((level) {
                 return DropdownMenuItem(
@@ -217,9 +212,9 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
               controller: _audioUrlController,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Audio URL (optional)',
+                label: 'Đường dẫn âm thanh (tùy chọn)',
                 hint: 'https://example.com/audio.mp3',
-                icon: Icons.audiotrack,
+                icon: IconsaxPlusLinear.music,
               ),
             ),
             const SizedBox(height: 16),
@@ -229,9 +224,9 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
               controller: _thumbnailUrlController,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Thumbnail URL (optional)',
+                label: 'Đường dẫn ảnh bìa (tùy chọn)',
                 hint: 'https://example.com/image.jpg',
-                icon: Icons.image,
+                icon: IconsaxPlusLinear.gallery,
               ),
             ),
             const SizedBox(height: 32),
@@ -258,7 +253,7 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
                       ),
                     )
                   : Text(
-                      'Create meditation',
+                      'Tạo bài thiền',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
@@ -274,24 +269,24 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
   String _getCategoryLabel(MeditationCategory category) {
     switch (category) {
       case MeditationCategory.stress:
-        return 'Stress Relief';
+        return 'Căng thẳng';
       case MeditationCategory.anxiety:
-        return 'Anxiety';
+        return 'Lo âu';
       case MeditationCategory.sleep:
-        return 'Sleep';
+        return 'Giấc ngủ';
       case MeditationCategory.focus:
-        return 'Focus';
+        return 'Tập trung';
     }
   }
 
   String _getLevelLabel(MeditationLevel level) {
     switch (level) {
       case MeditationLevel.beginner:
-        return 'Beginner';
+        return 'Cơ bản';
       case MeditationLevel.intermediate:
-        return 'Intermediate';
+        return 'Trung cấp';
       case MeditationLevel.advanced:
-        return 'Advanced';
+        return 'Nâng cao';
     }
   }
 }

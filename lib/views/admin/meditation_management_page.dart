@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/meditation.dart';
@@ -91,21 +93,48 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
   }
 
   Future<void> _deleteMeditation(Meditation meditation) async {
-    // Show confirmation dialog
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Meditation'),
-        content: Text('Are you sure you want to delete "${meditation.title}"?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: AppColors.osSurfaceContainerLowest,
+        title: Text(
+          'Xóa bài thiền',
+          style: GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.w800,
+            fontSize: 18,
+          ),
+        ),
+        content: Text(
+          'Bạn có chắc muốn xóa "${meditation.title}"?',
+          style: GoogleFonts.manrope(
+            fontSize: 14,
+            color: AppColors.osOnSurfaceVariant,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(
+              'Hủy',
+              style: GoogleFonts.manrope(
+                color: AppColors.osOnSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-          TextButton(
+          FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.osError,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'Xóa',
+              style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),
@@ -119,8 +148,8 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Meditation deleted successfully'),
-            backgroundColor: Colors.green,
+            content: Text('Đã xóa bài thiền'),
+            backgroundColor: AppColors.osPrimary,
           ),
         );
       }
@@ -128,8 +157,8 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error deleting meditation: $e'),
-            backgroundColor: Colors.red,
+            content: Text('Lỗi: $e'),
+            backgroundColor: AppColors.osError,
           ),
         );
       }
@@ -142,29 +171,21 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
       backgroundColor: AppColors.osSurface,
       appBar: AppBar(
         title: Text(
-          'Manage meditations',
+          'Quản lý bài thiền',
           style: GoogleFonts.plusJakartaSans(
-            color: Colors.white,
+            color: AppColors.osOnSurface,
             fontSize: 20,
             fontWeight: FontWeight.w800,
             letterSpacing: -0.4,
           ),
         ),
-        backgroundColor: AppColors.osPrimary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.osSurface,
+        foregroundColor: AppColors.osOnSurface,
         elevation: 0,
-        flexibleSpace: const DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.osPrimary, AppColors.osPrimaryDim],
-            ),
-          ),
-        ),
+        scrolledUnderElevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: const Icon(IconsaxPlusLinear.add),
             onPressed: () async {
               final result = await Navigator.push(
                 context,
@@ -183,7 +204,7 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
         children: [
           // Search and Filter Bar
           Container(
-            color: AppColors.osSurfaceContainerLowest,
+            color: AppColors.osSurface,
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
@@ -191,12 +212,12 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                 TextField(
                   style: GoogleFonts.manrope(color: AppColors.osOnSurface),
                   decoration: InputDecoration(
-                    hintText: 'Search meditations',
+                    hintText: 'Tìm kiếm bài thiền',
                     hintStyle: GoogleFonts.manrope(
                       color: AppColors.osOnSurfaceVariant,
                     ),
                     prefixIcon: const Icon(
-                      Icons.search,
+                      IconsaxPlusLinear.search_normal_1,
                       color: AppColors.osOnSurfaceVariant,
                     ),
                     border: OutlineInputBorder(
@@ -220,7 +241,7 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                     children: [
                       // Category Filter
                       _buildFilterChip(
-                        label: 'All Categories',
+                        label: 'Tất cả',
                         isSelected: _selectedCategory == null,
                         onTap: () {
                           setState(() => _selectedCategory = null);
@@ -241,7 +262,7 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
 
                       // Level Filter
                       _buildFilterChip(
-                        label: 'All Levels',
+                        label: 'Tất cả cấp',
                         isSelected: _selectedLevel == null,
                         onTap: () {
                           setState(() => _selectedLevel = null);
@@ -271,6 +292,7 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                 ? const Center(
                     child: CircularProgressIndicator(
                       color: AppColors.osPrimary,
+                      strokeWidth: 2.5,
                     ),
                   )
                 : _filteredMeditations.isEmpty
@@ -363,7 +385,7 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                             height: 80,
                             color: AppColors.osSurfaceContainerHigh,
                             child: const Icon(
-                              Icons.image_not_supported,
+                              PhosphorIconsRegular.imageBroken,
                               color: AppColors.osOnSurfaceVariant,
                             ),
                           );
@@ -374,7 +396,7 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                         height: 80,
                         color: AppColors.osSurfaceContainerHigh,
                         child: const Icon(
-                          Icons.spa,
+                          PhosphorIconsRegular.flowerLotus,
                           size: 32,
                           color: AppColors.osOnSurfaceVariant,
                         ),
@@ -414,19 +436,19 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                       runSpacing: 4,
                       children: [
                         _buildInfoChip(
-                          Icons.schedule,
-                          '${meditation.duration} min',
+                          IconsaxPlusLinear.clock,
+                          '${meditation.duration} phút',
                         ),
                         _buildInfoChip(
-                          Icons.category_outlined,
+                          IconsaxPlusLinear.category,
                           _getCategoryLabel(meditation.category),
                         ),
                         _buildInfoChip(
-                          Icons.bar_chart,
+                          IconsaxPlusLinear.chart_2,
                           _getLevelLabel(meditation.level),
                         ),
                         _buildInfoChip(
-                          Icons.star,
+                          IconsaxPlusBold.star,
                           '${meditation.rating.toStringAsFixed(1)} (${meditation.totalReviews})',
                         ),
                       ],
@@ -441,7 +463,7 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.edit, size: 20),
+                    icon: const Icon(IconsaxPlusLinear.edit_2, size: 20),
                     color: AppColors.osPrimary,
                     onPressed: () async {
                       final result = await Navigator.push(
@@ -457,7 +479,7 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                     },
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete, size: 20),
+                    icon: const Icon(IconsaxPlusLinear.trash, size: 20),
                     color: AppColors.osError,
                     onPressed: () => _deleteMeditation(meditation),
                   ),
@@ -496,7 +518,7 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(
-            Icons.spa_outlined,
+            PhosphorIconsRegular.flowerLotus,
             size: 64,
             color: AppColors.osOutlineVariant,
           ),
@@ -505,8 +527,8 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
             _searchQuery.isEmpty &&
                     _selectedCategory == null &&
                     _selectedLevel == null
-                ? 'No meditations yet'
-                : 'No meditations found',
+                ? 'Chưa có bài thiền nào'
+                : 'Không tìm thấy bài thiền',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -518,8 +540,8 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
             _searchQuery.isEmpty &&
                     _selectedCategory == null &&
                     _selectedLevel == null
-                ? 'Tap the + button to add your first meditation'
-                : 'Try adjusting your filters',
+                ? 'Nhấn nút + để thêm bài thiền đầu tiên'
+                : 'Thử thay đổi bộ lọc',
             style: GoogleFonts.manrope(
               fontSize: 14,
               color: AppColors.osOnSurfaceVariant,
@@ -533,24 +555,24 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
   String _getCategoryLabel(MeditationCategory category) {
     switch (category) {
       case MeditationCategory.stress:
-        return 'Stress';
+        return 'Căng thẳng';
       case MeditationCategory.anxiety:
-        return 'Anxiety';
+        return 'Lo âu';
       case MeditationCategory.sleep:
-        return 'Sleep';
+        return 'Giấc ngủ';
       case MeditationCategory.focus:
-        return 'Focus';
+        return 'Tập trung';
     }
   }
 
   String _getLevelLabel(MeditationLevel level) {
     switch (level) {
       case MeditationLevel.beginner:
-        return 'Beginner';
+        return 'Cơ bản';
       case MeditationLevel.intermediate:
-        return 'Intermediate';
+        return 'Trung cấp';
       case MeditationLevel.advanced:
-        return 'Advanced';
+        return 'Nâng cao';
     }
   }
 }
