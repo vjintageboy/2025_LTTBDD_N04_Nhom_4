@@ -59,6 +59,14 @@ lib/core/config/*_secrets.dart
 .env
 .env.local
 *.env.local
+ios/Runner/client_*.plist
+
+# AI tool configs
+.qwen/
+*.orig
+
+# Prototype/scratch
+stitch/
 
 # Node.js
 node_modules/
