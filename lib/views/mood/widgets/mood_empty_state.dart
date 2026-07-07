@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class MoodEmptyState extends StatelessWidget {
   const MoodEmptyState({super.key});
@@ -12,7 +13,7 @@ class MoodEmptyState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.emoji_emotions_outlined,
+              PhosphorIconsRegular.smiley,
               size: 80,
               color: Colors.grey.shade300,
             ),

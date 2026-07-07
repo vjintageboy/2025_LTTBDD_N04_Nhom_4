@@ -1,5 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../models/mood_entry.dart';
@@ -177,7 +179,7 @@ class _MoodAnalyticsPageState extends State<MoodAnalyticsPage> {
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
+            IconsaxPlusLinear.arrow_left_2,
             color: _kPrimary,
             size: 20,
           ),
@@ -640,23 +642,23 @@ class _MoodAnalyticsPageState extends State<MoodAnalyticsPage> {
   IconData _getInfluencerIcon(String factor) {
     final lower = factor.toLowerCase();
     if (lower.contains('work') || lower.contains('job') || lower.contains('career')) {
-      return Icons.work_outline_rounded;
+      return IconsaxPlusLinear.briefcase;
     } else if (lower.contains('family') || lower.contains('home')) {
-      return Icons.family_restroom_rounded;
+      return IconsaxPlusLinear.profile_2user;
     } else if (lower.contains('exercise') || lower.contains('sport') || lower.contains('fitness')) {
-      return Icons.fitness_center_rounded;
+      return PhosphorIconsRegular.barbell;
     } else if (lower.contains('health') || lower.contains('medical')) {
-      return Icons.eco_outlined;
+      return PhosphorIconsRegular.leaf;
     } else if (lower.contains('social') || lower.contains('friend')) {
-      return Icons.groups_outlined;
+      return IconsaxPlusLinear.people;
     } else if (lower.contains('sleep')) {
-      return Icons.bedtime_outlined;
+      return IconsaxPlusLinear.moon;
     } else if (lower.contains('finance') || lower.contains('money')) {
-      return Icons.attach_money_rounded;
+      return IconsaxPlusLinear.dollar_square;
     } else if (lower.contains('love') || lower.contains('relationship')) {
-      return Icons.favorite_outline_rounded;
+      return IconsaxPlusLinear.heart;
     }
-    return Icons.label_outline_rounded;
+    return IconsaxPlusLinear.tag;
   }
 
   // ── Best & Worst days ─────────────────────────────────────────────────────
@@ -797,7 +799,7 @@ class _MoodAnalyticsPageState extends State<MoodAnalyticsPage> {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.analytics_outlined,
+                IconsaxPlusLinear.chart,
                 size: 40,
                 color: _kOnSurfaceVariant,
               ),

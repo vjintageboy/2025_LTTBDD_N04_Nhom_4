@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../models/mood_entry.dart';
@@ -228,7 +229,7 @@ class _MoodHistoryPageState extends State<MoodHistoryPage>
         leading: Navigator.canPop(context)
             ? IconButton(
                 icon: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
+                  IconsaxPlusLinear.arrow_left_2,
                   color: _kPrimary,
                   size: 20,
                 ),
@@ -247,7 +248,7 @@ class _MoodHistoryPageState extends State<MoodHistoryPage>
         actions: [
           IconButton(
             icon: const Icon(
-              Icons.analytics_outlined,
+              IconsaxPlusLinear.chart,
               color: _kOnSurfaceVariant,
               size: 22,
             ),
@@ -287,7 +288,7 @@ class _MoodHistoryPageState extends State<MoodHistoryPage>
                     ),
                   ],
                 ),
-                child: const Icon(Icons.add, color: Colors.white, size: 22),
+                child: const Icon(IconsaxPlusLinear.add, color: Colors.white, size: 22),
               ),
             ),
           ),
@@ -582,7 +583,7 @@ class _MoodHistoryPageState extends State<MoodHistoryPage>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildMonthNavButton(
-                Icons.chevron_left_rounded,
+                IconsaxPlusLinear.arrow_left_2,
                 () => setState(() {
                   _selectedMonth = DateTime(
                     _selectedMonth.year,
@@ -599,7 +600,7 @@ class _MoodHistoryPageState extends State<MoodHistoryPage>
                 ),
               ),
               _buildMonthNavButton(
-                Icons.chevron_right_rounded,
+                IconsaxPlusLinear.arrow_right_3,
                 () {
                   final now = DateTime.now();
                   final next = DateTime(
@@ -906,7 +907,7 @@ class _MoodHistoryPageState extends State<MoodHistoryPage>
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Icon(Icons.delete_outline_rounded, color: Colors.white, size: 26),
+            Icon(IconsaxPlusLinear.trash, color: Colors.white, size: 26),
             SizedBox(width: 8),
             Text(
               'Delete',

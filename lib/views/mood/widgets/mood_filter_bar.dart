@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import '../../../l10n/app_localizations.dart';
 
 class MoodFilterBar extends StatelessWidget {
@@ -30,7 +31,7 @@ class MoodFilterBar extends StatelessWidget {
             context,
             AppLocalizations.of(context)!.all,
             0,
-            Icons.filter_list,
+            IconsaxPlusLinear.filter,
           ),
           const SizedBox(width: 8),
           _buildFilterChip(

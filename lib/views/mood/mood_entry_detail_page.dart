@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:intl/intl.dart';
 import '../../models/mood_entry.dart';
 import '../../core/services/localization_service.dart';
@@ -178,7 +179,7 @@ class _MoodEntryDetailPageState extends State<MoodEntryDetailPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(IconsaxPlusLinear.arrow_left, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -221,7 +222,7 @@ class _MoodEntryDetailPageState extends State<MoodEntryDetailPage> {
               ),
           ] else
             IconButton(
-              icon: const Icon(Icons.edit_rounded, color: Color(0xFF4CAF50)),
+              icon: const Icon(IconsaxPlusLinear.edit_2, color: Color(0xFF4CAF50)),
               onPressed: () {
                 setState(() {
                   _isEditing = true;
@@ -248,7 +249,7 @@ class _MoodEntryDetailPageState extends State<MoodEntryDetailPage> {
                 child: Column(
                   children: [
                     Icon(
-                      Icons.calendar_today,
+                      IconsaxPlusLinear.calendar,
                       color: Colors.grey.shade600,
                       size: 32,
                     ),
