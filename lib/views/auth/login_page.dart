@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'signup_page.dart';
 import '../home/home_page.dart';
-import '../expert_dashboard/expert_main_page.dart';
 import '../admin/admin_main_page.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/services/localization_service.dart';
@@ -82,8 +81,6 @@ class _LoginPageState extends State<LoginPage>
         Widget destinationPage;
         if (role == 'admin') {
           destinationPage = const AdminMainPage();
-        } else if (role == 'expert') {
-          destinationPage = const ExpertMainPage();
         } else {
           destinationPage = const HomePage();
         }
@@ -125,8 +122,6 @@ class _LoginPageState extends State<LoginPage>
         Widget destinationPage;
         if (role == 'admin') {
           destinationPage = const AdminMainPage();
-        } else if (role == 'expert') {
-          destinationPage = const ExpertMainPage();
         } else {
           destinationPage = const HomePage();
         }
