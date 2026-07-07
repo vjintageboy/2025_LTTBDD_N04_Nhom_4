@@ -45,12 +45,10 @@ model User {
 
   // Relations
   moodEntries      MoodEntry[]
-  chatParticipants ChatParticipant[]
   posts            Post[]
   postLikes        PostLike[]
   postComments     PostComment[]
   notifications    Notification[]
-  messages         Message[]
   aiConversations  AiConversation[]
   aiMessages       AiMessage[]
 
@@ -89,63 +87,6 @@ model Meditation {
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   @@map("meditations")
-}
-
-model ChatRoom {
-  id              String    @id @default(uuid()) @db.Uuid
-  lastMessage     String?   @map("last_message") @db.Text
-  status          String    @default("active") @db.VarChar(50)
-  lastMessageTime DateTime? @map("last_message_time") @db.Timestamptz
-  roomType        String    @default("appointment") @map("room_type") @db.VarChar(50)
-  directKey       String?   @map("direct_key") @db.Text
-  createdBy       String?   @map("created_by") @db.Uuid
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-
-  // Relations
-  participants ChatParticipant[]
-  messages     Message[]
-
-  @@map("chat_rooms")
-}
-
-model ChatParticipant {
-  roomId            String    @map("room_id") @db.Uuid
-  userId            String    @map("user_id") @db.Uuid
-  unreadCount       Int       @default(0) @map("unread_count")
-  lastReadAt        DateTime? @map("last_read_at") @db.Timestamptz
-  lastReadMessageId String?   @map("last_read_message_id") @db.Uuid
-
-  // Relations
-  room ChatRoom @relation(fields: [roomId], references: [id])
-  user User     @relation(fields: [userId], references: [id])
-
-  @@id([roomId, userId])
-  @@map("chat_participants")
-}
-
-model Message {
-  id                  String    @id @default(uuid()) @db.Uuid
-  roomId              String    @map("room_id") @db.Uuid
-  senderId            String    @map("sender_id") @db.Uuid
-  content             String    @db.Text
-  type                String    @default("text") @db.VarChar(50)
-  isPinned            Boolean   @default(false) @map("is_pinned")
-  attachmentUrl       String?   @map("attachment_url") @db.Text
-  attachmentName      String?   @map("attachment_name") @db.Text
-  attachmentSizeBytes Int?      @map("attachment_size_bytes")
-  deliveredAt         DateTime? @map("delivered_at") @db.Timestamptz
-  readAt              DateTime? @map("read_at") @db.Timestamptz
-  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz
-
-  // Relations
-  room   ChatRoom @relation(fields: [roomId], references: [id])
-  sender User     @relation(fields: [senderId], references: [id])
-
-  @@index([roomId])
-  @@index([senderId])
-  @@map("messages")
 }
 
 model Post {

@@ -261,69 +261,6 @@ class SupabaseService {
   }
 
   // ==========================================
-  // CHAT (chat_rooms + chat_participants + messages)
-  // ==========================================
-
-  Future<List<Map<String, dynamic>>> getUserChatRooms(String userId) async {
-    try {
-      // Lấy các room mà user tham gia qua chat_participants
-      final participantRows = await _supabase
-          .from('chat_participants')
-          .select('room_id')
-          .eq('user_id', userId);
-
-      final roomIds = (participantRows as List)
-          .map((row) => row['room_id'] as String)
-          .toList();
-
-      if (roomIds.isEmpty) return [];
-
-      final response = await _supabase
-          .from('chat_rooms')
-          .select()
-          .filter('id', 'in', '(${roomIds.map((id) => '"$id"').join(',')})')
-          .order('updated_at', ascending: false);
-
-      return List<Map<String, dynamic>>.from(response);
-    } catch (e) {
-      return [];
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> getMessages(String roomId) async {
-    try {
-      final response = await _supabase
-          .from('messages')
-          .select('*, users!sender_id(full_name, avatar_url)')
-          .eq('room_id', roomId)
-          .order('created_at', ascending: true);
-      return List<Map<String, dynamic>>.from(response);
-    } catch (e) {
-      return [];
-    }
-  }
-
-  Future<void> sendMessage({
-    required String roomId,
-    required String senderId,
-    required String content,
-  }) async {
-    await _supabase.from('messages').insert({
-      'room_id': roomId,
-      'sender_id': senderId,
-      'content': content,
-    });
-    // Cập nhật last_message trong chat_rooms
-    await _supabase
-        .from('chat_rooms')
-        .update({
-          'last_message': content,
-          'updated_at': DateTime.now().toIso8601String(),
-        })
-        .eq('id', roomId);
-  }
-
-  // ==========================================
   // MEDITATIONS (bảng `meditations`)
   // ==========================================
 
