@@ -51,6 +51,7 @@ app.*.map.json
 prisma/.env
 prisma/node_modules/
 prisma/backups/
+prisma/build/
 
 # API Keys & Secrets (IMPORTANT: Never commit these!)
 lib/core/config/gemini_config.local.dart
