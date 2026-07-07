@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'admin_dashboard_page.dart';
 import 'admin_user_management_page.dart';
 import 'meditation_management_page.dart';
-import '../news/news_manager_page.dart';
+import '../news/news_feed_page.dart';
 import '../profile/profile_page.dart';
+import '../../core/constants/app_colors.dart';
 import '../../core/services/localization_service.dart';
 
 /// Main navigation page for admins with specialized dashboard
@@ -36,7 +37,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
         currentTab = const AdminUserManagementPage();
         break;
       case 2:
-        currentTab = const NewsManagerPage();
+        currentTab = const NewsFeedPage(moderateAll: true);
         break;
       case 3:
         currentTab = const MeditationManagementPage();
@@ -49,13 +50,17 @@ class _AdminMainPageState extends State<AdminMainPage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.osSurface,
       body: currentTab,
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
+        decoration: const BoxDecoration(
+          color: AppColors.osSurfaceContainerLowest,
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10),
+            BoxShadow(
+              color: Color(0x0F0B361D), // osOnSurface @ ~6%
+              blurRadius: 24,
+              offset: Offset(0, -6),
+            ),
           ],
         ),
         child: SafeArea(
@@ -130,7 +135,9 @@ class _AdminMainPageState extends State<AdminMainPage> {
         children: [
           Icon(
             isSelected ? filledIcon : outlinedIcon,
-            color: isSelected ? const Color(0xFF7B2BB0) : Colors.grey,
+            color: isSelected
+                ? AppColors.osPrimary
+                : AppColors.osOnSurfaceVariant,
             size: 28,
           ),
           const SizedBox(height: 4),
@@ -140,7 +147,9 @@ class _AdminMainPageState extends State<AdminMainPage> {
             overflow: TextOverflow.fade,
             style: TextStyle(
               fontSize: 11,
-              color: isSelected ? const Color(0xFF7B2BB0) : Colors.grey,
+              color: isSelected
+                  ? AppColors.osPrimary
+                  : AppColors.osOnSurfaceVariant,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
           ),

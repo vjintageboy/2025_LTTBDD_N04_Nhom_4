@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/meditation.dart';
+import '../../core/constants/app_colors.dart';
+import 'admin_form_styles.dart';
 
 /// Edit Meditation Page - Trang chỉnh sửa meditation (Admin only)
 class EditMeditationPage extends StatefulWidget {
@@ -104,15 +107,29 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.osSurface,
       appBar: AppBar(
-        title: const Text(
-          'Edit Meditation',
-          style: TextStyle(fontWeight: FontWeight.w700),
+        title: Text(
+          'Edit meditation',
+          style: GoogleFonts.plusJakartaSans(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.4,
+          ),
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        backgroundColor: AppColors.osPrimary,
+        foregroundColor: Colors.white,
         elevation: 0,
+        flexibleSpace: const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.osPrimary, AppColors.osPrimaryDim],
+            ),
+          ),
+        ),
       ),
       body: Form(
         key: _formKey,
@@ -123,13 +140,15 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blue.shade200),
+                color: AppColors.osSurfaceContainerLowest,
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.blue.shade700),
+                  const Icon(
+                    Icons.info_outline,
+                    color: AppColors.osOnPrimaryContainer,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -137,18 +156,18 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
                       children: [
                         Text(
                           'Meditation ID: ${widget.meditation.meditationId}',
-                          style: TextStyle(
+                          style: GoogleFonts.manrope(
                             fontSize: 12,
-                            color: Colors.blue.shade900,
+                            color: AppColors.osOnSurface,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Rating: ${widget.meditation.rating.toStringAsFixed(1)} ★ (${widget.meditation.totalReviews} reviews)',
-                          style: TextStyle(
+                          style: GoogleFonts.manrope(
                             fontSize: 12,
-                            color: Colors.blue.shade700,
+                            color: AppColors.osOnSurfaceVariant,
                           ),
                         ),
                       ],
@@ -162,13 +181,11 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
             // Title
             TextFormField(
               controller: _titleController,
-              decoration: InputDecoration(
-                labelText: 'Title *',
-                hintText: 'e.g., Morning Gratitude',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefixIcon: const Icon(Icons.title),
+              style: GoogleFonts.manrope(color: AppColors.osOnSurface),
+              decoration: osFieldDecoration(
+                label: 'Title *',
+                hint: 'e.g., Morning Gratitude',
+                icon: Icons.title,
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
@@ -182,13 +199,11 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
             // Description
             TextFormField(
               controller: _descriptionController,
-              decoration: InputDecoration(
-                labelText: 'Description *',
-                hintText: 'Describe this meditation...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefixIcon: const Icon(Icons.description),
+              style: GoogleFonts.manrope(color: AppColors.osOnSurface),
+              decoration: osFieldDecoration(
+                label: 'Description *',
+                hint: 'Describe this meditation...',
+                icon: Icons.description,
               ),
               maxLines: 4,
               validator: (value) {
@@ -203,13 +218,11 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
             // Duration
             TextFormField(
               controller: _durationController,
-              decoration: InputDecoration(
-                labelText: 'Duration (minutes) *',
-                hintText: 'e.g., 10',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefixIcon: const Icon(Icons.schedule),
+              style: GoogleFonts.manrope(color: AppColors.osOnSurface),
+              decoration: osFieldDecoration(
+                label: 'Duration (minutes) *',
+                hint: 'e.g., 10',
+                icon: Icons.schedule,
               ),
               keyboardType: TextInputType.number,
               validator: (value) {
@@ -227,12 +240,10 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
             // Category
             DropdownButtonFormField<MeditationCategory>(
               initialValue: _selectedCategory,
-              decoration: InputDecoration(
-                labelText: 'Category *',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefixIcon: const Icon(Icons.category),
+              style: GoogleFonts.manrope(color: AppColors.osOnSurface),
+              decoration: osFieldDecoration(
+                label: 'Category *',
+                icon: Icons.category,
               ),
               items: MeditationCategory.values.map((category) {
                 return DropdownMenuItem(
@@ -251,12 +262,10 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
             // Level
             DropdownButtonFormField<MeditationLevel>(
               initialValue: _selectedLevel,
-              decoration: InputDecoration(
-                labelText: 'Level *',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefixIcon: const Icon(Icons.bar_chart),
+              style: GoogleFonts.manrope(color: AppColors.osOnSurface),
+              decoration: osFieldDecoration(
+                label: 'Level *',
+                icon: Icons.bar_chart,
               ),
               items: MeditationLevel.values.map((level) {
                 return DropdownMenuItem(
@@ -275,13 +284,11 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
             // Audio URL
             TextFormField(
               controller: _audioUrlController,
-              decoration: InputDecoration(
-                labelText: 'Audio URL (optional)',
-                hintText: 'https://example.com/audio.mp3',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefixIcon: const Icon(Icons.audiotrack),
+              style: GoogleFonts.manrope(color: AppColors.osOnSurface),
+              decoration: osFieldDecoration(
+                label: 'Audio URL (optional)',
+                hint: 'https://example.com/audio.mp3',
+                icon: Icons.audiotrack,
               ),
             ),
             const SizedBox(height: 16),
@@ -289,13 +296,11 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
             // Thumbnail URL
             TextFormField(
               controller: _thumbnailUrlController,
-              decoration: InputDecoration(
-                labelText: 'Thumbnail URL (optional)',
-                hintText: 'https://example.com/image.jpg',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefixIcon: const Icon(Icons.image),
+              style: GoogleFonts.manrope(color: AppColors.osOnSurface),
+              decoration: osFieldDecoration(
+                label: 'Thumbnail URL (optional)',
+                hint: 'https://example.com/image.jpg',
+                icon: Icons.image,
               ),
             ),
             const SizedBox(height: 32),
@@ -304,13 +309,13 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
             ElevatedButton(
               onPressed: _isSaving ? null : _saveMeditation,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4CAF50),
+                backgroundColor: AppColors.osPrimary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                elevation: 2,
+                elevation: 0,
               ),
               child: _isSaving
                   ? const SizedBox(
@@ -321,11 +326,11 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : const Text(
-                      'Save Changes',
-                      style: TextStyle(
+                  : Text(
+                      'Save changes',
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
             ),

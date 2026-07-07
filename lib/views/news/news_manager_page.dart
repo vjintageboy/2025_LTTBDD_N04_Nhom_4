@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import '../../models/news_post.dart';
 import '../../services/news_service.dart';
@@ -20,50 +21,67 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
   String _searchQuery = '';
   NewsPost? _selectedPost;
 
+  // Ambient tinted shadow — mimics natural light instead of a grey smudge.
+  static const List<BoxShadow> _ambientShadow = [
+    BoxShadow(
+      color: Color(0x0F0B361D), // osOnSurface @ ~6%
+      blurRadius: 32,
+      offset: Offset(0, 12),
+    ),
+  ];
+
   // Build a consistent search card used by both narrow and wide layout
   Widget _buildSearchCard(bool isWide) {
-    final borderRadius = BorderRadius.circular(12.0);
-    final primary = AppColors.primaryLight;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Card(
-        elevation: 2,
-        color: primary.withValues(alpha: 0.10),
-        shape: RoundedRectangleBorder(borderRadius: borderRadius),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  style: TextStyle(fontSize: 14, color: Colors.white),
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search, color: Colors.white70),
-                    hintText: 'Search title or content',
-                    hintStyle: TextStyle(color: Colors.white70, fontSize: 14),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    filled: true,
-                    fillColor: Colors.transparent,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                    isDense: true,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.osSurfaceContainerLowest,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: _ambientShadow,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                style: GoogleFonts.manrope(
+                  fontSize: 14,
+                  color: AppColors.osOnSurface,
+                ),
+                textAlignVertical: TextAlignVertical.center,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: AppColors.osOnSurfaceVariant,
                   ),
-                  onChanged: (v) => setState(() => _searchQuery = v.trim()),
+                  hintText: 'Search title or content',
+                  hintStyle: GoogleFonts.manrope(
+                    color: AppColors.osOnSurfaceVariant,
+                    fontSize: 14,
+                  ),
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.transparent,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  isDense: true,
                 ),
+                onChanged: (v) => setState(() => _searchQuery = v.trim()),
               ),
-              const SizedBox(width: 8),
-              if (_searchQuery.isNotEmpty)
-                IconButton(
-                  onPressed: () => setState(() => _searchQuery = ''),
-                  icon: Icon(Icons.close, color: Colors.white70),
-                  tooltip: 'Clear search',
+            ),
+            const SizedBox(width: 8),
+            if (_searchQuery.isNotEmpty)
+              IconButton(
+                onPressed: () => setState(() => _searchQuery = ''),
+                icon: const Icon(
+                  Icons.close,
+                  color: AppColors.osOnSurfaceVariant,
                 ),
-            ],
-          ),
+                tooltip: 'Clear search',
+              ),
+          ],
         ),
       ),
     );
@@ -72,12 +90,29 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.osSurface,
       appBar: AppBar(
-        title: const Text(
-          'News Manager',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          'News manager',
+          style: GoogleFonts.plusJakartaSans(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.4,
+          ),
         ),
-        backgroundColor: AppColors.primaryLight,
+        backgroundColor: AppColors.osPrimary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        flexibleSpace: const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.osPrimary, AppColors.osPrimaryDim],
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.add, color: Colors.white),
@@ -112,7 +147,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                                 }
                                 if (!snapshot.hasData) {
                                   return const Center(
-                                    child: CircularProgressIndicator(),
+                                    child: CircularProgressIndicator(color: AppColors.osPrimary),
                                   );
                                 }
                                 var posts = snapshot.data!;
@@ -142,13 +177,13 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                                           Icon(
                                             Icons.article_outlined,
                                             size: 64,
-                                            color: Colors.grey.shade300,
+                                            color: AppColors.osOutlineVariant,
                                           ),
                                           const SizedBox(height: 12),
                                           Text(
                                             'No posts found',
                                             style: TextStyle(
-                                              color: Colors.grey.shade600,
+                                              color: AppColors.osOnSurfaceVariant,
                                               fontSize: 16,
                                             ),
                                           ),
@@ -194,7 +229,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                     Expanded(
                       flex: 2,
                       child: Container(
-                        color: Colors.grey.shade50,
+                        color: AppColors.osSurface,
                         child: _selectedPost == null
                             ? Center(
                                 child: Padding(
@@ -205,13 +240,13 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                                       Icon(
                                         Icons.info_outline,
                                         size: 64,
-                                        color: Colors.grey.shade400,
+                                        color: AppColors.osOutlineVariant,
                                       ),
                                       const SizedBox(height: 12),
                                       Text(
                                         'Select a post to preview',
                                         style: TextStyle(
-                                          color: Colors.grey.shade600,
+                                          color: AppColors.osOnSurfaceVariant,
                                           fontSize: 16,
                                         ),
                                       ),
@@ -241,8 +276,8 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                           }
                           if (!snapshot.hasData) {
                             return const Center(
-                              child: CircularProgressIndicator(),
-                            );
+                                    child: CircularProgressIndicator(color: AppColors.osPrimary),
+                                  );
                           }
                           var posts = snapshot.data!;
 
@@ -270,13 +305,13 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                                     Icon(
                                       Icons.article_outlined,
                                       size: 64,
-                                      color: Colors.grey.shade300,
+                                      color: AppColors.osOutlineVariant,
                                     ),
                                     const SizedBox(height: 12),
                                     Text(
                                       'No posts found',
                                       style: TextStyle(
-                                        color: Colors.grey.shade600,
+                                        color: AppColors.osOnSurfaceVariant,
                                         fontSize: 16,
                                       ),
                                     ),
@@ -313,37 +348,42 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
 
   Widget _buildPostCard(NewsPost post, bool isWide) {
     final isSelected = _selectedPost?.postId == post.postId;
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () {
-          if (isWide) {
-            setState(() => _selectedPost = post);
-          } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => PostDetailPage(post: post)),
-            );
-          }
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          decoration: BoxDecoration(
-            border: isSelected && isWide
-              ? Border.all(color: AppColors.primaryLight, width: 1.5)
-                : null,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.all(12.0),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.osSurfaceContainerLowest,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: _ambientShadow,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            if (isWide) {
+              setState(() => _selectedPost = post);
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => PostDetailPage(post: post)),
+              );
+            }
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            decoration: BoxDecoration(
+              border: isSelected && isWide
+                  ? Border.all(color: AppColors.osPrimary, width: 1.5)
+                  : null,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            padding: const EdgeInsets.all(12.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CircleAvatar(
                 radius: 26,
                 backgroundColor: post.authorName == 'Anonymous'
-                    ? Colors.grey.shade300
-                  : AppColors.primaryLight.withValues(alpha: 0.12),
+                    ? AppColors.osOutlineVariant
+                  : AppColors.osPrimaryContainer,
                 backgroundImage:
                     post.authorName != 'Anonymous' &&
                         post.authorAvatarUrl != null &&
@@ -357,7 +397,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                     ? Icon(
                         Icons.visibility_off,
                         size: 20,
-                        color: Colors.grey.shade700,
+                        color: AppColors.osOnSurfaceVariant,
                       )
                     : (post.authorAvatarUrl == null || post.authorAvatarUrl!.isEmpty
                           ? Text(
@@ -366,7 +406,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                                   : '?',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.primaryLight,
+                                color: AppColors.osOnPrimaryContainer,
                               ),
                             )
                           : null),
@@ -381,9 +421,11 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                         Expanded(
                           child: Text(
                             post.title,
-                            style: const TextStyle(
+                            style: GoogleFonts.plusJakartaSans(
                               fontSize: 16,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.2,
+                              color: AppColors.osOnSurface,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -414,7 +456,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                       post.content,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.grey.shade700),
+                      style: TextStyle(color: AppColors.osOnSurfaceVariant),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -429,18 +471,18 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                                 post.authorName,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey.shade600,
+                                  color: AppColors.osOnSurfaceVariant,
                                 ),
                               ),
                               Text(
                                 '•',
-                                style: TextStyle(color: Colors.grey.shade400),
+                                style: TextStyle(color: AppColors.osOutlineVariant),
                               ),
                               Text(
                                 _shortDate(post.createdAt),
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey.shade600,
+                                  color: AppColors.osOnSurfaceVariant,
                                 ),
                               ),
 
@@ -450,14 +492,14 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.grey.shade100,
+                                  color: AppColors.osSurfaceContainer,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
                                   categoryDisplayName(post.category, context.l10n),
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey.shade800,
+                                    color: AppColors.osOnSurface,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -479,10 +521,10 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                                   Container(
                                     width: 88,
                                     height: 64,
-                                    color: Colors.grey.shade200,
+                                    color: AppColors.osSurfaceContainer,
                                     child: Icon(
                                       Icons.broken_image,
-                                      color: Colors.grey.shade400,
+                                      color: AppColors.osOutlineVariant,
                                     ),
                                   ),
                             ),
@@ -503,21 +545,21 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                               '${post.likeCount}',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey.shade600,
+                                color: AppColors.osOnSurfaceVariant,
                               ),
                             ),
                             const SizedBox(width: 12),
                             Icon(
                               Icons.chat_bubble,
                               size: 14,
-                              color: Colors.grey.shade600,
+                              color: AppColors.osOnSurfaceVariant,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               '${post.commentCount}',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey.shade600,
+                                color: AppColors.osOnSurfaceVariant,
                               ),
                             ),
                           ],
@@ -528,6 +570,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),
@@ -545,8 +588,8 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
               CircleAvatar(
                 radius: 28,
                 backgroundColor: post.authorName == 'Anonymous'
-                    ? Colors.grey.shade300
-                  : AppColors.primaryLight.withValues(alpha: 0.12),
+                    ? AppColors.osOutlineVariant
+                  : AppColors.osPrimaryContainer,
                 backgroundImage:
                     post.authorName != 'Anonymous' &&
                         post.authorAvatarUrl != null &&
@@ -560,7 +603,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                     ? Icon(
                         Icons.visibility_off,
                         size: 20,
-                        color: Colors.grey.shade700,
+                        color: AppColors.osOnSurfaceVariant,
                       )
                     : (post.authorAvatarUrl == null || post.authorAvatarUrl!.isEmpty
                           ? Text(
@@ -569,7 +612,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                                   : '?',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.primaryLight,
+                                color: AppColors.osOnPrimaryContainer,
                               ),
                             )
                           : null),
@@ -581,15 +624,19 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                   children: [
                     Text(
                       post.title,
-                      style: const TextStyle(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
+                        color: AppColors.osOnSurface,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       '${post.authorName} • ${_shortDate(post.createdAt)}',
-                      style: TextStyle(color: Colors.grey.shade600),
+                      style: GoogleFonts.manrope(
+                        color: AppColors.osOnSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -611,7 +658,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
           ],
           Text(
             post.content,
-            style: TextStyle(color: Colors.grey.shade800, height: 1.45),
+            style: TextStyle(color: AppColors.osOnSurface, height: 1.45),
           ),
           const SizedBox(height: 16),
           Row(
@@ -621,7 +668,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                 icon: const Icon(Icons.edit, size: 18),
                 label: const Text('Edit'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryLight,
+                  backgroundColor: AppColors.osPrimary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -643,7 +690,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
               const Spacer(),
               Text(
                 '${post.likeCount} ❤️  •  ${post.commentCount} comments',
-                style: TextStyle(color: Colors.grey.shade600),
+                style: TextStyle(color: AppColors.osOnSurfaceVariant),
               ),
             ],
           ),

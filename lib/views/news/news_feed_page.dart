@@ -18,7 +18,11 @@ enum SortBy {
 
 
 class NewsFeedPage extends StatefulWidget {
-  const NewsFeedPage({super.key});
+  /// When true, the edit/delete menu is shown on every post (admin moderation).
+  /// Defaults to false so regular users can only manage their own posts.
+  final bool moderateAll;
+
+  const NewsFeedPage({super.key, this.moderateAll = false});
 
   @override
   State<NewsFeedPage> createState() => _NewsFeedPageState();
@@ -465,7 +469,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                       ),
                       const SizedBox(width: 8),
                       _buildCategoryBadge(post),
-                      if (post.authorId == currentUserId)
+                      if (widget.moderateAll || post.authorId == currentUserId)
                         PopupMenuButton<String>(
                           icon: Icon(
                             Icons.more_vert,

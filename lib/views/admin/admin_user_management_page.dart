@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/app_user.dart';
+import '../../core/constants/app_colors.dart';
 
 class AdminUserManagementPage extends StatefulWidget {
   const AdminUserManagementPage({super.key});
@@ -16,6 +18,15 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
   String _filterRole = 'all'; // all, user, admin
   List<Map<String, dynamic>>? _allUsers;
   bool _isLoading = true;
+
+  // Ambient tinted shadow — mimics natural light instead of a grey smudge.
+  static const List<BoxShadow> _ambientShadow = [
+    BoxShadow(
+      color: Color(0x0F0B361D), // osOnSurface @ ~6%
+      blurRadius: 32,
+      offset: Offset(0, 12),
+    ),
+  ];
 
   @override
   void initState() {
@@ -56,16 +67,26 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
   Widget build(BuildContext context) {
     final filteredUsers = _isLoading ? <Map<String, dynamic>>[] : _computeFilteredUsers();
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: AppColors.osSurface,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF7B2BB0),
+        backgroundColor: AppColors.osPrimary,
         elevation: 0,
-        title: const Text(
-          'User Management',
-          style: TextStyle(
+        flexibleSpace: const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.osPrimary, AppColors.osPrimaryDim],
+            ),
+          ),
+        ),
+        title: Text(
+          'User management',
+          style: GoogleFonts.plusJakartaSans(
             color: Colors.white,
             fontSize: 20,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.4,
           ),
         ),
         centerTitle: true,
@@ -81,19 +102,27 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
         children: [
           // Search and Filter
           Container(
-            color: Colors.white,
+            color: AppColors.osSurfaceContainerLowest,
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 TextField(
+                  style: GoogleFonts.manrope(color: AppColors.osOnSurface),
                   decoration: InputDecoration(
-                    hintText: 'Search users...',
-                    prefixIcon: const Icon(Icons.search),
+                    hintText: 'Search users',
+                    hintStyle: GoogleFonts.manrope(
+                      color: AppColors.osOnSurfaceVariant,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: AppColors.osOnSurfaceVariant,
+                    ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
                     ),
                     filled: true,
-                    fillColor: Colors.grey.shade100,
+                    fillColor: AppColors.osSurfaceContainer,
                   ),
                   onChanged: (value) {
                     setState(() => _searchQuery = value.toLowerCase());
@@ -120,11 +149,14 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
           Expanded(
             child: _isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF7B2BB0)),
+                    child: CircularProgressIndicator(
+                      color: AppColors.osPrimary,
+                    ),
                   )
                 : RefreshIndicator(
                     onRefresh: _loadUsers,
-                    color: const Color(0xFF7B2BB0),
+                    color: AppColors.osPrimary,
+                    backgroundColor: AppColors.osSurfaceContainerLowest,
                     child: filteredUsers.isEmpty
                         ? ListView(
                             children: [
@@ -134,17 +166,17 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.people_outline,
                                         size: 64,
-                                        color: Colors.grey.shade400,
+                                        color: AppColors.osOutlineVariant,
                                       ),
                                       const SizedBox(height: 16),
                                       Text(
                                         'No users found',
-                                        style: TextStyle(
+                                        style: GoogleFonts.manrope(
                                           fontSize: 16,
-                                          color: Colors.grey.shade600,
+                                          color: AppColors.osOnSurfaceVariant,
                                         ),
                                       ),
                                     ],
@@ -176,14 +208,18 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
     return FilterChip(
       label: Text(label),
       selected: isSelected,
+      showCheckmark: false,
       onSelected: (selected) {
         setState(() => _filterRole = value);
       },
-      selectedColor: const Color(0xFF7B2BB0).withValues(alpha: 0.2),
-      checkmarkColor: const Color(0xFF7B2BB0),
-      labelStyle: TextStyle(
-        color: isSelected ? const Color(0xFF7B2BB0) : Colors.grey.shade700,
-        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+      backgroundColor: AppColors.osSurfaceContainer,
+      selectedColor: AppColors.osPrimaryContainer,
+      side: BorderSide.none,
+      labelStyle: GoogleFonts.manrope(
+        color: isSelected
+            ? AppColors.osOnPrimaryContainer
+            : AppColors.osOnSurfaceVariant,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
       ),
     );
   }
@@ -193,15 +229,9 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: AppColors.osSurfaceContainerLowest,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: _ambientShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,13 +240,13 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: _getRoleColor(user.role).withValues(alpha: 0.2),
+                backgroundColor: AppColors.osPrimaryContainer,
                 child: Text(
                   _userInitial(user),
-                  style: TextStyle(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: _getRoleColor(user.role),
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.osOnPrimaryContainer,
                   ),
                 ),
               ),
@@ -227,17 +257,19 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                   children: [
                     Text(
                       user.displayName,
-                      style: const TextStyle(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                        color: AppColors.osOnSurface,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       user.email,
-                      style: TextStyle(
+                      style: GoogleFonts.manrope(
                         fontSize: 13,
-                        color: Colors.grey.shade600,
+                        color: AppColors.osOnSurfaceVariant,
                       ),
                     ),
                   ],
@@ -246,9 +278,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
               _buildRoleBadge(user.role),
             ],
           ),
-          const SizedBox(height: 12),
-          Divider(color: Colors.grey.shade200),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
           // Show ban reason if user is banned
           if (isBanned && banReason != null && banReason.isNotEmpty) ...[
@@ -301,8 +331,11 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Joined: ${user.createdAt != null ? _formatDate(user.createdAt!) : 'N/A'}',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                'Joined ${user.createdAt != null ? _formatDate(user.createdAt!) : 'N/A'}',
+                style: GoogleFonts.manrope(
+                  fontSize: 12,
+                  color: AppColors.osOnSurfaceVariant,
+                ),
               ),
               Row(
                 children: [
@@ -373,44 +406,31 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
   }
 
   Widget _buildRoleBadge(UserRole role) {
-    Color color;
-    String label;
-
-    switch (role) {
-      case UserRole.admin:
-        color = Colors.purple;
-        label = 'ADMIN';
-        break;
-      case UserRole.user:
-        color = Colors.blue;
-        label = 'USER';
-        break;
-    }
+    final bool isAdmin = role == UserRole.admin;
+    final Color bg = isAdmin
+        ? AppColors.osPrimaryContainer
+        : AppColors.osSurfaceContainer;
+    final Color fg = isAdmin
+        ? AppColors.osOnPrimaryContainer
+        : AppColors.osOnSurfaceVariant;
+    final String label = isAdmin ? 'ADMIN' : 'USER';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: bg,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: GoogleFonts.manrope(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: color,
+          letterSpacing: 0.4,
+          color: fg,
         ),
       ),
     );
-  }
-
-  Color _getRoleColor(UserRole role) {
-    switch (role) {
-      case UserRole.admin:
-        return Colors.purple;
-      case UserRole.user:
-        return Colors.blue;
-    }
   }
 
   String _formatDate(DateTime date) {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/meditation.dart';
+import '../../core/constants/app_colors.dart';
 import 'edit_meditation_page.dart';
 import 'add_meditation_page.dart';
 
@@ -21,6 +23,15 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
   String _searchQuery = '';
   MeditationCategory? _selectedCategory;
   MeditationLevel? _selectedLevel;
+
+  // Ambient tinted shadow — mimics natural light instead of a grey smudge.
+  static const List<BoxShadow> _ambientShadow = [
+    BoxShadow(
+      color: Color(0x0F0B361D), // osOnSurface @ ~6%
+      blurRadius: 32,
+      offset: Offset(0, 12),
+    ),
+  ];
 
   @override
   void initState() {
@@ -128,15 +139,29 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.osSurface,
       appBar: AppBar(
-        title: const Text(
-          'Manage Meditations',
-          style: TextStyle(fontWeight: FontWeight.w700),
+        title: Text(
+          'Manage meditations',
+          style: GoogleFonts.plusJakartaSans(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.4,
+          ),
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        backgroundColor: AppColors.osPrimary,
+        foregroundColor: Colors.white,
         elevation: 0,
+        flexibleSpace: const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.osPrimary, AppColors.osPrimaryDim],
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -158,21 +183,28 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
         children: [
           // Search and Filter Bar
           Container(
-            color: Colors.white,
+            color: AppColors.osSurfaceContainerLowest,
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 // Search Bar
                 TextField(
+                  style: GoogleFonts.manrope(color: AppColors.osOnSurface),
                   decoration: InputDecoration(
-                    hintText: 'Search meditations...',
-                    prefixIcon: const Icon(Icons.search),
+                    hintText: 'Search meditations',
+                    hintStyle: GoogleFonts.manrope(
+                      color: AppColors.osOnSurfaceVariant,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: AppColors.osOnSurfaceVariant,
+                    ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide.none,
                     ),
                     filled: true,
-                    fillColor: Colors.grey.shade100,
+                    fillColor: AppColors.osSurfaceContainer,
                   ),
                   onChanged: (value) {
                     _searchQuery = value;
@@ -236,11 +268,17 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
           // Meditation List
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.osPrimary,
+                    ),
+                  )
                 : _filteredMeditations.isEmpty
                 ? _buildEmptyState()
                 : RefreshIndicator(
                     onRefresh: _loadMeditations,
+                    color: AppColors.osPrimary,
+                    backgroundColor: AppColors.osSurfaceContainerLowest,
                     child: ListView.builder(
                       padding: const EdgeInsets.all(16),
                       itemCount: _filteredMeditations.length,
@@ -267,38 +305,46 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
       child: FilterChip(
         label: Text(label),
         selected: isSelected,
+        showCheckmark: false,
         onSelected: (_) => onTap(),
-        backgroundColor: Colors.grey.shade100,
-        selectedColor: const Color(0xFF4CAF50).withValues(alpha: 0.2),
-        checkmarkColor: const Color(0xFF4CAF50),
-        labelStyle: TextStyle(
-          color: isSelected ? const Color(0xFF4CAF50) : Colors.black87,
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        backgroundColor: AppColors.osSurfaceContainer,
+        selectedColor: AppColors.osPrimaryContainer,
+        side: BorderSide.none,
+        labelStyle: GoogleFonts.manrope(
+          color: isSelected
+              ? AppColors.osOnPrimaryContainer
+              : AppColors.osOnSurfaceVariant,
+          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
         ),
       ),
     );
   }
 
   Widget _buildMeditationCard(Meditation meditation) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => EditMeditationPage(meditation: meditation),
-            ),
-          );
-          if (result == true) {
-            _loadMeditations();
-          }
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.osSurfaceContainerLowest,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: _ambientShadow,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => EditMeditationPage(meditation: meditation),
+              ),
+            );
+            if (result == true) {
+              _loadMeditations();
+            }
+          },
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -315,16 +361,23 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                           return Container(
                             width: 80,
                             height: 80,
-                            color: Colors.grey.shade300,
-                            child: const Icon(Icons.image_not_supported),
+                            color: AppColors.osSurfaceContainerHigh,
+                            child: const Icon(
+                              Icons.image_not_supported,
+                              color: AppColors.osOnSurfaceVariant,
+                            ),
                           );
                         },
                       )
                     : Container(
                         width: 80,
                         height: 80,
-                        color: Colors.grey.shade300,
-                        child: const Icon(Icons.spa, size: 32),
+                        color: AppColors.osSurfaceContainerHigh,
+                        child: const Icon(
+                          Icons.spa,
+                          size: 32,
+                          color: AppColors.osOnSurfaceVariant,
+                        ),
                       ),
               ),
               const SizedBox(width: 16),
@@ -336,9 +389,11 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                   children: [
                     Text(
                       meditation.title,
-                      style: const TextStyle(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                        color: AppColors.osOnSurface,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -346,9 +401,9 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                     const SizedBox(height: 4),
                     Text(
                       meditation.description,
-                      style: TextStyle(
+                      style: GoogleFonts.manrope(
                         fontSize: 13,
-                        color: Colors.grey.shade600,
+                        color: AppColors.osOnSurfaceVariant,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -387,7 +442,7 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.edit, size: 20),
-                    color: Colors.blue,
+                    color: AppColors.osPrimary,
                     onPressed: () async {
                       final result = await Navigator.push(
                         context,
@@ -403,12 +458,13 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete, size: 20),
-                    color: Colors.red,
+                    color: AppColors.osError,
                     onPressed: () => _deleteMeditation(meditation),
                   ),
                 ],
               ),
             ],
+          ),
           ),
         ),
       ),
@@ -416,43 +472,18 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
   }
 
   Widget _buildInfoChip(IconData icon, String label) {
-    // Định nghĩa màu cho icon và text (không có background)
-    Color iconColor;
-    Color textColor;
-
-    if (icon == Icons.schedule) {
-      // Duration - Blue
-      iconColor = const Color(0xFF1976D2);
-      textColor = const Color(0xFF1976D2);
-    } else if (icon == Icons.category_outlined) {
-      // Category - Purple
-      iconColor = const Color(0xFF8E24AA);
-      textColor = const Color(0xFF8E24AA);
-    } else if (icon == Icons.bar_chart) {
-      // Level - Orange
-      iconColor = const Color(0xFFF57C00);
-      textColor = const Color(0xFFF57C00);
-    } else if (icon == Icons.star) {
-      // Rating - Amber
-      iconColor = const Color(0xFFFFA000);
-      textColor = const Color(0xFFFFA000);
-    } else {
-      // Default - Grey
-      iconColor = Colors.grey.shade700;
-      textColor = Colors.grey.shade700;
-    }
-
+    // Single muted accent — one consistent metadata treatment, no rainbow.
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: iconColor),
+        Icon(icon, size: 14, color: AppColors.osOnSurfaceVariant),
         const SizedBox(width: 4),
         Text(
           label,
-          style: TextStyle(
+          style: GoogleFonts.manrope(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: textColor,
+            color: AppColors.osOnSurfaceVariant,
           ),
         ),
       ],
@@ -464,7 +495,11 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.spa_outlined, size: 64, color: Colors.grey.shade400),
+          const Icon(
+            Icons.spa_outlined,
+            size: 64,
+            color: AppColors.osOutlineVariant,
+          ),
           const SizedBox(height: 16),
           Text(
             _searchQuery.isEmpty &&
@@ -472,10 +507,10 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                     _selectedLevel == null
                 ? 'No meditations yet'
                 : 'No meditations found',
-            style: TextStyle(
+            style: GoogleFonts.plusJakartaSans(
               fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w700,
+              color: AppColors.osOnSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -485,7 +520,10 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
                     _selectedLevel == null
                 ? 'Tap the + button to add your first meditation'
                 : 'Try adjusting your filters',
-            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+            style: GoogleFonts.manrope(
+              fontSize: 14,
+              color: AppColors.osOnSurfaceVariant,
+            ),
           ),
         ],
       ),
