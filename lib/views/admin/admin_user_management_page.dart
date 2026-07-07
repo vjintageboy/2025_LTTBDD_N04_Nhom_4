@@ -15,14 +15,12 @@ class AdminUserManagementPage extends StatefulWidget {
 class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
   final _supabase = Supabase.instance.client;
   String _searchQuery = '';
-  String _filterRole = 'all'; // all, user, admin
   List<Map<String, dynamic>>? _allUsers;
   bool _isLoading = true;
 
-  // Ambient tinted shadow — mimics natural light instead of a grey smudge.
   static const List<BoxShadow> _ambientShadow = [
     BoxShadow(
-      color: Color(0x0F0B361D), // osOnSurface @ ~6%
+      color: Color(0x0F0B361D),
       blurRadius: 32,
       offset: Offset(0, 12),
     ),
@@ -52,20 +50,18 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
 
   List<Map<String, dynamic>> _computeFilteredUsers() {
     final all = _allUsers ?? const <Map<String, dynamic>>[];
+    if (_searchQuery.isEmpty) return all;
     return all.where((data) {
       final user = AppUser.fromMap(data);
-      if (_filterRole != 'all' && user.role.name != _filterRole) return false;
-      if (_searchQuery.isNotEmpty) {
-        return user.displayName.toLowerCase().contains(_searchQuery) ||
-            user.email.toLowerCase().contains(_searchQuery);
-      }
-      return true;
+      return user.displayName.toLowerCase().contains(_searchQuery) ||
+          user.email.toLowerCase().contains(_searchQuery);
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    final filteredUsers = _isLoading ? <Map<String, dynamic>>[] : _computeFilteredUsers();
+    final filteredUsers =
+        _isLoading ? <Map<String, dynamic>>[] : _computeFilteredUsers();
     return Scaffold(
       backgroundColor: AppColors.osSurface,
       appBar: AppBar(
@@ -81,7 +77,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
           ),
         ),
         title: Text(
-          'User management',
+          'Quản lý người dùng',
           style: GoogleFonts.plusJakartaSans(
             color: Colors.white,
             fontSize: 20,
@@ -100,48 +96,33 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
       ),
       body: Column(
         children: [
-          // Search and Filter
+          // Search bar only (no filter)
           Container(
             color: AppColors.osSurfaceContainerLowest,
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                TextField(
-                  style: GoogleFonts.manrope(color: AppColors.osOnSurface),
-                  decoration: InputDecoration(
-                    hintText: 'Search users',
-                    hintStyle: GoogleFonts.manrope(
-                      color: AppColors.osOnSurfaceVariant,
-                    ),
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: AppColors.osOnSurfaceVariant,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: AppColors.osSurfaceContainer,
-                  ),
-                  onChanged: (value) {
-                    setState(() => _searchQuery = value.toLowerCase());
-                  },
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: TextField(
+              style: GoogleFonts.manrope(color: AppColors.osOnSurface),
+              decoration: InputDecoration(
+                hintText: 'Tìm kiếm người dùng...',
+                hintStyle: GoogleFonts.manrope(
+                  color: AppColors.osOnSurfaceVariant,
                 ),
-                const SizedBox(height: 12),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildFilterChip('All', 'all'),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('Users', 'user'),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('Admins', 'admin'),
-                    ],
-                  ),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: AppColors.osOnSurfaceVariant,
                 ),
-              ],
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: AppColors.osSurfaceContainer,
+              ),
+              onChanged: (value) {
+                setState(() => _searchQuery = value.toLowerCase());
+              },
             ),
           ),
 
@@ -173,10 +154,11 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                                       ),
                                       const SizedBox(height: 16),
                                       Text(
-                                        'No users found',
+                                        'Không tìm thấy người dùng',
                                         style: GoogleFonts.manrope(
                                           fontSize: 16,
-                                          color: AppColors.osOnSurfaceVariant,
+                                          color:
+                                              AppColors.osOnSurfaceVariant,
                                         ),
                                       ),
                                     ],
@@ -191,35 +173,16 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                             itemBuilder: (context, index) {
                               final data = filteredUsers[index];
                               final user = AppUser.fromMap(data);
-                              final isBanned = data['is_banned'] as bool? ?? false;
-                              final banReason = data['ban_reason'] as String?;
+                              final isBanned =
+                                  data['is_banned'] as bool? ?? false;
+                              final banReason =
+                                  data['ban_reason'] as String?;
                               return _buildUserCard(user, isBanned, banReason);
                             },
                           ),
                   ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String label, String value) {
-    final isSelected = _filterRole == value;
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      showCheckmark: false,
-      onSelected: (selected) {
-        setState(() => _filterRole = value);
-      },
-      backgroundColor: AppColors.osSurfaceContainer,
-      selectedColor: AppColors.osPrimaryContainer,
-      side: BorderSide.none,
-      labelStyle: GoogleFonts.manrope(
-        color: isSelected
-            ? AppColors.osOnPrimaryContainer
-            : AppColors.osOnSurfaceVariant,
-        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
       ),
     );
   }
@@ -263,6 +226,8 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                         letterSpacing: -0.2,
                         color: AppColors.osOnSurface,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -271,16 +236,18 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                         fontSize: 13,
                         color: AppColors.osOnSurfaceVariant,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               _buildRoleBadge(user.role),
             ],
           ),
           const SizedBox(height: 16),
 
-          // Show ban reason if user is banned
           if (isBanned && banReason != null && banReason.isNotEmpty) ...[
             Container(
               padding: const EdgeInsets.all(12),
@@ -303,7 +270,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Ban Reason:',
+                          'Lý do khóa:',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -331,7 +298,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Joined ${user.createdAt != null ? _formatDate(user.createdAt!) : 'N/A'}',
+                'Tham gia ${user.createdAt != null ? _formatDate(user.createdAt!) : 'N/A'}',
                 style: GoogleFonts.manrope(
                   fontSize: 12,
                   color: AppColors.osOnSurfaceVariant,
@@ -350,7 +317,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        'BANNED',
+                        'BỊ KHÓA',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
@@ -358,43 +325,59 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                         ),
                       ),
                     ),
-                  const SizedBox(width: 8),
-                  PopupMenuButton<String>(
-                    onSelected: (value) => _handleAction(value, user),
-                    itemBuilder: (context) => [
-                      if (!isBanned)
-                        const PopupMenuItem(
-                          value: 'ban',
-                          child: Row(
-                            children: [
-                              Icon(Icons.block, color: Colors.red),
-                              SizedBox(width: 8),
-                              Text('Ban User'),
-                            ],
+                  const SizedBox(width: 4),
+                  SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: PopupMenuButton<String>(
+                      onSelected: (value) => _handleAction(value, user),
+                      itemBuilder: (context) => [
+                        if (!isBanned)
+                          const PopupMenuItem(
+                            value: 'ban',
+                            child: Row(
+                              children: [
+                                Icon(Icons.block, color: Colors.red),
+                                SizedBox(width: 8),
+                                Text('Khóa người dùng'),
+                              ],
+                            ),
+                          )
+                        else
+                          const PopupMenuItem(
+                            value: 'unban',
+                            child: Row(
+                              children: [
+                                Icon(Icons.check_circle, color: Colors.green),
+                                SizedBox(width: 8),
+                                Text('Mở khóa'),
+                              ],
+                            ),
                           ),
-                        )
-                      else
                         const PopupMenuItem(
-                          value: 'unban',
+                          value: 'delete',
                           child: Row(
                             children: [
-                              Icon(Icons.check_circle, color: Colors.green),
+                              Icon(Icons.delete, color: Colors.red),
                               SizedBox(width: 8),
-                              Text('Unban User'),
+                              Text('Xóa người dùng'),
                             ],
                           ),
                         ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Delete User'),
-                          ],
+                      ],
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.osSurfaceContainer,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.more_vert,
+                          size: 20,
+                          color: AppColors.osOnSurfaceVariant,
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
@@ -416,11 +399,12 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
     final String label = isAdmin ? 'ADMIN' : 'USER';
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(8),
       ),
+      alignment: Alignment.center,
       child: Text(
         label,
         style: GoogleFonts.manrope(
@@ -478,13 +462,13 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
       await _loadUsers();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User banned successfully')),
+          const SnackBar(content: Text('Đã khóa người dùng')),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('Lỗi: $e')),
         );
       }
     }
@@ -500,13 +484,13 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
       await _loadUsers();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User unbanned successfully')),
+          const SnackBar(content: Text('Đã mở khóa người dùng')),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('Lỗi: $e')),
         );
       }
     }
@@ -522,13 +506,13 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
       await _loadUsers();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User deleted successfully')),
+          const SnackBar(content: Text('Đã xóa người dùng')),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('Lỗi: $e')),
         );
       }
     }
@@ -539,20 +523,20 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
     return showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Ban User'),
+        title: const Text('Khóa người dùng'),
         content: TextField(
-          decoration: const InputDecoration(hintText: 'Reason for ban...'),
+          decoration: const InputDecoration(hintText: 'Lý do khóa...'),
           onChanged: (value) => reason = value,
           maxLines: 3,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Hủy'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, reason),
-            child: const Text('Ban'),
+            child: const Text('Khóa'),
           ),
         ],
       ),
@@ -563,17 +547,17 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete User'),
-        content: Text('Are you sure you want to delete ${user.displayName}?'),
+        title: const Text('Xóa người dùng'),
+        content: Text('Bạn có chắc muốn xóa ${user.displayName}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Hủy'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: const Text('Xóa'),
           ),
         ],
       ),
