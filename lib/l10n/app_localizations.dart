@@ -224,12 +224,6 @@ abstract class AppLocalizations {
   /// **'Be the first to share!'**
   String get beFirstToShare;
 
-  /// No description provided for @expert.
-  ///
-  /// In en, this message translates to:
-  /// **'Expert'**
-  String get expert;
-
   /// No description provided for @edit.
   ///
   /// In en, this message translates to:
@@ -536,12 +530,6 @@ abstract class AppLocalizations {
   /// **'Error creating post'**
   String get errorCreatingPost;
 
-  /// No description provided for @experts.
-  ///
-  /// In en, this message translates to:
-  /// **'Experts'**
-  String get experts;
-
   /// No description provided for @profile.
   ///
   /// In en, this message translates to:
@@ -757,18 +745,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View your mood analytics'**
   String get statisticsSubtitle;
-
-  /// No description provided for @myAppointments.
-  ///
-  /// In en, this message translates to:
-  /// **'My Appointments'**
-  String get myAppointments;
-
-  /// No description provided for @myAppointmentsSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'View and manage your bookings'**
-  String get myAppointmentsSubtitle;
 
   /// No description provided for @privacySecurity.
   ///
@@ -1010,29 +986,11 @@ abstract class AppLocalizations {
   /// **'Stop'**
   String get stop;
 
-  /// No description provided for @findExpert.
-  ///
-  /// In en, this message translates to:
-  /// **'Find Expert'**
-  String get findExpert;
-
-  /// No description provided for @searchExperts.
-  ///
-  /// In en, this message translates to:
-  /// **'Search experts by name or specialization...'**
-  String get searchExperts;
-
   /// No description provided for @yearsExperience.
   ///
   /// In en, this message translates to:
   /// **'yrs exp'**
   String get yearsExperience;
-
-  /// No description provided for @bookAppointment.
-  ///
-  /// In en, this message translates to:
-  /// **'Book Appointment'**
-  String get bookAppointment;
 
   /// No description provided for @about.
   ///
@@ -1045,12 +1003,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Specializations'**
   String get specializations;
-
-  /// No description provided for @availability.
-  ///
-  /// In en, this message translates to:
-  /// **'Availability'**
-  String get availability;
 
   /// No description provided for @selectDateTime.
   ///
@@ -1244,12 +1196,6 @@ abstract class AppLocalizations {
   /// **'{count} days'**
   String daysStreak(int count);
 
-  /// Error message when loading experts fails
-  ///
-  /// In en, this message translates to:
-  /// **'Error loading experts'**
-  String errorLoadingExperts(String error);
-
   /// Error message when logout fails
   ///
   /// In en, this message translates to:
@@ -1273,12 +1219,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send'**
   String get sendMessage;
-
-  /// No description provided for @appointmentBooked.
-  ///
-  /// In en, this message translates to:
-  /// **'Appointment booked successfully'**
-  String get appointmentBooked;
 
   /// No description provided for @date.
   ///
@@ -1658,23 +1598,11 @@ abstract class AppLocalizations {
   /// **'Error updating mood'**
   String get errorUpdatingMood;
 
-  /// No description provided for @findAnExpert.
-  ///
-  /// In en, this message translates to:
-  /// **'Find an Expert'**
-  String get findAnExpert;
-
   /// No description provided for @available.
   ///
   /// In en, this message translates to:
   /// **'available'**
   String get available;
-
-  /// No description provided for @noExpertsFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No experts found'**
-  String get noExpertsFound;
 
   /// No description provided for @tryAnotherFilter.
   ///
@@ -1718,36 +1646,6 @@ abstract class AppLocalizations {
   /// **'Reviews'**
   String get reviews;
 
-  /// No description provided for @availableDays.
-  ///
-  /// In en, this message translates to:
-  /// **'Available Days'**
-  String get availableDays;
-
-  /// No description provided for @availableTimeSlots.
-  ///
-  /// In en, this message translates to:
-  /// **'Available Time Slots'**
-  String get availableTimeSlots;
-
-  /// No description provided for @selectDate.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Date'**
-  String get selectDate;
-
-  /// No description provided for @selectDateToView.
-  ///
-  /// In en, this message translates to:
-  /// **'Select a date to view available time slots'**
-  String get selectDateToView;
-
-  /// No description provided for @chooseDateFromCalendar.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a date from the calendar above'**
-  String get chooseDateFromCalendar;
-
   /// No description provided for @notesOptional.
   ///
   /// In en, this message translates to:
@@ -1790,36 +1688,6 @@ abstract class AppLocalizations {
   /// **'History'**
   String get history;
 
-  /// No description provided for @noUpcomingAppointments.
-  ///
-  /// In en, this message translates to:
-  /// **'No Upcoming Appointments'**
-  String get noUpcomingAppointments;
-
-  /// No description provided for @bookAppointmentToGetStarted.
-  ///
-  /// In en, this message translates to:
-  /// **'Book an appointment with an expert to get started'**
-  String get bookAppointmentToGetStarted;
-
-  /// No description provided for @noAppointmentHistory.
-  ///
-  /// In en, this message translates to:
-  /// **'No Appointment History'**
-  String get noAppointmentHistory;
-
-  /// No description provided for @pastAppointmentsWillAppear.
-  ///
-  /// In en, this message translates to:
-  /// **'Your past appointments will appear here'**
-  String get pastAppointmentsWillAppear;
-
-  /// No description provided for @cancelAppointment.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel Appointment'**
-  String get cancelAppointment;
-
   /// No description provided for @confirmed.
   ///
   /// In en, this message translates to:
@@ -1837,30 +1705,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Completed'**
   String get completed;
-
-  /// No description provided for @cancelAppointmentQuestion.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel Appointment?'**
-  String get cancelAppointmentQuestion;
-
-  /// No description provided for @selectPaymentMethod.
-  ///
-  /// In en, this message translates to:
-  /// **'Select Payment Method'**
-  String get selectPaymentMethod;
-
-  /// No description provided for @confirmPayment.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Payment'**
-  String get confirmPayment;
-
-  /// No description provided for @paymentSuccessful.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment Successful!'**
-  String get paymentSuccessful;
 
   /// No description provided for @ratingSort.
   ///
@@ -2029,12 +1873,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Quick Actions'**
   String get quickActions;
-
-  /// No description provided for @expertConsultation.
-  ///
-  /// In en, this message translates to:
-  /// **'Expert Consultation'**
-  String get expertConsultation;
 
   /// No description provided for @allMeditations.
   ///
@@ -2414,30 +2252,6 @@ abstract class AppLocalizations {
   /// **'Monthly Highlights'**
   String get monthlyHighlights;
 
-  /// Button text for mental health experts to sign up
-  ///
-  /// In en, this message translates to:
-  /// **'Join as Mental Health Expert'**
-  String get joinAsExpert;
-
-  /// No description provided for @couldNotLoadExpertInfo.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not load expert info: {error}'**
-  String couldNotLoadExpertInfo(String error);
-
-  /// No description provided for @errorLoadingSlots.
-  ///
-  /// In en, this message translates to:
-  /// **'Error loading slots: {error}'**
-  String errorLoadingSlots(String error);
-
-  /// No description provided for @expertNotAvailableOnDay.
-  ///
-  /// In en, this message translates to:
-  /// **'{expertName} is not available on {day}'**
-  String expertNotAvailableOnDay(String expertName, String day);
-
   /// No description provided for @pleaseSelectDateAndTime.
   ///
   /// In en, this message translates to:
@@ -2450,185 +2264,11 @@ abstract class AppLocalizations {
   /// **'Please login first'**
   String get pleaseLoginFirst;
 
-  /// No description provided for @bookingConflictAlreadyHaveAppointment.
-  ///
-  /// In en, this message translates to:
-  /// **'You already have an appointment at this time. Please choose another time slot.'**
-  String get bookingConflictAlreadyHaveAppointment;
-
-  /// No description provided for @bookingConflictExpertNotAvailable.
-  ///
-  /// In en, this message translates to:
-  /// **'This expert is not available at the selected time. Please choose another time slot.'**
-  String get bookingConflictExpertNotAvailable;
-
-  /// No description provided for @bookingInvalidCallTypeConfig.
-  ///
-  /// In en, this message translates to:
-  /// **'Call type configuration is invalid in database. Please contact admin.'**
-  String get bookingInvalidCallTypeConfig;
-
-  /// No description provided for @bookingInvalidData.
-  ///
-  /// In en, this message translates to:
-  /// **'Booking data is invalid (expert/user not found). Please reopen this page and try again.'**
-  String get bookingInvalidData;
-
-  /// No description provided for @bookingNoPermission.
-  ///
-  /// In en, this message translates to:
-  /// **'You do not have permission to create this appointment. Please sign in again.'**
-  String get bookingNoPermission;
-
-  /// No description provided for @bookingFailedWithReason.
-  ///
-  /// In en, this message translates to:
-  /// **'Booking failed: {reason}'**
-  String bookingFailedWithReason(String reason);
-
-  /// No description provided for @bookingFailedGeneric.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to book appointment. Please try again.'**
-  String get bookingFailedGeneric;
-
-  /// No description provided for @expertNotFound.
-  ///
-  /// In en, this message translates to:
-  /// **'Expert not found'**
-  String get expertNotFound;
-
-  /// No description provided for @availableTimeSlotsOnDate.
-  ///
-  /// In en, this message translates to:
-  /// **'Available Time Slots - {date}'**
-  String availableTimeSlotsOnDate(String date);
-
-  /// No description provided for @noAvailableSlotsForThisDay.
-  ///
-  /// In en, this message translates to:
-  /// **'No available slots for this day'**
-  String get noAvailableSlotsForThisDay;
-
-  /// No description provided for @allSlotsAreFullyBooked.
-  ///
-  /// In en, this message translates to:
-  /// **'All slots are fully booked'**
-  String get allSlotsAreFullyBooked;
-
-  /// No description provided for @expertIsNotAvailableOnSelectedDay.
-  ///
-  /// In en, this message translates to:
-  /// **'Expert is not available on {day}'**
-  String expertIsNotAvailableOnSelectedDay(String day);
-
-  /// No description provided for @anyNotesForExpert.
-  ///
-  /// In en, this message translates to:
-  /// **'Any notes for the expert?'**
-  String get anyNotesForExpert;
-
-  /// No description provided for @cancelUpTo4HoursBeforeAppointment.
-  ///
-  /// In en, this message translates to:
-  /// **'You can cancel up to 4 hours before your appointment'**
-  String get cancelUpTo4HoursBeforeAppointment;
-
-  /// No description provided for @appointmentSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'Appointment Summary'**
-  String get appointmentSummary;
-
-  /// No description provided for @sessionFee.
-  ///
-  /// In en, this message translates to:
-  /// **'Session Fee'**
-  String get sessionFee;
-
-  /// No description provided for @serviceFee.
-  ///
-  /// In en, this message translates to:
-  /// **'Service Fee'**
-  String get serviceFee;
-
-  /// No description provided for @mockCreditCard.
-  ///
-  /// In en, this message translates to:
-  /// **'Mock Credit Card'**
-  String get mockCreditCard;
-
-  /// No description provided for @simulateCardPayment.
-  ///
-  /// In en, this message translates to:
-  /// **'Simulate card payment'**
-  String get simulateCardPayment;
-
-  /// No description provided for @mockMomo.
-  ///
-  /// In en, this message translates to:
-  /// **'Mock MoMo'**
-  String get mockMomo;
-
-  /// No description provided for @simulateMomoEwallet.
-  ///
-  /// In en, this message translates to:
-  /// **'Simulate MoMo e-wallet'**
-  String get simulateMomoEwallet;
-
-  /// No description provided for @mockBanking.
-  ///
-  /// In en, this message translates to:
-  /// **'Mock Banking'**
-  String get mockBanking;
-
-  /// No description provided for @simulateBankTransfer.
-  ///
-  /// In en, this message translates to:
-  /// **'Simulate bank transfer'**
-  String get simulateBankTransfer;
-
-  /// No description provided for @viewMyAppointments.
-  ///
-  /// In en, this message translates to:
-  /// **'View My Appointments'**
-  String get viewMyAppointments;
-
-  /// No description provided for @yourAppointmentHasBeenConfirmed.
-  ///
-  /// In en, this message translates to:
-  /// **'Your appointment has been confirmed'**
-  String get yourAppointmentHasBeenConfirmed;
-
   /// No description provided for @at.
   ///
   /// In en, this message translates to:
   /// **'at'**
   String get at;
-
-  /// No description provided for @momoOpenFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Cannot open MoMo'**
-  String get momoOpenFailed;
-
-  /// No description provided for @momoCreateFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to create MoMo transaction'**
-  String get momoCreateFailed;
-
-  /// No description provided for @paymentInfoSaveError.
-  ///
-  /// In en, this message translates to:
-  /// **'Error saving payment information: {error}'**
-  String paymentInfoSaveError(String error);
-
-  /// No description provided for @paymentConfirmTimeout.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment confirmation timed out. Please check transaction status again.'**
-  String get paymentConfirmTimeout;
 }
 
 class _AppLocalizationsDelegate

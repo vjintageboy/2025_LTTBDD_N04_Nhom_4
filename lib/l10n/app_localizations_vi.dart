@@ -73,9 +73,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get beFirstToShare => 'Hãy là người đầu tiên chia sẻ!';
 
   @override
-  String get expert => 'Chuyên gia';
-
-  @override
   String get edit => 'Chỉnh sửa';
 
   @override
@@ -238,9 +235,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get errorCreatingPost => 'Lỗi khi tạo bài viết';
 
   @override
-  String get experts => 'Chuyên gia';
-
-  @override
   String get profile => 'Hồ sơ';
 
   @override
@@ -351,12 +345,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get statisticsSubtitle => 'Xem phân tích tâm trạng của bạn';
-
-  @override
-  String get myAppointments => 'Lịch hẹn của tôi';
-
-  @override
-  String get myAppointmentsSubtitle => 'Xem và quản lý các đặt chỗ của bạn';
 
   @override
   String get privacySecurity => 'Quyền riêng tư & Bảo mật';
@@ -482,25 +470,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get stop => 'Dừng';
 
   @override
-  String get findExpert => 'Tìm chuyên gia';
-
-  @override
-  String get searchExperts => 'Tìm kiếm chuyên gia theo tên hoặc chuyên môn...';
-
-  @override
   String get yearsExperience => 'năm kinh nghiệm';
-
-  @override
-  String get bookAppointment => 'Đặt lịch hẹn';
 
   @override
   String get about => 'Giới thiệu';
 
   @override
   String get specializations => 'Chuyên môn';
-
-  @override
-  String get availability => 'Lịch trống';
 
   @override
   String get selectDateTime => 'Chọn ngày & giờ';
@@ -601,11 +577,6 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String errorLoadingExperts(String error) {
-    return 'Lỗi khi tải chuyên gia';
-  }
-
-  @override
   String errorLogout(String error) {
     return 'Lỗi đăng xuất: $error';
   }
@@ -618,9 +589,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get sendMessage => 'Gửi';
-
-  @override
-  String get appointmentBooked => 'Đã đặt lịch hẹn thành công';
 
   @override
   String get date => 'Ngày';
@@ -816,13 +784,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get errorUpdatingMood => 'Lỗi khi cập nhật';
 
   @override
-  String get findAnExpert => 'Tìm chuyên gia';
-
-  @override
   String get available => 'có sẵn';
-
-  @override
-  String get noExpertsFound => 'Không tìm thấy chuyên gia';
 
   @override
   String get tryAnotherFilter => 'Thử chọn chuyên môn khác';
@@ -846,21 +808,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get reviews => 'Lượt đánh giá';
 
   @override
-  String get availableDays => 'Ngày có lịch';
-
-  @override
-  String get availableTimeSlots => 'Khung giờ có lịch';
-
-  @override
-  String get selectDate => 'Chọn ngày';
-
-  @override
-  String get selectDateToView => 'Chọn một ngày để xem khung giờ có sẵn';
-
-  @override
-  String get chooseDateFromCalendar => 'Chọn một ngày từ lịch bên trên';
-
-  @override
   String get notesOptional => 'Ghi chú (Tùy chọn)';
 
   @override
@@ -882,23 +829,6 @@ class AppLocalizationsVi extends AppLocalizations {
   String get history => 'Lịch sử';
 
   @override
-  String get noUpcomingAppointments => 'Không có lịch hẹn sắp tới';
-
-  @override
-  String get bookAppointmentToGetStarted =>
-      'Đặt lịch hẹn với chuyên gia để bắt đầu';
-
-  @override
-  String get noAppointmentHistory => 'Chưa có lịch sử';
-
-  @override
-  String get pastAppointmentsWillAppear =>
-      'Các lịch hẹn đã qua sẽ xuất hiện ở đây';
-
-  @override
-  String get cancelAppointment => 'Hủy lịch hẹn';
-
-  @override
   String get confirmed => 'Đã xác nhận';
 
   @override
@@ -906,18 +836,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get completed => 'Hoàn thành';
-
-  @override
-  String get cancelAppointmentQuestion => 'Hủy lịch hẹn?';
-
-  @override
-  String get selectPaymentMethod => 'Chọn phương thức thanh toán';
-
-  @override
-  String get confirmPayment => 'Xác nhận thanh toán';
-
-  @override
-  String get paymentSuccessful => 'Thanh toán thành công!';
 
   @override
   String get ratingSort => '⭐ Đánh giá';
@@ -1005,9 +923,6 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get quickActions => 'Thao tác nhanh';
-
-  @override
-  String get expertConsultation => 'Tư vấn chuyên gia';
 
   @override
   String get allMeditations => 'Tất cả bài thiền';
@@ -1209,133 +1124,11 @@ class AppLocalizationsVi extends AppLocalizations {
   String get monthlyHighlights => 'Nổi bật tháng này';
 
   @override
-  String get joinAsExpert => 'Tham gia với vai trò Chuyên gia Tâm lý';
-
-  @override
-  String couldNotLoadExpertInfo(String error) {
-    return 'Không thể tải thông tin chuyên gia: $error';
-  }
-
-  @override
-  String errorLoadingSlots(String error) {
-    return 'Lỗi tải khung giờ: $error';
-  }
-
-  @override
-  String expertNotAvailableOnDay(String expertName, String day) {
-    return '$expertName không có lịch vào $day';
-  }
-
-  @override
   String get pleaseSelectDateAndTime => 'Vui lòng chọn ngày và giờ';
 
   @override
   String get pleaseLoginFirst => 'Vui lòng đăng nhập trước';
 
   @override
-  String get bookingConflictAlreadyHaveAppointment =>
-      'Bạn đã có lịch hẹn vào thời điểm này. Vui lòng chọn khung giờ khác.';
-
-  @override
-  String get bookingConflictExpertNotAvailable =>
-      'Chuyên gia không rảnh vào thời điểm đã chọn. Vui lòng chọn khung giờ khác.';
-
-  @override
-  String get bookingInvalidCallTypeConfig =>
-      'Cấu hình loại cuộc gọi trong cơ sở dữ liệu không hợp lệ. Vui lòng liên hệ quản trị viên.';
-
-  @override
-  String get bookingInvalidData =>
-      'Dữ liệu đặt lịch không hợp lệ (không tìm thấy chuyên gia/người dùng). Vui lòng mở lại trang và thử lại.';
-
-  @override
-  String get bookingNoPermission =>
-      'Bạn không có quyền tạo lịch hẹn này. Vui lòng đăng nhập lại.';
-
-  @override
-  String bookingFailedWithReason(String reason) {
-    return 'Đặt lịch thất bại: $reason';
-  }
-
-  @override
-  String get bookingFailedGeneric => 'Đặt lịch thất bại. Vui lòng thử lại.';
-
-  @override
-  String get expertNotFound => 'Không tìm thấy chuyên gia';
-
-  @override
-  String availableTimeSlotsOnDate(String date) {
-    return 'Khung giờ trống - $date';
-  }
-
-  @override
-  String get noAvailableSlotsForThisDay =>
-      'Không có khung giờ trống trong ngày này';
-
-  @override
-  String get allSlotsAreFullyBooked => 'Tất cả khung giờ đã được đặt';
-
-  @override
-  String expertIsNotAvailableOnSelectedDay(String day) {
-    return 'Chuyên gia không có lịch vào $day';
-  }
-
-  @override
-  String get anyNotesForExpert => 'Bạn có ghi chú gì cho chuyên gia không?';
-
-  @override
-  String get cancelUpTo4HoursBeforeAppointment =>
-      'Bạn có thể hủy tối đa 4 giờ trước lịch hẹn';
-
-  @override
-  String get appointmentSummary => 'Tóm tắt lịch hẹn';
-
-  @override
-  String get sessionFee => 'Phí buổi tư vấn';
-
-  @override
-  String get serviceFee => 'Phí dịch vụ';
-
-  @override
-  String get mockCreditCard => 'Thẻ tín dụng mô phỏng';
-
-  @override
-  String get simulateCardPayment => 'Mô phỏng thanh toán thẻ';
-
-  @override
-  String get mockMomo => 'MoMo mô phỏng';
-
-  @override
-  String get simulateMomoEwallet => 'Mô phỏng ví điện tử MoMo';
-
-  @override
-  String get mockBanking => 'Chuyển khoản mô phỏng';
-
-  @override
-  String get simulateBankTransfer => 'Mô phỏng chuyển khoản ngân hàng';
-
-  @override
-  String get viewMyAppointments => 'Xem lịch hẹn của tôi';
-
-  @override
-  String get yourAppointmentHasBeenConfirmed =>
-      'Lịch hẹn của bạn đã được xác nhận';
-
-  @override
   String get at => 'lúc';
-
-  @override
-  String get momoOpenFailed => 'Không thể mở MoMo';
-
-  @override
-  String get momoCreateFailed => 'Tạo giao dịch MoMo thất bại';
-
-  @override
-  String paymentInfoSaveError(String error) {
-    return 'Lỗi lưu thông tin thanh toán: $error';
-  }
-
-  @override
-  String get paymentConfirmTimeout =>
-      'Đã quá thời gian chờ xác nhận thanh toán. Vui lòng kiểm tra lại trạng thái giao dịch.';
 }
