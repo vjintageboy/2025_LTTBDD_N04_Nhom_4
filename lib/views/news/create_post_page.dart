@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/news_post.dart';
 import '../../services/news_service.dart';
@@ -249,7 +251,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       height: 40,
                       alignment: Alignment.center,
                       child: const Icon(
-                        Icons.arrow_back_rounded,
+                        IconsaxPlusLinear.arrow_left_2,
                         color: _kPrimary,
                         size: 24,
                       ),
@@ -408,7 +410,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              _postAnonymously ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+              _postAnonymously ? IconsaxPlusLinear.eye_slash : IconsaxPlusLinear.eye,
               color: _kPrimary,
               size: 24,
             ),
@@ -560,14 +562,14 @@ class _CreatePostPageState extends State<CreatePostPage> {
       children: [
         Expanded(
           child: _MediaButton(
-            icon: Icons.image_rounded,
+            icon: IconsaxPlusLinear.gallery,
             label: l10n.addPhoto,
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: _MediaButton(
-            icon: Icons.link_rounded,
+            icon: IconsaxPlusLinear.link,
             label: l10n.attachLink,
           ),
         ),
@@ -644,7 +646,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     border: Border.all(color: _kSurfaceContainerLow, width: 3),
                   ),
                   child: const Icon(
-                    Icons.eco_rounded,
+                    PhosphorIconsRegular.leaf,
                     color: _kPrimary,
                     size: 28,
                   ),

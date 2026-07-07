@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../models/news_post.dart';
 import '../../services/news_service.dart';
 import '../../services/supabase_service.dart';
@@ -105,7 +107,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                             ? NetworkImage(user!.userMetadata!['avatar_url'] as String)
                             : null,
                         child: (user?.userMetadata?['avatar_url'] as String?)?.isNotEmpty != true
-                            ? Icon(Icons.person, size: 20, color: _kPrimary)
+                            ? Icon(IconsaxPlusBold.user, size: 20, color: _kPrimary)
                             : null,
                       ),
                       const SizedBox(width: 12),
@@ -120,17 +122,17 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                       ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.search, color: _kOnSurface),
+                        icon: const Icon(IconsaxPlusLinear.search_normal_1, color: _kOnSurface),
                         onPressed: () {},
                         splashRadius: 22,
                       ),
                       IconButton(
-                        icon: const Icon(Icons.notifications_outlined, color: _kOnSurface),
+                        icon: const Icon(IconsaxPlusLinear.notification, color: _kOnSurface),
                         onPressed: () {},
                         splashRadius: 22,
                       ),
                       IconButton(
-                        icon: const Icon(Icons.add, color: _kOnSurface),
+                        icon: const Icon(IconsaxPlusLinear.add, color: _kOnSurface),
                         onPressed: () async {
                           final changed = await Navigator.push<bool>(
                             context,
@@ -177,7 +179,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
           ),
           IconButton(
             key: _sortButtonKey,
-            icon: const Icon(Icons.tune, color: _kOnSurfaceVariant),
+            icon: const Icon(IconsaxPlusLinear.setting_4, color: _kOnSurfaceVariant),
             onPressed: _showSortMenu,
             splashRadius: 22,
             tooltip: l10n.sortBy,
@@ -249,7 +251,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
       child: Row(
         children: [
           if (_sortBy == value)
-            const Icon(Icons.check, size: 18, color: _kPrimary)
+            const Icon(PhosphorIconsRegular.check, size: 18, color: _kPrimary)
           else
             const SizedBox(width: 18),
           const SizedBox(width: 8),
@@ -277,7 +279,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
+                  Icon(IconsaxPlusLinear.danger, size: 64, color: Colors.red.shade300),
                   const SizedBox(height: 16),
                   Text(
                     l10n.cannotLoadPosts,
@@ -296,7 +298,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: () => setState(() => _selectedCategory = null),
-                    icon: const Icon(Icons.refresh),
+                    icon: const Icon(IconsaxPlusLinear.refresh),
                     label: Text(l10n.tryAgain),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _kPrimary,
@@ -325,7 +327,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.article_outlined, size: 80, color: _kSurfaceContainerHighest),
+                Icon(IconsaxPlusLinear.document_text, size: 80, color: _kSurfaceContainerHighest),
                 const SizedBox(height: 16),
                 Text(
                   l10n.noPostsYet,
@@ -472,7 +474,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                       if (widget.moderateAll || post.authorId == currentUserId)
                         PopupMenuButton<String>(
                           icon: Icon(
-                            Icons.more_vert,
+                            IconsaxPlusLinear.more_2,
                             color: _kOnSurfaceVariant,
                             size: 20,
                           ),
@@ -482,7 +484,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                               value: 'edit',
                               child: Row(
                                 children: [
-                                  const Icon(Icons.edit_outlined, size: 18),
+                                  const Icon(IconsaxPlusLinear.edit_2, size: 18),
                                   const SizedBox(width: 8),
                                   Text(context.l10n.edit),
                                 ],
@@ -492,7 +494,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                               value: 'delete',
                               child: Row(
                                 children: [
-                                  const Icon(Icons.delete_outline,
+                                  const Icon(IconsaxPlusLinear.trash,
                                       size: 18, color: Colors.red),
                                   const SizedBox(width: 8),
                                   Text(context.l10n.delete,
@@ -544,7 +546,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) => Container(
                             color: _kSurfaceContainerHighest,
-                            child: const Icon(Icons.broken_image,
+                            child: const Icon(PhosphorIconsRegular.imageBroken,
                                 size: 48, color: _kOnSurfaceVariant),
                           ),
                         ),
@@ -573,8 +575,8 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                               children: [
                                 Icon(
                                   isLiked
-                                      ? Icons.favorite
-                                      : Icons.favorite_border,
+                                      ? IconsaxPlusBold.heart
+                                      : IconsaxPlusLinear.heart,
                                   color: isLiked
                                       ? Colors.red
                                       : _kOnSurfaceVariant,
@@ -597,7 +599,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                         // Comment
                         Row(
                           children: [
-                            const Icon(Icons.chat_bubble_outline,
+                            const Icon(IconsaxPlusLinear.message,
                                 color: _kPrimary, size: 20),
                             const SizedBox(width: 6),
                             Text(
@@ -612,7 +614,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                         ),
                         const Spacer(),
                         // Share
-                        const Icon(Icons.share_outlined,
+                        const Icon(IconsaxPlusLinear.share,
                             color: _kOnSurfaceVariant, size: 20),
                       ],
                     ),
@@ -636,34 +638,34 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
   Color _getCategoryColor(PostCategory category) {
     switch (category) {
       case PostCategory.mentalHealth:
-        return _kOnSecondaryContainer;
+        return const Color(0xFF0077B6); // blue
       case PostCategory.meditation:
-        return const Color(0xFF7B3FC4); // purple tint
+        return const Color(0xFF6C3FBF); // purple
       case PostCategory.wellness:
-        return _kPrimary;
+        return const Color(0xFF2E7D32); // green
       case PostCategory.tips:
-        return _kOnSecondaryContainer;
+        return const Color(0xFFD97706); // amber
       case PostCategory.community:
-        return _kOnTertiaryContainer;
+        return const Color(0xFFC62828); // red
       case PostCategory.news:
-        return _kOnSurfaceVariant;
+        return const Color(0xFF00838F); // teal
     }
   }
 
   Color _getCategoryBgColor(PostCategory category) {
     switch (category) {
       case PostCategory.mentalHealth:
-        return _kSecondaryContainer;
+        return const Color(0xFFE3F2FD); // blue-50
       case PostCategory.meditation:
-        return const Color(0xFFE9D5FF); // purple-100
+        return const Color(0xFFEDE7F6); // purple-50
       case PostCategory.wellness:
-        return _kPrimaryContainer;
+        return const Color(0xFFE8F5E9); // green-50
       case PostCategory.tips:
-        return _kSecondaryContainer;
+        return const Color(0xFFFFF8E1); // amber-50
       case PostCategory.community:
-        return _kTertiaryContainer;
+        return const Color(0xFFFFEBEE); // red-50
       case PostCategory.news:
-        return _kSurfaceContainerHigh;
+        return const Color(0xFFE0F7FA); // teal-50
     }
   }
 
@@ -686,7 +688,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                 as ImageProvider
             : null,
         child: isAnon
-            ? const Icon(Icons.visibility_off, size: 18, color: _kOnSurfaceVariant)
+            ? const Icon(IconsaxPlusLinear.eye_slash, size: 18, color: _kOnSurfaceVariant)
             : (post.authorAvatarUrl == null || post.authorAvatarUrl!.isEmpty
                 ? Text(
                     post.authorName[0].toUpperCase(),

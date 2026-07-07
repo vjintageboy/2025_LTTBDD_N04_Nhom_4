@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'dart:convert';
 import '../../models/news_post.dart';
 import '../../services/news_service.dart';
@@ -52,7 +54,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                 textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(
-                    Icons.search,
+                    IconsaxPlusLinear.search_normal_1,
                     color: AppColors.osOnSurfaceVariant,
                   ),
                   hintText: 'Search title or content',
@@ -76,7 +78,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
               IconButton(
                 onPressed: () => setState(() => _searchQuery = ''),
                 icon: const Icon(
-                  Icons.close,
+                  IconsaxPlusLinear.close_circle,
                   color: AppColors.osOnSurfaceVariant,
                 ),
                 tooltip: 'Clear search',
@@ -115,7 +117,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: Colors.white),
+            icon: const Icon(IconsaxPlusLinear.add, color: Colors.white),
             onPressed: () {
               Navigator.push(
                 context,
@@ -175,7 +177,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                                             MainAxisAlignment.center,
                                         children: [
                                           Icon(
-                                            Icons.article_outlined,
+                                            IconsaxPlusLinear.document_text,
                                             size: 64,
                                             color: AppColors.osOutlineVariant,
                                           ),
@@ -238,7 +240,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(
-                                        Icons.info_outline,
+                                        IconsaxPlusLinear.info_circle,
                                         size: 64,
                                         color: AppColors.osOutlineVariant,
                                       ),
@@ -303,7 +305,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
-                                      Icons.article_outlined,
+                                      IconsaxPlusLinear.document_text,
                                       size: 64,
                                       color: AppColors.osOutlineVariant,
                                     ),
@@ -395,7 +397,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                     : null,
                 child: post.authorName == 'Anonymous'
                     ? Icon(
-                        Icons.visibility_off,
+                        IconsaxPlusLinear.eye_slash,
                         size: 20,
                         color: AppColors.osOnSurfaceVariant,
                       )
@@ -523,7 +525,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                                     height: 64,
                                     color: AppColors.osSurfaceContainer,
                                     child: Icon(
-                                      Icons.broken_image,
+                                      PhosphorIconsRegular.imageBroken,
                                       color: AppColors.osOutlineVariant,
                                     ),
                                   ),
@@ -536,7 +538,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              Icons.favorite,
+                              IconsaxPlusBold.heart,
                               size: 14,
                               color: Colors.red.shade400,
                             ),
@@ -550,7 +552,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                             ),
                             const SizedBox(width: 12),
                             Icon(
-                              Icons.chat_bubble,
+                              IconsaxPlusBold.message,
                               size: 14,
                               color: AppColors.osOnSurfaceVariant,
                             ),
@@ -601,7 +603,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                     : null,
                 child: post.authorName == 'Anonymous'
                     ? Icon(
-                        Icons.visibility_off,
+                        IconsaxPlusLinear.eye_slash,
                         size: 20,
                         color: AppColors.osOnSurfaceVariant,
                       )
@@ -665,7 +667,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
             children: [
               ElevatedButton.icon(
                 onPressed: () => _handleAction('edit', post),
-                icon: const Icon(Icons.edit, size: 18),
+                icon: const Icon(IconsaxPlusLinear.edit_2, size: 18),
                 label: const Text('Edit'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.osPrimary,
@@ -675,7 +677,7 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
               OutlinedButton.icon(
                 onPressed: () => _handleAction('delete', post),
                 icon: const Icon(
-                  Icons.delete_outline,
+                  IconsaxPlusLinear.trash,
                   size: 18,
                   color: Colors.red,
                 ),
