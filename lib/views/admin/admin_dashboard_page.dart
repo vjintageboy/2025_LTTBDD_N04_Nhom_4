@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../profile/profile_page.dart';
 import '../../core/constants/app_colors.dart';
 
 class AdminDashboardPage extends StatefulWidget {
@@ -17,9 +20,17 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
   bool _isLoading = true;
 
-  // Stats
+  // Totals
   int _totalUsers = 0;
   int _totalMeditations = 0;
+  int _totalPosts = 0;
+  int _totalMoods = 0;
+
+  // New in the last 7 days
+  int _newUsersWeek = 0;
+  int _newMeditationsWeek = 0;
+  int _newPostsWeek = 0;
+  int _newMoodsWeek = 0;
 
   String get _currentUserName =>
       _supabase.auth.currentUser?.userMetadata?['full_name'] as String? ??
@@ -37,18 +48,38 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
     try {
       final results = await Future.wait([
-        _supabase.from('users').select('role'),
-        _supabase.from('meditations').select('id'),
+        _supabase.from('users').select('role, is_banned, created_at'),
+        _supabase.from('meditations').select('created_at'),
+        _supabase.from('posts').select('created_at'),
+        _supabase.from('mood_entries').select('created_at'),
       ]);
 
       final users = results[0] as List;
       final meditations = results[1] as List;
+      final posts = results[2] as List;
+      final moods = results[3] as List;
 
-      final regularUsersCount = users.where((u) => u['role'] == 'user').length;
+      final now = DateTime.now();
+      final weekAgo = now.subtract(const Duration(days: 7));
+
+      bool isNew(dynamic row) {
+        final ts = DateTime.tryParse(row['created_at']?.toString() ?? '');
+        return ts != null && ts.isAfter(weekAgo);
+      }
+
+      // Only count regular users (exclude admins).
+      final regularUsers =
+          users.where((u) => u['role'] == 'user').toList();
 
       setState(() {
-        _totalUsers = regularUsersCount;
+        _totalUsers = regularUsers.length;
         _totalMeditations = meditations.length;
+        _totalPosts = posts.length;
+        _totalMoods = moods.length;
+        _newUsersWeek = regularUsers.where(isNew).length;
+        _newMeditationsWeek = meditations.where(isNew).length;
+        _newPostsWeek = posts.where(isNew).length;
+        _newMoodsWeek = moods.where(isNew).length;
         _isLoading = false;
       });
     } catch (e) {
@@ -95,29 +126,53 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       children: [
         const SizedBox(height: 24),
 
-        // Overview
+        // Overview — 4 headline metrics.
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _sectionTitle('Overview'),
+              _sectionTitle('Tổng quan'),
               const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
                     child: _buildStatCard(
-                      'Users',
+                      'Người dùng',
                       '$_totalUsers',
-                      Icons.people_outline,
+                      IconsaxPlusLinear.profile_2user,
+                      _newUsersWeek,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildStatCard(
-                      'Meditations',
+                      'Bài thiền',
                       '$_totalMeditations',
-                      Icons.spa_outlined,
+                      PhosphorIconsRegular.flowerLotus,
+                      _newMeditationsWeek,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      'Bài viết',
+                      '$_totalPosts',
+                      IconsaxPlusLinear.document_text,
+                      _newPostsWeek,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildStatCard(
+                      'Nhật ký cảm xúc',
+                      '$_totalMoods',
+                      IconsaxPlusLinear.emoji_happy,
+                      _newMoodsWeek,
                     ),
                   ),
                 ],
@@ -127,48 +182,56 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         ),
         const SizedBox(height: 32),
 
-        // Quick actions
+        // Analytics navigation.
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _sectionTitle('Quick actions'),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildQuickActionButton(
-                      'Manage users',
-                      Icons.people,
-                      () => widget.onNavigate?.call(1),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => widget.onNavigate?.call(4),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.osSurfaceContainerLowest,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: _ambientShadow,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.osPrimaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        IconsaxPlusLinear.chart_2,
+                        color: AppColors.osOnPrimaryContainer,
+                        size: 22,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildQuickActionButton(
-                      'Meditations',
-                      Icons.spa,
-                      () => widget.onNavigate?.call(3),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Text(
+                        'Xem phân tích chi tiết',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.osOnSurface,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    Icon(
+                      IconsaxPlusLinear.arrow_right_3,
+                      color: AppColors.osOnSurfaceVariant,
+                      size: 20,
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 12),
-              // Analytics is not built yet — shown as a muted, disabled action.
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildQuickActionButton(
-                      'Analytics',
-                      Icons.analytics_outlined,
-                      null,
-                      comingSoon: true,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
         const SizedBox(height: 28),
@@ -210,78 +273,88 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(14),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ProfilePage(),
                         ),
-                        child: const Icon(
-                          Icons.admin_panel_settings,
-                          color: Colors.white,
-                          size: 32,
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Icon(
+                            IconsaxPlusLinear.user_tick,
+                            color: Colors.white,
+                            size: 32,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Admin dashboard',
-                              style: GoogleFonts.manrope(
-                                color: AppColors.osOnPrimary,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.2,
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Bảng điều khiển',
+                                style: GoogleFonts.manrope(
+                                  color: AppColors.osOnPrimary,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.2,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _currentUserName,
-                              style: GoogleFonts.plusJakartaSans(
+                              const SizedBox(height: 4),
+                              Text(
+                                _currentUserName,
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                IconsaxPlusLinear.shield_tick,
                                 color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.4,
+                                size: 16,
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.verified_user,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'ADMIN',
-                              style: GoogleFonts.manrope(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.8,
+                              const SizedBox(width: 4),
+                              Text(
+                                'ADMIN',
+                                style: GoogleFonts.manrope(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.8,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -292,7 +365,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon) {
+  Widget _buildStatCard(
+    String label,
+    String value,
+    IconData icon,
+    int newThisWeek,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -303,13 +381,23 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.osPrimaryContainer,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: AppColors.osOnPrimaryContainer, size: 20),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.osPrimaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  color: AppColors.osOnPrimaryContainer,
+                  size: 20,
+                ),
+              ),
+              const Spacer(),
+              if (newThisWeek > 0) _buildDeltaChip(newThisWeek),
+            ],
           ),
           const SizedBox(height: 12),
           Text(
@@ -326,6 +414,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           const SizedBox(height: 4),
           Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.manrope(
               fontSize: 12,
               color: AppColors.osOnSurfaceVariant,
@@ -337,68 +427,32 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     );
   }
 
-  Widget _buildQuickActionButton(
-    String label,
-    IconData icon,
-    VoidCallback? onTap, {
-    bool comingSoon = false,
-  }) {
-    final Color tileColor = comingSoon
-        ? AppColors.osSurfaceContainer
-        : AppColors.osPrimaryContainer;
-    final Color iconColor = comingSoon
-        ? AppColors.osOnSurfaceVariant
-        : AppColors.osOnPrimaryContainer;
-
-    return Opacity(
-      opacity: comingSoon ? 0.7 : 1,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            decoration: BoxDecoration(
-              color: AppColors.osSurfaceContainerLowest,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: _ambientShadow,
-            ),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: tileColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: iconColor, size: 24),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.manrope(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.osOnSurface,
-                  ),
-                ),
-                if (comingSoon) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    'Coming soon',
-                    style: GoogleFonts.manrope(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.osOnSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ],
+  // "+N mới trong 7 ngày" pill shown on a stat card.
+  Widget _buildDeltaChip(int value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.osPrimaryContainer,
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            IconsaxPlusLinear.arrow_up_1,
+            size: 12,
+            color: AppColors.osOnPrimaryContainer,
+          ),
+          const SizedBox(width: 2),
+          Text(
+            '$value',
+            style: GoogleFonts.manrope(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: AppColors.osOnPrimaryContainer,
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -442,10 +496,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           block(20, w: 120),
           const SizedBox(height: 16),
           Row(children: [cardSkeleton(), const SizedBox(width: 12), cardSkeleton()]),
-          const SizedBox(height: 32),
-          block(20, w: 140),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Row(children: [cardSkeleton(), const SizedBox(width: 12), cardSkeleton()]),
+          const SizedBox(height: 24),
+          block(60),
         ],
       ),
     );

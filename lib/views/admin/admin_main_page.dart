@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'admin_dashboard_page.dart';
 import 'admin_user_management_page.dart';
 import 'meditation_management_page.dart';
 import '../news/news_feed_page.dart';
-import '../profile/profile_page.dart';
+import 'admin_analytics_page.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/services/localization_service.dart';
 
 /// Main navigation page for admins with specialized dashboard
 /// Shows: Dashboard, Users, Meditations, Profile
@@ -43,7 +44,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
         currentTab = const MeditationManagementPage();
         break;
       case 4:
-        currentTab = const ProfilePage();
+        currentTab = const AdminAnalyticsPage();
         break;
       default:
         currentTab = const AdminDashboardPage();
@@ -71,41 +72,41 @@ class _AdminMainPageState extends State<AdminMainPage> {
                 Expanded(
                   child: _buildNavItem(
                     0,
-                    Icons.dashboard_outlined,
-                    Icons.dashboard,
+                    IconsaxPlusLinear.element_3,
+                    IconsaxPlusBold.element_3,
                     'Dashboard',
                   ),
                 ),
                 Expanded(
                   child: _buildNavItem(
                     1,
-                    Icons.people_outline,
-                    Icons.people,
+                    IconsaxPlusLinear.profile_2user,
+                    IconsaxPlusBold.profile_2user,
                     'Users',
                   ),
                 ),
                 Expanded(
                   child: _buildNavItem(
                     2,
-                    Icons.article_outlined,
-                    Icons.article,
+                    IconsaxPlusLinear.document_text,
+                    IconsaxPlusBold.document_text,
                     'News',
                   ),
                 ),
                 Expanded(
                   child: _buildNavItem(
                     3,
-                    Icons.spa_outlined,
-                    Icons.spa,
+                    PhosphorIconsRegular.flowerLotus,
+                    PhosphorIconsFill.flowerLotus,
                     'Meditations',
                   ),
                 ),
                 Expanded(
                   child: _buildNavItem(
                     4,
-                    Icons.person_outline,
-                    Icons.person,
-                    context.l10n.profile,
+                    IconsaxPlusLinear.chart_2,
+                    IconsaxPlusBold.chart_2,
+                    'Phân tích',
                   ),
                 ),
               ],
