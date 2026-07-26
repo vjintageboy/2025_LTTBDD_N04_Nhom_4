@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/services/localization_service.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/image_source.dart';
 import '../../services/supabase_service.dart';
 
 class EditProfilePage extends StatefulWidget {
@@ -21,7 +22,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   final SupabaseService _supabaseService = SupabaseService();
   bool _isSaving = false;
@@ -51,8 +51,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       final profileData = await _supabaseService.getUserProfile(user.id);
       if (profileData != null && mounted) {
         setState(() {
-          _photoUrl = profileData['photo_url'] as String?;
-          _phoneController.text = profileData['phone_number'] ?? '';
+          _photoUrl = profileData['avatar_url'] as String?;
           _gender = profileData['gender'] as String?;
           final dob = profileData['date_of_birth'];
           if (dob != null) _dateOfBirth = DateTime.tryParse(dob.toString());
@@ -95,7 +94,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (user == null) return;
       final bytes = await _imageFile!.readAsBytes();
       final base64String = base64Encode(bytes);
-      await _supabaseService.updateUser(user.id, {'photo_url': base64String});
+      await _supabaseService.updateUser(user.id, {'avatar_url': base64String});
       setState(() => _photoUrl = base64String);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -123,7 +122,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
     super.dispose();
   }
 
@@ -136,9 +134,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       final profileData = <String, dynamic>{
         'full_name': _nameController.text.trim(),
       };
-      if (_phoneController.text.isNotEmpty) {
-        profileData['phone_number'] = _phoneController.text.trim();
-      }
       if (_gender != null) profileData['gender'] = _gender;
       if (_dateOfBirth != null) {
         profileData['date_of_birth'] = _dateOfBirth!.toIso8601String();
@@ -230,22 +225,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   },
                 ),
                 const SizedBox(height: 16),
-                _buildField(
-                  controller: _phoneController,
-                  label: 'Phone Number',
-                  hint: 'Enter your phone number',
-                  icon: IconsaxPlusLinear.call,
-                  keyboardType: TextInputType.phone,
-                  validator: (v) {
-                    if (v != null && v.isNotEmpty) {
-                      if (!RegExp(r'^\+?[\d\s-()]+$').hasMatch(v)) {
-                        return 'Invalid phone number';
-                      }
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
                 _buildDatePicker(),
                 const SizedBox(height: 16),
                 _buildGenderDropdown(),
@@ -274,6 +253,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Widget _buildAvatar(User? user) {
+    // avatar_url holds base64 or a legacy URL, so it cannot be decoded blindly.
+    final avatar = _imageFile != null
+        ? FileImage(_imageFile!) as ImageProvider
+        : imageProviderFromSource(_photoUrl);
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -300,14 +283,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
               : CircleAvatar(
                   radius: 56,
                   backgroundColor: AppColors.osPrimaryContainer,
-                  backgroundImage: _imageFile != null
-                      ? FileImage(_imageFile!)
-                      : (_photoUrl != null && _photoUrl!.isNotEmpty
-                              ? MemoryImage(base64Decode(_photoUrl!))
-                              : null)
-                          as ImageProvider?,
-                  child: (_imageFile == null &&
-                          (_photoUrl == null || _photoUrl!.isEmpty))
+                  backgroundImage: avatar,
+                  child: avatar == null
                       ? Text(
                           _nameController.text.isNotEmpty
                               ? _nameController.text[0].toUpperCase()
