@@ -3,29 +3,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/news_post.dart';
 import '../models/post_comment.dart';
 import '../core/utils/stream_utils.dart';
-import 'notification_service.dart';
 
+/// Notifying a post's author on a like or comment is a database trigger
+/// (`notify_post_author`), not client code — users have no INSERT rights on
+/// `notifications`, so writing them from here was silently denied by RLS.
 class NewsService {
   final SupabaseClient _supabase = Supabase.instance.client;
-
-  /// Notify a post's author about an interaction, unless they are the actor
-  /// or the post is authorless (anonymous / deleted account).
-  Future<void> _notifyPostAuthor({
-    required String? postAuthorId,
-    required String actorId,
-    required String title,
-    required String message,
-    required String type,
-  }) async {
-    if (postAuthorId == null || postAuthorId.isEmpty) return;
-    if (postAuthorId == actorId) return;
-    await NotificationService().sendNotification(
-      userId: postAuthorId,
-      title: title,
-      message: message,
-      type: type,
-    );
-  }
 
   // ==================== POSTS ====================
 
@@ -218,17 +201,9 @@ class NewsService {
           'user_id': userId,
         });
         
-        final post = await _supabase.from('posts').select('likes_count, author_id').eq('id', postId).single();
+        final post = await _supabase.from('posts').select('likes_count').eq('id', postId).single();
         final currentCount = post['likes_count'] as int? ?? 0;
         await _supabase.from('posts').update({'likes_count': currentCount + 1}).eq('id', postId);
-
-        await _notifyPostAuthor(
-          postAuthorId: post['author_id'] as String?,
-          actorId: userId,
-          title: 'Lượt thích mới',
-          message: 'Có người vừa thích bài viết của bạn.',
-          type: 'like',
-        );
       }
     } catch (e) {
       debugPrint('Error toggling like: $e');
@@ -294,17 +269,9 @@ class NewsService {
       });
 
       // Increment comment count
-      final post = await _supabase.from('posts').select('comment_count, author_id').eq('id', comment.postId).single();
+      final post = await _supabase.from('posts').select('comment_count').eq('id', comment.postId).single();
       final currentCount = post['comment_count'] as int? ?? 0;
       await _supabase.from('posts').update({'comment_count': currentCount + 1}).eq('id', comment.postId);
-
-      await _notifyPostAuthor(
-        postAuthorId: post['author_id'] as String?,
-        actorId: comment.userId,
-        title: 'Bình luận mới',
-        message: 'Có người vừa bình luận bài viết của bạn.',
-        type: 'comment',
-      );
     } on PostgrestException catch (e) {
       // Backward compatibility: if DB doesn't have is_anonymous yet.
       if (e.message.toLowerCase().contains('is_anonymous') && comment.isAnonymous) {

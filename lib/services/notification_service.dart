@@ -8,26 +8,9 @@ class NotificationService {
   NotificationService._internal();
 
   final _supabase = Supabase.instance.client;
-  
-  // Send notification to user
-  Future<void> sendNotification({
-    required String userId,
-    required String title,
-    required String message,
-    String type = 'general', // general, refund, etc.
-  }) async {
-    try {
-      await _supabase.from('notifications').insert({
-        'user_id': userId,
-        'title': title,
-        'message': message,
-        'type': type,
-        'is_read': false,
-      });
-    } catch (e) {
-      debugPrint('❌ Error sending notification: $e');
-    }
-  }
+
+  // Rows are created by the `notify_post_author` database trigger, not here —
+  // users have no INSERT rights on `notifications`.
 
   // Stream notifications for a user
   Stream<List<Map<String, dynamic>>> streamNotifications(String userId) {
@@ -49,6 +32,24 @@ class NotificationService {
           .eq('id', notificationId);
     } catch (e) {
       debugPrint('❌ Error marking notification as read: $e');
+    }
+  }
+
+  // Delete a single notification
+  Future<void> deleteNotification(String notificationId) async {
+    try {
+      await _supabase.from('notifications').delete().eq('id', notificationId);
+    } catch (e) {
+      debugPrint('❌ Error deleting notification: $e');
+    }
+  }
+
+  // Delete every notification a user has
+  Future<void> deleteAll(String userId) async {
+    try {
+      await _supabase.from('notifications').delete().eq('user_id', userId);
+    } catch (e) {
+      debugPrint('❌ Error deleting all notifications: $e');
     }
   }
 
