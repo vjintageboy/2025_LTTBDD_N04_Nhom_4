@@ -19,7 +19,17 @@ class GeminiConfig {
 
   // Generation config
   static const double temperature = 0.5;
-  static const int maxOutputTokens = 512;
+
+  // gemini-2.5-flash thinks before it answers and those thought tokens are
+  // billed against this same budget — a typical Vietnamese wellness question
+  // spends ~450-550 on thinking and only ~150 on the reply. At 512 the reply
+  // came back cut mid-sentence (finishReason MAX_TOKENS), or empty, which sent
+  // the service down to the keyword-matching fallback.
+  //
+  // ponytail: the SDK (google_generative_ai 0.4.7) cannot send thinkingConfig,
+  // so thinking cannot be turned off — only given room. Drop this back down if
+  // you ever move to raw HTTP and set thinkingBudget: 0.
+  static const int maxOutputTokens = 2048;
 
   // ─── Safety Settings (STRICT) ───────────────────────────────────
   // Use `low` threshold = block when medium or high probability of unsafe.
