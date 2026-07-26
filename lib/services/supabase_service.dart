@@ -136,13 +136,19 @@ class SupabaseService {
     await _supabase.from('mood_entries').update(supabaseData).eq('id', id);
   }
 
-  /// Kiểm tra user có bị ban không
+  /// Kiểm tra user có bị ban không (cột `is_banned` trên bảng `users`).
   Future<bool> isUserBanned(String userId) async {
     try {
-      // Bảng users hiện không có cột is_banned trong schema ảnh
-      // Nếu sau này cần, thêm cột is_banned vào bảng users
-      return false;
+      final row = await _supabase
+          .from('users')
+          .select('is_banned')
+          .eq('id', userId)
+          .maybeSingle();
+      return row?['is_banned'] == true;
     } catch (e) {
+      // ponytail: fail-open — lỗi truy vấn không khóa nhầm người dùng hợp lệ;
+      // ban chỉ là kiểm duyệt, không phải cổng bảo mật cốt lõi.
+      debugPrint('isUserBanned query failed: $e');
       return false;
     }
   }

@@ -56,9 +56,10 @@ KHẢ NĂNG ĐẶC BIỆT:
 
 Tôi không phải chuyên gia tâm lý, nhưng tôi rất lo lắng về những gì bạn đang chia sẻ.
 Vui lòng liên hệ ngay:
-📞 Tổng quốc gia về Bảo vệ Trẻ em & Người dễ bị tổn thương: 111
-📞 Cấp cứu: 115
-📞 Đường dây nóng Mai Tâm (hỗ trợ tâm lý): 113
+📞 Tổng đài Quốc gia Bảo vệ Trẻ em: 111
+📞 Cấp cứu y tế: 115
+📞 Cảnh sát (khẩn cấp): 113
+📞 Đường dây nóng hỗ trợ sức khỏe tâm thần (Bộ Y tế, miễn phí): 1800 599 920
 
 Bạn không đơn độc. Hãy tìm kiếm sự giúp đỡ chuyên nghiệp ngay bây giờ. 💙
 ''';

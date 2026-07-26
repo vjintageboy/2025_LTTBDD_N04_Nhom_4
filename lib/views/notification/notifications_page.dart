@@ -72,7 +72,7 @@ class NotificationsPage extends StatelessWidget {
             itemCount: notifications.length,
             itemBuilder: (context, index) {
               final notification = notifications[index];
-              final isRead = notification['isRead'] ?? false;
+              final isRead = notification['is_read'] == true;
               final timestamp =
                   notification['created_at'];
 

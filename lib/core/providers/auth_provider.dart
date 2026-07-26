@@ -119,6 +119,8 @@ class AuthProvider extends ChangeNotifier {
         password: password,
       );
 
+      if (await _rejectIfBanned()) return false;
+
       // Status will be updated by onAuthStateChange listener
       return true;
     } on AuthException catch (e) {
@@ -196,6 +198,7 @@ class AuthProvider extends ChangeNotifier {
           .timeout(const Duration(seconds: 30));
 
       if (event.event == AuthChangeEvent.signedIn) {
+        if (await _rejectIfBanned()) return false;
         debugPrint('🔵 Signed in successfully!');
         return true;
       }
@@ -213,6 +216,22 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// If the just-authenticated user is banned, sign them back out and surface
+  /// an error. Returns true when the user was rejected. Covers every sign-in
+  /// path (email + Google) so a banned account can never reach the app.
+  Future<bool> _rejectIfBanned() async {
+    final uid = _supabase.auth.currentUser?.id;
+    if (uid == null) return false;
+    if (!await _supabaseService.isUserBanned(uid)) return false;
+
+    await _supabase.auth.signOut();
+    _status = AuthStatus.error;
+    _errorMessage =
+        'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.';
+    notifyListeners();
+    return true;
   }
 
   /// Create user profile in `users` table if it doesn't exist yet.

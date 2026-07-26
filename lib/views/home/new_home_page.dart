@@ -257,7 +257,7 @@ class _NewHomePageState extends State<NewHomePage>
                 ),
                 builder: (context, snapshot) {
                   final unreadCount = (snapshot.data ?? [])
-                      .where((n) => n['isRead'] == false)
+                      .where((n) => n['is_read'] != true)
                       .length;
                   return GestureDetector(
                     onTap: () => Navigator.push(
