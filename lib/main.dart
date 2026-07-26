@@ -9,6 +9,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'l10n/app_localizations.dart';
 import 'views/auth/welcome_page.dart';
 import 'views/home/home_page.dart';
+import 'views/admin/admin_main_page.dart';
+import 'services/supabase_service.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/providers/mood_provider.dart';
 import 'core/providers/chatbot_provider.dart';
@@ -89,18 +91,51 @@ class MyApp extends StatelessWidget {
 // ============================================================================
 // AUTH WRAPPER - Checks auth status and routes accordingly
 // ============================================================================
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  // Resolved lazily on first use, and only once per auth status change (the
+  // widget is keyed on that status, so a change builds a fresh state).
+  late final Future<bool> _isAdmin = _loadIsAdmin();
+
+  /// Reads the signed-in user's role so an admin lands on the admin shell on
+  /// every entry — including a restored session, not just a fresh sign-in.
+  Future<bool> _loadIsAdmin() async {
+    final service = SupabaseService.instance;
+    final user = service.currentUser;
+    if (user == null) return false;
+    final profile = await service.getUserById(user.id);
+    return profile?.isAdmin ?? false;
+  }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     debugPrint('🔑 AuthWrapper rebuilt with status: ${authProvider.status}');
 
-    // If authenticated, go to home
+    // If authenticated, route by role
     if (authProvider.status == AuthStatus.authenticated) {
-      debugPrint('🏠 Navigating to HomePage');
-      return const HomePage();
+      return FutureBuilder<bool>(
+        future: _isAdmin,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              backgroundColor: AppColors.osSurface,
+              body: Center(
+                child: CircularProgressIndicator(color: AppColors.osPrimary),
+              ),
+            );
+          }
+          final isAdmin = snapshot.data ?? false;
+          debugPrint(isAdmin ? '🛠️ Navigating to AdminMainPage' : '🏠 Navigating to HomePage');
+          return isAdmin ? const AdminMainPage() : const HomePage();
+        },
+      );
     }
 
     // Otherwise show welcome/login

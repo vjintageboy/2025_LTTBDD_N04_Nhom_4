@@ -8,9 +8,7 @@ class ChatbotProvider extends ChangeNotifier {
   final FocusNode _inputFocusNode = FocusNode();
 
   // State
-  bool _isOpen = false;
   bool _isLoading = false;
-  bool _isMinimized = false;
   String? _activeConversationId;
   List<AIConversation> _conversations = [];
   final List<ChatMessage> _messages = [];
@@ -32,52 +30,15 @@ class ChatbotProvider extends ChangeNotifier {
   }
 
   // Getters
-  bool get isOpen => _isOpen;
   bool get isLoading => _isLoading;
-  bool get isMinimized => _isMinimized;
   String? get activeConversationId => _activeConversationId;
   List<AIConversation> get conversations => _conversations;
   List<ChatMessage> get messages => _messages;
   TextEditingController get messageController => _messageController;
   FocusNode get inputFocusNode => _inputFocusNode;
-  bool get isInputFocused => _isInputFocused;
   bool get showQuickReplies => !_quickRepliesDismissed && !_hasUserMessages;
 
   bool get _hasUserMessages => _messages.any((m) => m.isUser);
-
-  Future<void> ensureInitialized() async {
-    await _initializeConversation();
-  }
-
-  /// Toggle chatbot panel
-  void toggleChatbot() {
-    _isOpen = !_isOpen;
-    if (_isOpen && _messages.isEmpty) {
-      // Add welcome message on first open
-      _addWelcomeMessage();
-    }
-    notifyListeners();
-  }
-
-  /// Open chatbot
-  void openChatbot() {
-    _isOpen = true;
-    _initializeConversation();
-    notifyListeners();
-  }
-
-  /// Close chatbot
-  void closeChatbot() {
-    _isOpen = false;
-    _isMinimized = false;
-    notifyListeners();
-  }
-
-  /// Toggle minimize/maximize
-  void toggleMinimize() {
-    _isMinimized = !_isMinimized;
-    notifyListeners();
-  }
 
   /// Add welcome message
   void _addWelcomeMessage() {
@@ -88,36 +49,6 @@ class ChatbotProvider extends ChangeNotifier {
       timestamp: DateTime.now(),
     );
     _messages.insert(0, welcomeMessage);
-  }
-
-  Future<void> _initializeConversation() async {
-    _activeConversationId ??= await _chatbotService.getOrCreateLatestConversation();
-    await refreshConversations();
-
-    if (_activeConversationId == null) {
-      if (_messages.isEmpty) {
-        _addWelcomeMessage();
-        notifyListeners();
-      }
-      return;
-    }
-
-    final loaded = await _chatbotService.getConversationMessages(
-      _activeConversationId!,
-      limit: 100,
-    );
-
-    _messages
-      ..clear()
-      ..addAll(loaded);
-
-    if (_messages.isEmpty) {
-      _addWelcomeMessage();
-    }
-
-    _quickRepliesDismissed = _hasUserMessages;
-
-    notifyListeners();
   }
 
   Future<void> refreshConversations() async {

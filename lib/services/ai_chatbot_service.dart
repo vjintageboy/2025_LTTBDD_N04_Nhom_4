@@ -662,14 +662,14 @@ $userMessage
     if (_containsAny(lowerMessage, ['xin chào', 'chào', 'hello', 'hi'])) {
       return isAdmin
           ? '👋 Xin chào Admin! Tôi có thể giúp gì cho bạn hôm nay? Bạn có thể hỏi về quản lý người dùng, meditations, hoặc thống kê hệ thống.'
-          : '👋 Xin chào! Tôi là trợ lý AI của Moodiki. Tôi có thể giúp bạn tìm meditations, theo dõi mood, hoặc đặt lịch với chuyên gia. Bạn cần giúp gì?';
+          : '👋 Xin chào! Tôi là trợ lý AI của Moodiki. Tôi có thể giúp bạn tìm meditations, theo dõi mood, hoặc xem báo cáo tâm lý tháng. Bạn cần giúp gì?';
     }
 
     // Help/Support
     if (_containsAny(lowerMessage, ['giúp', 'help', 'trợ giúp', 'hướng dẫn'])) {
       return isAdmin
           ? '📚 **Tôi có thể hỗ trợ bạn:**\n\n• Quản lý người dùng (ban/unban)\n• Quản lý meditations (thêm/sửa/xóa)\n• Xem thống kê hệ thống\n• Phân tích xu hướng người dùng\n\nBạn muốn làm gì?'
-          : '📚 **Tôi có thể giúp bạn:**\n\n• Tìm meditations phù hợp\n• Theo dõi tâm trạng\n• Đặt lịch với chuyên gia\n• Quản lý streak\n• Tips về wellness\n\nHãy cho tôi biết bạn cần gì!';
+          : '📚 **Tôi có thể giúp bạn:**\n\n• Tìm meditations phù hợp\n• Theo dõi tâm trạng\n• Xem báo cáo tâm lý tháng\n• Quản lý streak\n• Tips về wellness\n\nHãy cho tôi biết bạn cần gì!';
     }
 
     // Meditation related
@@ -731,7 +731,7 @@ $userMessage
     }
 
     // Default response with suggestions
-    return '🤔 Tôi chưa hiểu rõ câu hỏi của bạn. Bạn có thể hỏi tôi về:\n\n• Meditations & relaxation\n• Mood tracking\n• Đặt lịch với chuyên gia\n• Tips về wellness\n${isAdmin ? '• Quản lý hệ thống (Admin)\n• Thống kê & analytics' : ''}\n\nHoặc nhập "Giúp" để xem hướng dẫn!';
+    return '🤔 Tôi chưa hiểu rõ câu hỏi của bạn. Bạn có thể hỏi tôi về:\n\n• Meditations & relaxation\n• Mood tracking\n• Báo cáo tâm lý tháng\n• Tips về wellness\n${isAdmin ? '• Quản lý hệ thống (Admin)\n• Thống kê & analytics' : ''}\n\nHoặc nhập "Giúp" để xem hướng dẫn!';
   }
 
   /// Helper method to check if message contains any keyword
@@ -752,7 +752,7 @@ $userMessage
     return [
       'Tìm meditation',
       'Ghi nhận tâm trạng',
-      'Đặt lịch chuyên gia',
+      'Báo cáo tâm lý tháng',
       'Tips hôm nay',
     ];
   }

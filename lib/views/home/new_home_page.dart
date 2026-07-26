@@ -13,10 +13,9 @@ import '../../scripts/migrate_existing_users.dart';
 import '../mood/mood_log_page.dart';
 import '../meditation/meditation_detail_page.dart';
 import '../streak/streak_history_page.dart';
-import '../chatbot/chatbot_page.dart';
 import '../notification/notifications_page.dart';
-import '../mood/mood_history_page.dart';
 import '../meditation/meditation_library_page.dart';
+import '../../core/utils/image_source.dart';
 
 class NewHomePage extends StatefulWidget {
   const NewHomePage({super.key});
@@ -31,6 +30,7 @@ class _NewHomePageState extends State<NewHomePage>
 
   Streak? _streak;
   List<Meditation> _meditations = [];
+  String? _avatarUrl;
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -78,10 +78,12 @@ class _NewHomePageState extends State<NewHomePage>
       final streak = await _supabaseService.getStreak(user.id);
       final meditationsData = await _supabaseService.getMeditations();
       final meditations = meditationsData.take(1).map((m) => Meditation.fromMap(m)).toList();
+      final profile = await _supabaseService.getUserProfile(user.id);
       if (mounted) {
         setState(() {
           _streak = streak;
           _meditations = meditations;
+          _avatarUrl = profile?['avatar_url'] as String?;
           _isLoading = false;
         });
       }
@@ -154,7 +156,7 @@ class _NewHomePageState extends State<NewHomePage>
                   top: topPadding + 64,
                   left: 20,
                   right: 20,
-                  bottom: 24,
+                  bottom: 124,
                 ),
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: [
@@ -167,9 +169,6 @@ class _NewHomePageState extends State<NewHomePage>
                   const SizedBox(height: 16),
                   // Streak
                   _buildStreakCard(),
-                  const SizedBox(height: 24),
-                  // Quick actions
-                  _buildQuickActions(),
                   // Featured meditation
                   if (_meditations.isNotEmpty) ...[
                     const SizedBox(height: 24),
@@ -198,6 +197,7 @@ class _NewHomePageState extends State<NewHomePage>
   // ── TOP APP BAR ──────────────────────────────────────────────────────────
 
   Widget _buildTopBar(double topPadding) {
+    final avatar = imageProviderFromSource(_avatarUrl);
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
@@ -216,25 +216,21 @@ class _NewHomePageState extends State<NewHomePage>
           padding: EdgeInsets.only(top: topPadding, left: 20, right: 20),
           child: Row(
             children: [
-              // User avatar
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.osPrimaryContainer,
-                  border: Border.all(color: AppColors.osPrimary.withValues(alpha: 0.3), width: 1.5),
-                ),
-                child: Center(
-                  child: Text(
-                    _getUserInitial(),
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.osPrimary,
-                    ),
-                  ),
-                ),
+              // User avatar — falls back to the name initial when unset.
+              CircleAvatar(
+                radius: 17,
+                backgroundColor: AppColors.osPrimaryContainer,
+                backgroundImage: avatar,
+                child: avatar == null
+                    ? Text(
+                        _getUserInitial(),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.osPrimary,
+                        ),
+                      )
+                    : null,
               ),
               // Brand name
               Expanded(
@@ -252,6 +248,10 @@ class _NewHomePageState extends State<NewHomePage>
               ),
               // Notification bell
               StreamBuilder<List<Map<String, dynamic>>>(
+                // Rebuilt with the widget on purpose: this StreamBuilder sits in
+                // a subtree that is torn down whenever _isLoading flips, and
+                // `resilientStream` is single-subscription, so a hoisted stream
+                // would throw "Stream has already been listened to" on re-inflate.
                 stream: NotificationService().streamNotifications(
                   _supabaseService.currentUser?.id ?? '',
                 ),
@@ -535,95 +535,49 @@ class _NewHomePageState extends State<NewHomePage>
     );
   }
 
-  // ── QUICK ACTIONS 2×2 ────────────────────────────────────────────────────
-
-  Widget _buildQuickActions() {
-    final actions = [
-      _QuickAction(
-        label: context.l10n.aiAssistant,
-        icon: PhosphorIconsRegular.robot,
-        bg: const Color(0xFFE3F0FF),
-        iconColor: const Color(0xFF1565C0),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatbotPage())),
-      ),
-      _QuickAction(
-        label: context.l10n.moodHistory,
-        icon: IconsaxPlusLinear.chart_success,
-        bg: const Color(0xFFFFF3E0),
-        iconColor: const Color(0xFFE65100),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MoodHistoryPage())),
-      ),
-      _QuickAction(
-        label: context.l10n.allMeditations,
-        icon: PhosphorIconsRegular.personSimpleTaiChi,
-        bg: const Color(0xFFF3E5F5),
-        iconColor: const Color(0xFF7B1FA2),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MeditationLibraryPage())),
-      ),
-    ];
-
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 1.35,
-      children: actions.map((a) => _buildQuickActionCard(a)).toList(),
-    );
-  }
-
-  Widget _buildQuickActionCard(_QuickAction action) {
-    return GestureDetector(
-      onTap: action.onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: action.bg,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: action.iconColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(action.icon, color: action.iconColor, size: 22),
-            ),
-            const Spacer(),
-            Text(
-              action.label,
-              style: GoogleFonts.manrope(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppColors.osOnSurface,
-                height: 1.3,
-              ),
-              maxLines: 2,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // ── FEATURED MEDITATION ──────────────────────────────────────────────────
 
   Widget _buildFeaturedMeditation(Meditation meditation) {
+    // Covers are stored as base64 (or a legacy URL), not always a URL.
+    final cover = imageProviderFromSource(meditation.thumbnailUrl);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          context.l10n.featuredMeditation,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppColors.osOnSurface,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                context.l10n.featuredMeditation,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.osOnSurface,
+                ),
+              ),
+            ),
+            // Only route to the meditation library now that the quick-action
+            // grid is gone.
+            TextButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MeditationLibraryPage()),
+              ),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.osOnPrimaryContainer,
+                backgroundColor: AppColors.osSurfaceContainerLow,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                minimumSize: const Size(0, 44),
+                shape: const StadiumBorder(),
+              ),
+              child: Text(
+                context.l10n.viewAll,
+                style: GoogleFonts.manrope(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
         GestureDetector(
@@ -650,9 +604,9 @@ class _NewHomePageState extends State<NewHomePage>
                 // Image
                 AspectRatio(
                   aspectRatio: 16 / 10,
-                  child: meditation.thumbnailUrl != null && meditation.thumbnailUrl!.isNotEmpty
-                      ? Image.network(
-                          meditation.thumbnailUrl!,
+                  child: cover != null
+                      ? Image(
+                          image: cover,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(color: AppColors.osSurfaceContainerHigh),
                         )
@@ -836,22 +790,4 @@ class _NewHomePageState extends State<NewHomePage>
       ),
     );
   }
-}
-
-// ── DATA CLASS ───────────────────────────────────────────────────────────────
-
-class _QuickAction {
-  final String label;
-  final IconData icon;
-  final Color bg;
-  final Color iconColor;
-  final VoidCallback onTap;
-
-  const _QuickAction({
-    required this.label,
-    required this.icon,
-    required this.bg,
-    required this.iconColor,
-    required this.onTap,
-  });
 }

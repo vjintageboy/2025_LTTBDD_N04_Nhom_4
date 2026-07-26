@@ -385,7 +385,7 @@ class _MoodHistoryPageState extends State<MoodHistoryPage>
                   onRefresh: _loadMoodEntries,
                   color: _kPrimary,
                   child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 124),
                     itemCount: sortedKeys.length,
                     itemBuilder: (context, index) {
                       final dateKey = sortedKeys[index];
@@ -620,7 +620,7 @@ class _MoodHistoryPageState extends State<MoodHistoryPage>
         Expanded(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 124),
               child: Column(
                 children: [
                   _buildCalendarGrid(entriesByDate),

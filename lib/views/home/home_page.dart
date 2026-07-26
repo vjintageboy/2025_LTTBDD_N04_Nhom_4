@@ -110,6 +110,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         },
         child: FloatingActionButton(
           heroTag: 'ai_fab',
+          tooltip: context.l10n.aiAssistant,
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const ChatbotPage()),
