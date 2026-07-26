@@ -43,15 +43,11 @@ dependencies:
   provider: ^6.1.1
   table_calendar: ^3.1.2
   google_generative_ai: ^0.4.7
-  http: ^1.2.0
   flutter_dotenv: ^5.2.1
   image_picker: ^1.2.0
 
-  crypto: ^3.0.3        # Để mã hóa chữ ký (Signature)
-  url_launcher: ^6.3.0 # Để mở app MoMo hoặc Web thanh toán
   supabase_flutter: ^2.12.0
   google_sign_in: ^6.2.1
-  sign_in_with_apple: ^7.0.1
   iconsax_plus: ^1.0.0
   phosphor_flutter: ^2.1.0
 
@@ -89,7 +85,6 @@ flutter:
 
   assets:
     - assets/images/logo.png
-    - assets/images/Logo-MoMo-Circle.webp
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

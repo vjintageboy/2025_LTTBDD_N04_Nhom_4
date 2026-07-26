@@ -34,7 +34,6 @@ class AppStrings {
 
   // Social buttons
   static const String google = 'Google';
-  static const String apple = 'Apple';
   static const String facebook = 'Facebook';
 
   // Error messages

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../constants/app_constants.dart';
 import '../../services/supabase_service.dart';
 
@@ -211,65 +210,6 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('🔵 Error: $e');
       _status = AuthStatus.error;
       _errorMessage = 'Google sign-in failed: ${e.toString()}';
-      notifyListeners();
-      return false;
-    }
-  }
-
-  /// Apple sign-in using native Sign in with Apple sheet + Supabase ID token.
-  /// No nonce — avoids simulator incompatibilities and Supabase mismatch.
-  Future<bool> signInWithApple() async {
-    try {
-      _status = AuthStatus.loading;
-      _errorMessage = null;
-      notifyListeners();
-
-      final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
-
-      final idToken = credential.identityToken;
-      if (idToken == null) {
-        _status = AuthStatus.error;
-        _errorMessage = 'Apple sign-in did not return an ID token';
-        notifyListeners();
-        return false;
-      }
-
-      final AuthResponse res = await _supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.apple,
-        idToken: idToken,
-      );
-
-      if (res.user != null) {
-        // Apple only sends name on the very first sign-in
-        String fullName = '';
-        if (credential.givenName != null || credential.familyName != null) {
-          fullName =
-              '${credential.givenName ?? ''} ${credential.familyName ?? ''}'
-                  .trim();
-        }
-        await _ensureProfile(res.user!, overrideName: fullName);
-        _status = AuthStatus.authenticated;
-        notifyListeners();
-        return true;
-      }
-
-      _status = AuthStatus.error;
-      _errorMessage = 'Apple sign-in failed';
-      notifyListeners();
-      return false;
-    } on AuthException catch (e) {
-      _status = AuthStatus.error;
-      _errorMessage = e.message;
-      notifyListeners();
-      return false;
-    } catch (e) {
-      _status = AuthStatus.error;
-      _errorMessage = 'Apple sign-in failed: ${e.toString()}';
       notifyListeners();
       return false;
     }
