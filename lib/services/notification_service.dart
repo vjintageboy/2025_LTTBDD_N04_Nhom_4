@@ -51,4 +51,17 @@ class NotificationService {
       debugPrint('❌ Error marking notification as read: $e');
     }
   }
+
+  // Mark all of a user's unread notifications as read
+  Future<void> markAllAsRead(String userId) async {
+    try {
+      await _supabase
+          .from('notifications')
+          .update({'is_read': true})
+          .eq('user_id', userId)
+          .eq('is_read', false);
+    } catch (e) {
+      debugPrint('❌ Error marking all notifications as read: $e');
+    }
+  }
 }

@@ -1,7 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/news_post.dart';
@@ -41,6 +44,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
   PostCategory _selectedCategory = PostCategory.community;
   bool _isSubmitting = false;
   bool _postAnonymously = false;
+  String? _imageUrl; // base64 string or remote URL
 
   @override
   void initState() {
@@ -50,6 +54,30 @@ class _CreatePostPageState extends State<CreatePostPage> {
       _contentController.text = widget.postToEdit!.content;
       _selectedCategory = widget.postToEdit!.category;
       _postAnonymously = widget.postToEdit!.authorName == 'Anonymous';
+      _imageUrl = widget.postToEdit!.imageUrl;
+    }
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 70,
+      );
+      if (picked == null) return;
+      // ponytail: base64 in the image_url column, mirroring how avatars are
+      // stored in this app. Upgrade path: upload to a Supabase Storage bucket
+      // if post images grow large/numerous.
+      final bytes = await File(picked.path).readAsBytes();
+      setState(() => _imageUrl = base64Encode(bytes));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e')),
+        );
+      }
     }
   }
 
@@ -113,6 +141,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
         authorRole: authorRole,
         title: _titleController.text.trim(),
         content: _contentController.text.trim(),
+        imageUrl: _imageUrl,
         category: _selectedCategory,
       );
 
@@ -194,6 +223,12 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   // Content Field
                   _buildContentField(contentLength),
                   const SizedBox(height: 32),
+
+                  // Attached image preview
+                  if (_imageUrl != null && _imageUrl!.isNotEmpty) ...[
+                    _buildImagePreview(),
+                    const SizedBox(height: 16),
+                  ],
 
                   // Media Attachment Buttons
                   _buildMediaButtons(),
@@ -556,6 +591,43 @@ class _CreatePostPageState extends State<CreatePostPage> {
     );
   }
 
+  Widget _buildImagePreview() {
+    final url = _imageUrl!;
+    final isRemote = url.startsWith('http://') || url.startsWith('https://');
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Stack(
+        children: [
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: isRemote
+                ? Image.network(url, width: double.infinity, fit: BoxFit.cover)
+                : Image.memory(
+                    base64Decode(url),
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+          ),
+          Positioned(
+            top: 8,
+            right: 8,
+            child: GestureDetector(
+              onTap: () => setState(() => _imageUrl = null),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, color: Colors.white, size: 18),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMediaButtons() {
     final l10n = context.l10n;
     return Row(
@@ -564,6 +636,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
           child: _MediaButton(
             icon: IconsaxPlusLinear.gallery,
             label: l10n.addPhoto,
+            onTap: _pickImage,
           ),
         ),
         const SizedBox(width: 12),
@@ -741,13 +814,14 @@ class _FocusTextFieldState extends State<_FocusTextField> {
 class _MediaButton extends StatelessWidget {
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
 
-  const _MediaButton({required this.icon, required this.label});
+  const _MediaButton({required this.icon, required this.label, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap ?? () {},
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),

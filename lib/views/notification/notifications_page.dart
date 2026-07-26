@@ -29,6 +29,16 @@ class NotificationsPage extends StatelessWidget {
           icon: const Icon(IconsaxPlusLinear.arrow_left, color: Color(0xFF1A1A1A)),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Đánh dấu tất cả đã đọc',
+            icon: const Icon(IconsaxPlusLinear.tick_circle,
+                color: Color(0xFF006B1B)),
+            onPressed: userId.isEmpty
+                ? null
+                : () => notificationService.markAllAsRead(userId),
+          ),
+        ],
       ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: notificationService.streamNotifications(userId),

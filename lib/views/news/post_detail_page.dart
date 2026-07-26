@@ -235,11 +235,17 @@ class _PostDetailPageState extends State<PostDetailPage> {
             const SizedBox(height: 16),
             ClipRRect(
               borderRadius: BorderRadius.circular(14),
-              child: Image.network(
-                widget.post.imageUrl!,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              child: _isBase64(widget.post.imageUrl!)
+                  ? Image.memory(
+                      base64Decode(widget.post.imageUrl!),
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.network(
+                      widget.post.imageUrl!,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
             ),
           ],
           const SizedBox(height: 20),

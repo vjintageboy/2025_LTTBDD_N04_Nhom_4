@@ -541,15 +541,19 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                       borderRadius: BorderRadius.circular(12),
                       child: AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: Image.network(
-                          post.imageUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            color: _kSurfaceContainerHighest,
-                            child: const Icon(PhosphorIconsRegular.imageBroken,
-                                size: 48, color: _kOnSurfaceVariant),
-                          ),
-                        ),
+                        child: _isBase64(post.imageUrl!)
+                            ? Image.memory(
+                                base64Decode(post.imageUrl!),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _brokenImage(),
+                              )
+                            : Image.network(
+                                post.imageUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _brokenImage(),
+                              ),
                       ),
                     ),
                   ],
@@ -755,6 +759,12 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
       if (mounted) setState(() => _likeUpdating.remove(post.postId));
     }
   }
+
+  Widget _brokenImage() => Container(
+        color: _kSurfaceContainerHighest,
+        child: const Icon(PhosphorIconsRegular.imageBroken,
+            size: 48, color: _kOnSurfaceVariant),
+      );
 
   /// Check if string is Base64 encoded
   bool _isBase64(String str) {
