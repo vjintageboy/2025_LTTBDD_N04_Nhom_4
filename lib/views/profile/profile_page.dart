@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import '../../services/supabase_service.dart';
-import '../auth/welcome_page.dart';
 import '../mood/mood_analytics_page.dart';
 import 'edit_profile_page.dart';
 import '../../models/streak.dart';
 import '../../shared/widgets/language_switcher.dart';
+import '../../shared/widgets/logout_dialog.dart';
+import '../../core/utils/image_source.dart';
 import '../../core/services/localization_service.dart';
 import '../../core/constants/app_colors.dart';
 
@@ -182,7 +183,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   const LanguageSettingsTile(),
                   const SizedBox(height: 24),
                   _buildLogoutButton(),
-                  const SizedBox(height: 24),
+                  // Clears the AI chat FAB, which floats over this tab and
+                  // otherwise swallows taps on the log-out button.
+                  const SizedBox(height: 124),
                 ],
               ),
             ),
@@ -193,6 +196,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildAvatar(User user) {
+    final avatar = imageProviderFromSource(_avatarUrl);
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -207,11 +211,8 @@ class _ProfilePageState extends State<ProfilePage> {
       child: CircleAvatar(
         radius: 56,
         backgroundColor: AppColors.osPrimaryContainer,
-        backgroundImage:
-            _avatarUrl != null && _avatarUrl!.isNotEmpty
-                ? NetworkImage(_avatarUrl!)
-                : null,
-        child: _avatarUrl == null || _avatarUrl!.isEmpty
+        backgroundImage: avatar,
+        child: avatar == null
             ? Text(
                 _getUserDisplayName(user).substring(0, 1).toUpperCase(),
                 style: GoogleFonts.plusJakartaSans(
@@ -419,31 +420,7 @@ class _ProfilePageState extends State<ProfilePage> {
       width: double.infinity,
       height: 52,
       child: OutlinedButton(
-        onPressed: () async {
-          final shouldLogout = await _showLogoutDialog(context);
-          if (shouldLogout == true) {
-            try {
-              await _supabaseService.signOut();
-              if (context.mounted) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (_) => const WelcomePage(),
-                  ),
-                  (route) => false,
-                );
-              }
-            } catch (e) {
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(context.l10n.errorLogout(e.toString())),
-                    backgroundColor: AppColors.osError,
-                  ),
-                );
-              }
-            }
-          }
-        },
+        onPressed: () => confirmAndLogout(context),
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.osError,
           side: BorderSide(
@@ -616,60 +593,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ],
-    );
-  }
-
-  Future<bool?> _showLogoutDialog(BuildContext context) {
-    return showDialog<bool>(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        final l10n = dialogContext.l10n;
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          backgroundColor: AppColors.osSurfaceContainerLowest,
-          title: Text(
-            l10n.logoutConfirmTitle,
-            style: GoogleFonts.plusJakartaSans(
-              fontWeight: FontWeight.w800,
-              fontSize: 18,
-            ),
-          ),
-          content: Text(
-            l10n.logoutConfirmMessage,
-            style: GoogleFonts.manrope(
-              fontSize: 14,
-              color: AppColors.osOnSurfaceVariant,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(
-                l10n.cancel,
-                style: GoogleFonts.manrope(
-                  color: AppColors.osOnSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.osError,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                l10n.logout,
-                style: GoogleFonts.manrope(fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

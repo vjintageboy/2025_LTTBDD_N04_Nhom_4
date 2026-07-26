@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../profile/profile_page.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/services/localization_service.dart';
+import '../../shared/widgets/logout_dialog.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   final Function(int)? onNavigate;
@@ -351,6 +353,15 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                                 ),
                               ),
                             ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => confirmAndLogout(context),
+                          tooltip: context.l10n.logout,
+                          icon: const Icon(
+                            IconsaxPlusLinear.logout,
+                            color: Colors.white,
+                            size: 22,
                           ),
                         ),
                       ],
