@@ -251,6 +251,7 @@ class _MeditationLibraryPageState extends State<MeditationLibraryPage> {
   }
 
   Widget _buildMeditationCard(Meditation meditation, Color color) {
+    final cover = imageProviderFromSource(meditation.thumbnailUrl);
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -278,12 +279,9 @@ class _MeditationLibraryPageState extends State<MeditationLibraryPage> {
               // Background: Thumbnail or Gradient
               Positioned.fill(
                 child:
-                    meditation.thumbnailUrl != null &&
-                        meditation.thumbnailUrl!.isNotEmpty
+                    cover != null
                     ? Image(
-                        image: imageProviderFromSource(
-                          meditation.thumbnailUrl!,
-                        ),
+                        image: cover,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           // Fallback to gradient if image fails

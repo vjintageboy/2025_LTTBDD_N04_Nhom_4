@@ -7,6 +7,7 @@ import '../../models/news_post.dart';
 import '../../services/news_service.dart';
 import '../../core/services/localization_service.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/image_source.dart';
 import 'create_post_page.dart';
 import 'post_detail_page.dart';
 
@@ -510,12 +511,13 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
                           ),
                         ),
                         // Thumbnail if present
-                        if (post.imageUrl != null && post.imageUrl!.isNotEmpty) ...[
+                        if (imageProviderFromSource(post.imageUrl)
+                            case final thumb?) ...[
                           const SizedBox(width: 8),
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              post.imageUrl!,
+                            child: Image(
+                              image: thumb,
                               width: 88,
                               height: 64,
                               fit: BoxFit.cover,
@@ -646,11 +648,11 @@ class _NewsManagerPageState extends State<NewsManagerPage> {
             ],
           ),
           const SizedBox(height: 12),
-          if (post.imageUrl != null && post.imageUrl!.isNotEmpty) ...[
+          if (imageProviderFromSource(post.imageUrl) case final image?) ...[
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                post.imageUrl!,
+              child: Image(
+                image: image,
                 height: 180,
                 width: double.infinity,
                 fit: BoxFit.cover,

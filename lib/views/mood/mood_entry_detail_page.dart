@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:intl/intl.dart';
 import '../../models/mood_entry.dart';
 import '../../core/services/localization_service.dart';
 import '../../services/supabase_service.dart';
+import '../../core/utils/image_source.dart';
 
 class MoodEntryDetailPage extends StatefulWidget {
   final MoodEntry entry;
@@ -408,13 +408,13 @@ class _MoodEntryDetailPageState extends State<MoodEntryDetailPage> {
               ),
 
               // Attached photo (read-only)
-              if (widget.entry.imageUrl != null &&
-                  widget.entry.imageUrl!.isNotEmpty) ...[
+              if (imageProviderFromSource(widget.entry.imageUrl)
+                  case final photo?) ...[
                 const SizedBox(height: 24),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.memory(
-                    base64Decode(widget.entry.imageUrl!),
+                  child: Image(
+                    image: photo,
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),

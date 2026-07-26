@@ -85,7 +85,8 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
 
   String? _validateAudioUrl(String? value) {
     final v = value?.trim() ?? '';
-    if (v.isEmpty) return null; // optional
+    // meditations.audio_url is NOT NULL in the database.
+    if (v.isEmpty) return 'Vui lòng nhập đường dẫn âm thanh';
     if (!v.startsWith('http://') && !v.startsWith('https://')) {
       return 'URL phải bắt đầu bằng http:// hoặc https://';
     }
@@ -148,9 +149,7 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
         'description': _descriptionController.text.trim(),
         'duration_minutes': int.parse(_durationController.text),
         'category': _selectedCategory.toString().split('.').last,
-        'audio_url': _audioUrlController.text.trim().isEmpty
-            ? null
-            : _audioUrlController.text.trim(),
+        'audio_url': _audioUrlController.text.trim(),
         'thumbnail_url': _thumbnailData,
       };
 
@@ -358,7 +357,7 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
               controller: _audioUrlController,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Đường dẫn âm thanh (tùy chọn)',
+                label: 'Đường dẫn âm thanh',
                 hint: 'https://example.com/audio.mp3',
                 icon: IconsaxPlusLinear.music,
               ),
@@ -439,7 +438,8 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
           ),
         ),
         const SizedBox(height: 8),
-        if (_thumbnailData != null && _thumbnailData!.isNotEmpty) ...[
+        // Seeded from the DB, so it may be a legacy URL rather than base64.
+        if (imageProviderFromSource(_thumbnailData) case final cover?) ...[
           ClipRRect(
             borderRadius: BorderRadius.circular(14),
             child: Stack(
@@ -447,7 +447,7 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
                 AspectRatio(
                   aspectRatio: 16 / 9,
                   child: Image(
-                    image: imageProviderFromSource(_thumbnailData!),
+                    image: cover,
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),

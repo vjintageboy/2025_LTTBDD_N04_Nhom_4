@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/meditation.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/utils/image_source.dart';
 import 'admin_form_styles.dart';
 
 /// Add Meditation Page - Trang thêm meditation mới (Admin only)
@@ -70,7 +69,8 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
 
   String? _validateAudioUrl(String? value) {
     final v = value?.trim() ?? '';
-    if (v.isEmpty) return null; // optional
+    // meditations.audio_url is NOT NULL in the database.
+    if (v.isEmpty) return 'Vui lòng nhập đường dẫn âm thanh';
     if (!v.startsWith('http://') && !v.startsWith('https://')) {
       return 'URL phải bắt đầu bằng http:// hoặc https://';
     }
@@ -133,9 +133,7 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
         'description': _descriptionController.text.trim(),
         'duration_minutes': int.parse(_durationController.text),
         'category': _selectedCategory.toString().split('.').last,
-        'audio_url': _audioUrlController.text.trim().isEmpty
-            ? null
-            : _audioUrlController.text.trim(),
+        'audio_url': _audioUrlController.text.trim(),
         'thumbnail_url': _thumbnailData,
       });
 
@@ -296,7 +294,7 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
               controller: _audioUrlController,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
               decoration: osFieldDecoration(
-                label: 'Đường dẫn âm thanh (tùy chọn)',
+                label: 'Đường dẫn âm thanh',
                 hint: 'https://example.com/audio.mp3',
                 icon: IconsaxPlusLinear.music,
               ),
@@ -385,7 +383,8 @@ class _AddMeditationPageState extends State<AddMeditationPage> {
                 AspectRatio(
                   aspectRatio: 16 / 9,
                   child: Image(
-                    image: imageProviderFromSource(_thumbnailData!),
+                    // Always set from the picker, so decoding cannot fail.
+                    image: MemoryImage(base64Decode(_thumbnailData!)),
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),

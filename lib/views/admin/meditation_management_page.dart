@@ -344,6 +344,7 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
   }
 
   Widget _buildMeditationCard(Meditation meditation) {
+    final cover = imageProviderFromSource(meditation.thumbnailUrl);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -374,11 +375,9 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
               // Thumbnail
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: meditation.thumbnailUrl != null
+                child: cover != null
                     ? Image(
-                        image: imageProviderFromSource(
-                          meditation.thumbnailUrl!,
-                        ),
+                        image: cover,
                         width: 80,
                         height: 80,
                         fit: BoxFit.cover,
