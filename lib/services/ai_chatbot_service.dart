@@ -59,6 +59,7 @@ class AIChatbotService {
         maxOutputTokens: GeminiConfig.maxOutputTokens,
       ),
       systemInstruction: Content.text(GeminiConfig.systemPrompt),
+      safetySettings: GeminiConfig.safetySettings,
       tools: [ToolDefinitions.allTools],
     );
 
@@ -231,172 +232,6 @@ class AIChatbotService {
     }
   }
 
-  /// Get AI response based on user message
-  Future<ChatMessage> getAIResponse(
-    String userMessage, {
-    String? conversationId,
-  }) async {
-    try {
-      // ── Safety pre-check ──────────────────────────────────────
-      final safetyResult = SafetyFilter.check(userMessage);
-
-      // Critical: bypass AI, return emergency payload
-      if (safetyResult.shouldBypassAI) {
-        return ChatMessage(
-          message: safetyResult.emergencyMessage ??
-              SystemPromptTemplate.buildEmergency(),
-          isUser: false,
-          timestamp: DateTime.now(),
-        );
-      }
-
-      // Initialize Gemini if not already done
-      if (_model == null && GeminiConfig.isConfigured) {
-        _initializeGemini();
-      }
-
-      // Get user context for personalization
-      final user = _currentUser;
-      final isAdmin = await _checkIfAdmin(user?.id);
-      final userName =
-          user?.userMetadata?['full_name']?.toString() ?? user?.email ?? 'bạn';
-
-      final history = conversationId == null
-          ? <ChatMessage>[]
-          : await getConversationMessages(conversationId, limit: 12);
-
-      // Build context message with RAG (async)
-      final contextMessage = await _buildContextMessageAsync(
-        userMessage,
-        userName,
-        isAdmin,
-        history.reversed.toList(),
-        user?.id ?? '',
-      );
-
-      // Initialize tool calling if user is authenticated
-      if (user != null && _toolController == null) {
-        debugPrint('[AIChatbot] Initializing function calling for user: ${user.id}');
-        _initializeTools(user.id);
-      }
-
-      // Try function calling path first (if available)
-      if (_toolController != null && _modelWithTools != null) {
-        try {
-          debugPrint('[AIChatbot] Using function calling path');
-          final chat = _modelWithTools!.startChat(
-            history: _buildGeminiHistory(history.reversed.toList()),
-          );
-          
-          // Build enhanced message with RAG context for better tool selection
-          final enhancedMessage = contextMessage.isNotEmpty 
-              ? contextMessage 
-              : userMessage;
-          
-          debugPrint('[AIChatbot] Executing tool loop with message length: ${enhancedMessage.length}');
-          final aiText = await _toolController!.execute(
-            userMessage: enhancedMessage,
-            sendMessage: chat.sendMessage,
-          );
-          
-          if (aiText.isNotEmpty) {
-            debugPrint('[AIChatbot] Function calling returned response (${aiText.length} chars)');
-            // Inject disclaimer if needed
-            final finalResponse = DisclaimerInjector.maybeAdd(
-              aiResponse: aiText,
-              userInput: userMessage,
-            );
-            return ChatMessage(
-              message: finalResponse,
-              isUser: false,
-              timestamp: DateTime.now(),
-            );
-          }
-        } catch (toolError) {
-          debugPrint('[AIChatbot] Tool calling error: $toolError');
-          debugPrint('[AIChatbot] Stack trace: ${StackTrace.current}');
-          // Fall through to Gemini path WITH tools
-        }
-      } else {
-        debugPrint('[AIChatbot] Function calling not available: toolController=${_toolController != null}, modelWithTools=${_modelWithTools != null}');
-      }
-
-      // Fallback: Try Gemini WITH tools first (if available)
-      if (_modelWithTools != null) {
-        try {
-          debugPrint('[AIChatbot] Using Gemini with tools (fallback path)');
-          final response = await _modelWithTools!.generateContent([
-            Content.text(contextMessage),
-          ]);
-
-          final aiText = response.text?.trim();
-          if (aiText != null && aiText.isNotEmpty) {
-            debugPrint('[AIChatbot] Gemini with tools returned response (${aiText.length} chars)');
-            final finalResponse = DisclaimerInjector.maybeAdd(
-              aiResponse: aiText,
-              userInput: userMessage,
-            );
-            return ChatMessage(
-              message: finalResponse,
-              isUser: false,
-              timestamp: DateTime.now(),
-            );
-          }
-        } catch (geminiError) {
-          debugPrint('[AIChatbot] Gemini with tools error: $geminiError');
-          // Fall through to model without tools
-        }
-      }
-
-      // Last resort: Try Gemini without tools
-      if (_model != null) {
-        try {
-          debugPrint('[AIChatbot] Using Gemini without tools (last resort)');
-          final response = await _model!.generateContent([
-            Content.text(contextMessage),
-          ]);
-
-          final aiText = response.text?.trim();
-          if (aiText != null && aiText.isNotEmpty) {
-            debugPrint('[AIChatbot] Gemini without tools returned response (${aiText.length} chars)');
-            // Inject disclaimer if needed
-            final finalResponse = DisclaimerInjector.maybeAdd(
-              aiResponse: aiText,
-              userInput: userMessage,
-            );
-            return ChatMessage(
-              message: finalResponse,
-              isUser: false,
-              timestamp: DateTime.now(),
-            );
-          }
-        } catch (geminiError) {
-          debugPrint('[AIChatbot] Gemini without tools error: $geminiError');
-          // Fall back to rule-based response
-        }
-      }
-
-      // Fallback: Rule-based response with disclaimer
-      final response = _generateResponse(userMessage, isAdmin);
-      final finalResponse = DisclaimerInjector.maybeAdd(
-        aiResponse: response,
-        userInput: userMessage,
-      );
-      return ChatMessage(
-        message: finalResponse,
-        isUser: false,
-        timestamp: DateTime.now(),
-      );
-    } catch (e) {
-      debugPrint('Error getting AI response: $e');
-      return ChatMessage(
-        message: 'Xin lỗi, tôi gặp sự cố. Vui lòng thử lại sau. 🙏',
-        isUser: false,
-        timestamp: DateTime.now(),
-      );
-    }
-  }
-
   /// Emit [text] in small character slices to mimic token streaming for paths
   /// that only produce a full string (e.g. the non-streaming tool-call loop).
   /// Concatenating the slices reproduces [text] exactly.
@@ -440,11 +275,15 @@ class AIChatbotService {
           ? <ChatMessage>[]
           : await getConversationMessages(conversationId, limit: 12);
 
+      // Handed to Gemini as real conversation turns, so it is deliberately kept
+      // out of the context blob below: sending both made the model read its own
+      // past replies as part of what the user had just typed.
+      final geminiHistory = _buildGeminiHistory(history.reversed.toList());
+
       final contextMessage = await _buildContextMessageAsync(
         userMessage,
         userName,
         isAdmin,
-        history.reversed.toList(),
         user?.id ?? '',
       );
 
@@ -458,9 +297,7 @@ class AIChatbotService {
       if (_toolController != null && _modelWithTools != null) {
         try {
           debugPrint('[AIChatbot] Stream: trying function calling path');
-          final chat = _modelWithTools!.startChat(
-            history: _buildGeminiHistory(history.reversed.toList()),
-          );
+          final chat = _modelWithTools!.startChat(history: geminiHistory);
           final enhancedMessage = contextMessage.isNotEmpty ? contextMessage : userMessage;
           final aiText = await _toolController!.execute(
             userMessage: enhancedMessage,
@@ -486,9 +323,9 @@ class AIChatbotService {
       // Try Gemini streaming (no tools / fallback)
       if (_model != null) {
         try {
-          final responseStream = _model!.generateContentStream([
-            Content.text(contextMessage),
-          ]);
+          final responseStream = _model!
+              .startChat(history: geminiHistory)
+              .sendMessageStream(Content.text(contextMessage));
 
           bool yielded = false;
           String fullResponse = '';
@@ -514,17 +351,13 @@ class AIChatbotService {
           }
         } catch (geminiError) {
           debugPrint('Gemini streaming error: $geminiError');
-          // Fall back to rule-based
         }
       }
 
-      // Fallback: Rule-based with simulated streaming + disclaimer
-      final response = _generateResponse(userMessage, isAdmin);
-      final finalResponse = DisclaimerInjector.maybeAdd(
-        aiResponse: response,
-        userInput: userMessage,
-      );
-      yield finalResponse;
+      // Nothing worked: Gemini is unreachable or unconfigured. Yielding nothing
+      // lets ChatbotProvider surface its "không thể trả lời lúc này" message,
+      // which beats a keyword-matched canned answer pretending to have
+      // understood a question the assistant never saw.
     } catch (e) {
       debugPrint('Error in streaming response: $e');
       yield 'Xin lỗi, tôi gặp sự cố. Vui lòng thử lại sau. 🙏';
@@ -544,22 +377,18 @@ class AIChatbotService {
     _ragService.resetModel();
   }
 
-  /// Build context message with user info, short chat history, and RAG context
+  /// Build context message with user info and RAG context.
+  ///
+  /// Chat history is deliberately absent: the caller hands it to Gemini as real
+  /// conversation turns, and repeating it here made the model read its own past
+  /// replies as part of what the user had just typed.
   Future<String> _buildContextMessageAsync(
     String userMessage,
     String userName,
     bool isAdmin,
-    List<ChatMessage> history,
     String userId,
   ) async {
     final role = isAdmin ? 'Admin' : 'Người dùng';
-    final historyText = history
-        .where((m) => m.message.trim().isNotEmpty)
-        .take(12)
-        .map(
-          (m) => '${m.isUser ? 'User' : 'Assistant'}: ${m.message.replaceAll('\n', ' ')}',
-        )
-        .join('\n');
 
     // Try to get cached RAG context
     UserContext? ragContext;
@@ -595,8 +424,6 @@ class AIChatbotService {
     return '''
 [User: $userName | Role: $role]
 $ragContextStr
-[Conversation history]\n$historyText
-
 [Current user message]
 $userMessage
 ''';
@@ -654,91 +481,6 @@ $userMessage
     }
   }
 
-  /// Generate AI response based on context
-  String _generateResponse(String message, bool isAdmin) {
-    final lowerMessage = message.toLowerCase();
-
-    // Greetings
-    if (_containsAny(lowerMessage, ['xin chào', 'chào', 'hello', 'hi'])) {
-      return isAdmin
-          ? '👋 Xin chào Admin! Tôi có thể giúp gì cho bạn hôm nay? Bạn có thể hỏi về quản lý người dùng, meditations, hoặc thống kê hệ thống.'
-          : '👋 Xin chào! Tôi là trợ lý AI của Moodiki. Tôi có thể giúp bạn tìm meditations, theo dõi mood, hoặc xem báo cáo tâm lý tháng. Bạn cần giúp gì?';
-    }
-
-    // Help/Support
-    if (_containsAny(lowerMessage, ['giúp', 'help', 'trợ giúp', 'hướng dẫn'])) {
-      return isAdmin
-          ? '📚 **Tôi có thể hỗ trợ bạn:**\n\n• Quản lý người dùng (ban/unban)\n• Quản lý meditations (thêm/sửa/xóa)\n• Xem thống kê hệ thống\n• Phân tích xu hướng người dùng\n\nBạn muốn làm gì?'
-          : '📚 **Tôi có thể giúp bạn:**\n\n• Tìm meditations phù hợp\n• Theo dõi tâm trạng\n• Xem báo cáo tâm lý tháng\n• Quản lý streak\n• Tips về wellness\n\nHãy cho tôi biết bạn cần gì!';
-    }
-
-    // Meditation related
-    if (_containsAny(lowerMessage, [
-      'meditation',
-      'thiền',
-      'thư giãn',
-      'relax',
-    ])) {
-      return '🧘‍♀️ Bạn đang tìm kiếm sự thư giãn? Chúng tôi có nhiều chương trình meditation:\n\n• **Meditation cho giấc ngủ** - Giúp bạn ngủ ngon hơn\n• **Giảm stress** - Thư giãn sau ngày làm việc\n• **Tập trung** - Nâng cao năng suất\n• **Chánh niệm** - Sống trong hiện tại\n\nBạn muốn khám phá loại nào?';
-    }
-
-    // Mood tracking
-    if (_containsAny(lowerMessage, [
-      'mood',
-      'tâm trạng',
-      'cảm xúc',
-      'feeling',
-    ])) {
-      return '😊 Theo dõi tâm trạng giúp bạn hiểu rõ hơn về cảm xúc của mình!\n\nMỗi ngày, hãy dành vài giây để ghi lại cảm xúc. Bạn sẽ nhận được:\n\n• Insights về patterns cảm xúc\n• Gợi ý meditations phù hợp\n• Streak và achievements\n\nHôm nay bạn cảm thấy thế nào?';
-    }
-
-    // Statistics (Admin)
-    if (isAdmin &&
-        _containsAny(lowerMessage, [
-          'thống kê',
-          'stats',
-          'statistics',
-          'số liệu',
-        ])) {
-      return '📊 Để xem thống kê chi tiết:\n\n• **Dashboard** - Tổng quan hệ thống\n• **User Analytics** - Phân tích người dùng\n• **Meditation Stats** - Thống kê meditations\n• **Engagement** - Tỷ lệ tương tác\n\nBạn muốn xem phần nào?';
-    }
-
-    // User management (Admin)
-    if (isAdmin &&
-        _containsAny(lowerMessage, [
-          'user',
-          'người dùng',
-          'quản lý',
-          'ban',
-          'unban',
-        ])) {
-      return '👥 Quản lý người dùng:\n\n• Vào "Manage Users" để xem danh sách\n• Click vào user để xem chi tiết\n• Ban/Unban user nếu cần\n• Xem lịch sử hoạt động\n\nBạn cần làm gì cụ thể?';
-    }
-
-    // Streak/Progress
-    if (_containsAny(lowerMessage, [
-      'streak',
-      'tiến độ',
-      'progress',
-      'thành tích',
-    ])) {
-      return '🔥 Streak của bạn:\n\nGhi nhận tâm trạng liên tục mỗi ngày để duy trì streak và nhận rewards!\n\n• **Daily check-in** - Ghi nhận mood\n• **Meditation** - Hoàn thành sessions\n• **Achievements** - Mở khóa thành tích\n\nTiếp tục cố gắng nhé! 💪';
-    }
-
-    // Tips/Advice
-    if (_containsAny(lowerMessage, ['tip', 'lời khuyên', 'advice', 'gợi ý'])) {
-      return '💡 **Tips hôm nay:**\n\n🌅 Bắt đầu ngày với 5 phút meditation\n💧 Uống đủ nước\n🚶‍♀️ Đi bộ 15 phút ngoài trời\n😴 Ngủ đủ 7-8 tiếng\n📱 Giảm screen time trước khi ngủ\n\nHãy chăm sóc bản thân mỗi ngày!';
-    }
-
-    // Default response with suggestions
-    return '🤔 Tôi chưa hiểu rõ câu hỏi của bạn. Bạn có thể hỏi tôi về:\n\n• Meditations & relaxation\n• Mood tracking\n• Báo cáo tâm lý tháng\n• Tips về wellness\n${isAdmin ? '• Quản lý hệ thống (Admin)\n• Thống kê & analytics' : ''}\n\nHoặc nhập "Giúp" để xem hướng dẫn!';
-  }
-
-  /// Helper method to check if message contains any keyword
-  bool _containsAny(String message, List<String> keywords) {
-    return keywords.any((keyword) => message.contains(keyword));
-  }
-
   /// Get quick reply suggestions based on context
   List<String> getQuickReplies({bool isAdmin = false}) {
     if (isAdmin) {
@@ -757,23 +499,6 @@ $userMessage
     ];
   }
 
-  /// Save whole message list into a conversation (for compatibility)
-  Future<void> saveChatHistory(
-    List<ChatMessage> messages, {
-    String? conversationId,
-  }) async {
-    final cid = conversationId ?? await getOrCreateLatestConversation();
-    if (cid == null) return;
-
-    for (final m in messages.reversed) {
-      await saveMessage(
-        conversationId: cid,
-        content: m.message,
-        isUser: m.isUser,
-        modelName: m.isUser ? null : GeminiConfig.modelName,
-      );
-    }
-  }
 }
 
 class AIConversation {
