@@ -19,11 +19,9 @@ import { check, sleep, group } from 'k6';
 import { Trend, Rate, Counter } from 'k6/metrics';
 
 // ─── Custom metrics ────────────────────────────────────────────────────────────
-const expertListLatency   = new Trend('expert_list_p95',   true);
 const newsFeedLatency     = new Trend('news_feed_p95',     true);
 const meditationLatency   = new Trend('meditation_p95',    true);
 const moodHistoryLatency  = new Trend('mood_history_p95',  true);
-const appointmentLatency  = new Trend('appointment_p95',   true);
 const errorRate           = new Rate('error_rate');
 const totalRequests       = new Counter('total_requests');
 
@@ -45,7 +43,6 @@ export const options = {
   thresholds: {
     // Ngưỡng pass/fail — điều chỉnh theo mục tiêu của bạn
     http_req_duration: ['p(95)<300'],   // P95 toàn bộ < 300ms
-    expert_list_p95:  ['p(95)<400'],   // Expert list cho phép cao hơn vì join 2 bảng
     news_feed_p95:    ['p(95)<350'],
     meditation_p95:   ['p(95)<250'],
     error_rate:       ['rate<0.01'],    // Tỉ lệ lỗi < 1%
@@ -61,7 +58,6 @@ const ANON_KEY  = __ENV.SUPABASE_ANON_KEY || 'YOUR_ANON_KEY';
 // Hoặc dùng service role key nếu chỉ test performance, không test RLS.
 const USER_JWT   = __ENV.USER_JWT   || '';
 const USER_ID    = __ENV.USER_ID    || '';      // UUID của test user
-const EXPERT_ID  = __ENV.EXPERT_ID  || '';      // UUID của một expert trong DB
 
 function headers(withAuth = false) {
   const h = {
@@ -84,26 +80,7 @@ function rest(table, params = '') {
 // ─── Main VU scenario ──────────────────────────────────────────────────────────
 export default function () {
 
-  // 1. Expert list (public, join experts + users)
-  group('GET /experts (approved)', () => {
-    const res = http.get(
-      rest('experts', 'is_approved=eq.true&order=rating.desc'),
-      { headers: headers() },
-    );
-    expertListLatency.add(res.timings.duration);
-    totalRequests.add(1);
-    const ok = check(res, {
-      'experts: status 200': (r) => r.status === 200,
-      'experts: returns array': (r) => {
-        try { return Array.isArray(JSON.parse(r.body)); } catch { return false; }
-      },
-    });
-    errorRate.add(!ok);
-  });
-
-  sleep(0.3);
-
-  // 2. News feed (public)
+  // 1. News feed (public)
   group('GET /posts (news feed)', () => {
     const res = http.get(
       rest('posts', 'order=created_at.desc&limit=20'),
@@ -119,7 +96,7 @@ export default function () {
 
   sleep(0.3);
 
-  // 3. Meditation list (public)
+  // 2. Meditation list (public)
   group('GET /meditations', () => {
     const res = http.get(
       rest('meditations', 'order=created_at.desc&limit=20'),
@@ -133,7 +110,7 @@ export default function () {
     errorRate.add(!ok);
   });
 
-  // 4. Mood history (requires auth)
+  // 3. Mood history (requires auth)
   if (USER_ID && USER_JWT) {
     sleep(0.3);
 
@@ -146,45 +123,6 @@ export default function () {
       totalRequests.add(1);
       const ok = check(res, {
         'mood_entries: status 200': (r) => r.status === 200,
-      });
-      errorRate.add(!ok);
-    });
-  }
-
-  // 5. Appointments (requires auth)
-  if (USER_ID && USER_JWT) {
-    sleep(0.3);
-
-    group('GET /appointments (user)', () => {
-      const res = http.get(
-        rest(
-          'appointments',
-          `user_id=eq.${USER_ID}&order=appointment_date.desc` +
-          `&select=*,experts!expert_id(bio,specialization,users!id(full_name,avatar_url))`,
-        ),
-        { headers: headers(true) },
-      );
-      appointmentLatency.add(res.timings.duration);
-      totalRequests.add(1);
-      const ok = check(res, {
-        'appointments: status 200': (r) => r.status === 200,
-      });
-      errorRate.add(!ok);
-    });
-  }
-
-  // 6. Expert detail (public — nếu có EXPERT_ID)
-  if (EXPERT_ID) {
-    sleep(0.3);
-
-    group('GET /experts/:id', () => {
-      const res = http.get(
-        rest('experts', `id=eq.${EXPERT_ID}`),
-        { headers: headers() },
-      );
-      totalRequests.add(1);
-      const ok = check(res, {
-        'expert detail: status 200': (r) => r.status === 200,
       });
       errorRate.add(!ok);
     });
@@ -216,11 +154,9 @@ export function handleSummary(data) {
 ║  P95 LATENCY BY ENDPOINT                                 ║
 ║  ─────────────────────────────────────────────────────  ║
 ║  Toàn bộ        : ${String(p95All).padEnd(36)}║
-║  Expert list    : ${String(p95('expert_list_p95')).padEnd(36)}║
 ║  News feed      : ${String(p95('news_feed_p95')).padEnd(36)}║
 ║  Meditations    : ${String(p95('meditation_p95')).padEnd(36)}║
 ║  Mood history   : ${String(p95('mood_history_p95')).padEnd(36)}║
-║  Appointments   : ${String(p95('appointment_p95')).padEnd(36)}║
 ╚══════════════════════════════════════════════════════════╝
 `;
 

@@ -397,6 +397,18 @@ class AIChatbotService {
     }
   }
 
+  /// Emit [text] in small character slices to mimic token streaming for paths
+  /// that only produce a full string (e.g. the non-streaming tool-call loop).
+  /// Concatenating the slices reproduces [text] exactly.
+  Stream<String> _sliceStream(String text) async* {
+    const sliceLen = 12;
+    for (var i = 0; i < text.length; i += sliceLen) {
+      final end = (i + sliceLen < text.length) ? i + sliceLen : text.length;
+      yield text.substring(i, end);
+      await Future.delayed(const Duration(milliseconds: 25));
+    }
+  }
+
   /// Get AI response with streaming (real-time typing effect)
   Stream<String> getAIResponseStream(
     String userMessage, {
@@ -460,7 +472,9 @@ class AIChatbotService {
               aiResponse: aiText,
               userInput: userMessage,
             );
-            yield finalResponse;
+            // Slice the tool-path result so the UI still types it out
+            // progressively (the tool loop itself is non-streaming).
+            yield* _sliceStream(finalResponse);
             return;
           }
         } catch (toolError) {
