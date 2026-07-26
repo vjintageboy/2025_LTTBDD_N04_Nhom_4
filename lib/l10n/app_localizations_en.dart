@@ -1127,4 +1127,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get at => 'at';
+
+  @override
+  String get searchPosts => 'Search posts...';
+
+  @override
+  String get noNotificationsYet => 'No notifications yet';
+
+  @override
+  String get notificationsEmptyHint =>
+      'We\'ll let you know when someone interacts with your posts';
+
+  @override
+  String get markAllAsRead => 'Mark all as read';
+
+  @override
+  String get postUnavailable => 'This post is no longer available';
+
+  @override
+  String get deleteAllNotifications => 'Delete all notifications';
+
+  @override
+  String get deleteAllNotificationsConfirm =>
+      'Every notification will be deleted and cannot be restored.';
 }

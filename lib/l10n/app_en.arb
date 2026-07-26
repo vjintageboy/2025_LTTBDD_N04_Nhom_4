@@ -451,5 +451,12 @@
   "monthlyHighlights": "Monthly Highlights",
   "pleaseSelectDateAndTime": "Please select date and time",
   "pleaseLoginFirst": "Please login first",
-  "at": "at"
+  "at": "at",
+  "searchPosts": "Search posts...",
+  "noNotificationsYet": "No notifications yet",
+  "notificationsEmptyHint": "We'll let you know when someone interacts with your posts",
+  "markAllAsRead": "Mark all as read",
+  "postUnavailable": "This post is no longer available",
+  "deleteAllNotifications": "Delete all notifications",
+  "deleteAllNotificationsConfirm": "Every notification will be deleted and cannot be restored."
 }

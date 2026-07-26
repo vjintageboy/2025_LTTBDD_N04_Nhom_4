@@ -1135,4 +1135,27 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get at => 'lúc';
+
+  @override
+  String get searchPosts => 'Tìm bài viết...';
+
+  @override
+  String get noNotificationsYet => 'Chưa có thông báo nào';
+
+  @override
+  String get notificationsEmptyHint =>
+      'Chúng tôi sẽ báo cho bạn khi có người tương tác với bài viết của bạn';
+
+  @override
+  String get markAllAsRead => 'Đánh dấu tất cả đã đọc';
+
+  @override
+  String get postUnavailable => 'Bài viết không còn nữa';
+
+  @override
+  String get deleteAllNotifications => 'Xóa tất cả thông báo';
+
+  @override
+  String get deleteAllNotificationsConfirm =>
+      'Toàn bộ thông báo sẽ bị xóa và không thể khôi phục.';
 }

@@ -451,5 +451,12 @@
   "monthlyHighlights": "Nổi bật tháng này",
   "pleaseSelectDateAndTime": "Vui lòng chọn ngày và giờ",
   "pleaseLoginFirst": "Vui lòng đăng nhập trước",
-  "at": "lúc"
+  "at": "lúc",
+  "searchPosts": "Tìm bài viết...",
+  "noNotificationsYet": "Chưa có thông báo nào",
+  "notificationsEmptyHint": "Chúng tôi sẽ báo cho bạn khi có người tương tác với bài viết của bạn",
+  "markAllAsRead": "Đánh dấu tất cả đã đọc",
+  "postUnavailable": "Bài viết không còn nữa",
+  "deleteAllNotifications": "Xóa tất cả thông báo",
+  "deleteAllNotificationsConfirm": "Toàn bộ thông báo sẽ bị xóa và không thể khôi phục."
 }

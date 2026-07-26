@@ -2275,6 +2275,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'at'**
   String get at;
+
+  /// No description provided for @searchPosts.
+  ///
+  /// In en, this message translates to:
+  /// **'Search posts...'**
+  String get searchPosts;
+
+  /// No description provided for @noNotificationsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get noNotificationsYet;
+
+  /// No description provided for @notificationsEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll let you know when someone interacts with your posts'**
+  String get notificationsEmptyHint;
+
+  /// No description provided for @markAllAsRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get markAllAsRead;
+
+  /// No description provided for @postUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This post is no longer available'**
+  String get postUnavailable;
+
+  /// No description provided for @deleteAllNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all notifications'**
+  String get deleteAllNotifications;
+
+  /// No description provided for @deleteAllNotificationsConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Every notification will be deleted and cannot be restored.'**
+  String get deleteAllNotificationsConfirm;
 }
 
 class _AppLocalizationsDelegate
