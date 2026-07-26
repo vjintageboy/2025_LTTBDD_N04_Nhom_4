@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/meditation.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/image_source.dart';
 import 'edit_meditation_page.dart';
 import 'add_meditation_page.dart';
 
@@ -374,8 +375,10 @@ class _MeditationManagementPageState extends State<MeditationManagementPage> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: meditation.thumbnailUrl != null
-                    ? Image.network(
-                        meditation.thumbnailUrl!,
+                    ? Image(
+                        image: imageProviderFromSource(
+                          meditation.thumbnailUrl!,
+                        ),
                         width: 80,
                         height: 80,
                         fit: BoxFit.cover,

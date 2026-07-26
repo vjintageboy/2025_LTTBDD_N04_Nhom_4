@@ -103,13 +103,18 @@ class _MeditationDetailPageState extends State<MeditationDetailPage>
     });
 
     // Listen to duration changes
-    _audioPlayer.onDurationChanged.listen((duration) {
-      if (mounted) {
-        setState(() {
-          _duration = duration;
-        });
-      }
-    });
+    _audioPlayer.onDurationChanged.listen(
+      (duration) {
+        if (mounted) {
+          setState(() {
+            _duration = duration;
+          });
+        }
+      },
+      // Swallow media errors here; the completion stream below surfaces them
+      // to the user. Without onError they'd become uncaught async errors.
+      onError: (Object _) {},
+    );
 
     // Listen to position changes
     _audioPlayer.onPositionChanged.listen((position) {
@@ -121,14 +126,31 @@ class _MeditationDetailPageState extends State<MeditationDetailPage>
     });
 
     // Listen to completion
-    _audioPlayer.onPlayerComplete.listen((event) {
-      if (mounted) {
+    _audioPlayer.onPlayerComplete.listen(
+      (event) {
+        if (mounted) {
+          setState(() {
+            _isPlaying = false;
+            _position = Duration.zero;
+          });
+        }
+      },
+      // Web media errors (unreachable URL / unsupported format) arrive here.
+      onError: (Object _) {
+        if (!mounted) return;
+        _waveAnimationController.stop();
         setState(() {
           _isPlaying = false;
           _position = Duration.zero;
         });
-      }
-    });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Không phát được audio (nguồn không hỗ trợ)'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _playPause() async {
@@ -138,9 +160,21 @@ class _MeditationDetailPageState extends State<MeditationDetailPage>
     } else {
       if (widget.meditation.audioUrl != null &&
           widget.meditation.audioUrl!.isNotEmpty) {
-        // Play from URL
-        await _audioPlayer.play(ap.UrlSource(widget.meditation.audioUrl!));
-        _waveAnimationController.forward();
+        // Play from URL. On mobile a bad source can throw synchronously; on web
+        // the failure arrives via the completion stream's onError above.
+        try {
+          await _audioPlayer.play(ap.UrlSource(widget.meditation.audioUrl!));
+          _waveAnimationController.forward();
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Không phát được audio (nguồn không hỗ trợ)'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
       } else {
         // If no URL, show a message
         if (mounted) {

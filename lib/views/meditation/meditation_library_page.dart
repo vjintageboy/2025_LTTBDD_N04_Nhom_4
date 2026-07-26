@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../core/services/localization_service.dart';
+import '../../core/utils/image_source.dart';
 import '../../models/meditation.dart';
 import '../../services/supabase_service.dart';
 import 'meditation_detail_page.dart';
@@ -279,8 +280,10 @@ class _MeditationLibraryPageState extends State<MeditationLibraryPage> {
                 child:
                     meditation.thumbnailUrl != null &&
                         meditation.thumbnailUrl!.isNotEmpty
-                    ? Image.network(
-                        meditation.thumbnailUrl!,
+                    ? Image(
+                        image: imageProviderFromSource(
+                          meditation.thumbnailUrl!,
+                        ),
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           // Fallback to gradient if image fails

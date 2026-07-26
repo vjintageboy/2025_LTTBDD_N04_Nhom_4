@@ -1,9 +1,13 @@
+import 'dart:convert';
+import 'package:audioplayers/audioplayers.dart' as ap;
 import 'package:flutter/material.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/meditation.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/image_source.dart';
 import 'admin_form_styles.dart';
 
 /// Edit Meditation Page - Trang chỉnh sửa meditation (Admin only)
@@ -22,12 +26,15 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
   late TextEditingController _descriptionController;
   late TextEditingController _durationController;
   late TextEditingController _audioUrlController;
-  late TextEditingController _thumbnailUrlController;
+  String? _thumbnailData; // base64 or existing URL of the cover image
 
   final _supabase = Supabase.instance.client;
   late MeditationCategory _selectedCategory;
   late MeditationLevel _selectedLevel;
   bool _isSaving = false;
+
+  final ap.AudioPlayer _previewPlayer = ap.AudioPlayer();
+  bool _isPreviewPlaying = false;
 
   @override
   void initState() {
@@ -42,11 +49,28 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
     _audioUrlController = TextEditingController(
       text: widget.meditation.audioUrl ?? '',
     );
-    _thumbnailUrlController = TextEditingController(
-      text: widget.meditation.thumbnailUrl ?? '',
-    );
+    _thumbnailData = widget.meditation.thumbnailUrl;
     _selectedCategory = widget.meditation.category;
     _selectedLevel = widget.meditation.level;
+    _previewPlayer.onPlayerComplete.listen(
+      (_) {
+        if (mounted) setState(() => _isPreviewPlaying = false);
+      },
+      // audioplayers surfaces web media errors (unreachable URL / unsupported
+      // format) through this stream; without onError they become uncaught
+      // async errors.
+      onError: (Object _) {
+        if (!mounted) return;
+        setState(() => _isPreviewPlaying = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Không phát được link này (định dạng/nguồn không hỗ trợ trên web)',
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -55,8 +79,62 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
     _descriptionController.dispose();
     _durationController.dispose();
     _audioUrlController.dispose();
-    _thumbnailUrlController.dispose();
+    _previewPlayer.dispose();
     super.dispose();
+  }
+
+  String? _validateAudioUrl(String? value) {
+    final v = value?.trim() ?? '';
+    if (v.isEmpty) return null; // optional
+    if (!v.startsWith('http://') && !v.startsWith('https://')) {
+      return 'URL phải bắt đầu bằng http:// hoặc https://';
+    }
+    return null;
+  }
+
+  Future<void> _pickThumbnail() async {
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 70,
+      );
+      if (picked == null) return;
+      final bytes = await picked.readAsBytes();
+      setState(() => _thumbnailData = base64Encode(bytes));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi chọn ảnh: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _togglePreview() async {
+    final url = _audioUrlController.text.trim();
+    if (url.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Chưa có đường dẫn âm thanh')),
+      );
+      return;
+    }
+    if (_isPreviewPlaying) {
+      await _previewPlayer.stop();
+      if (mounted) setState(() => _isPreviewPlaying = false);
+      return;
+    }
+    try {
+      await _previewPlayer.play(ap.UrlSource(url));
+      if (mounted) setState(() => _isPreviewPlaying = true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Không phát được: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _saveMeditation() async {
@@ -73,9 +151,7 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
         'audio_url': _audioUrlController.text.trim().isEmpty
             ? null
             : _audioUrlController.text.trim(),
-        'thumbnail_url': _thumbnailUrlController.text.trim().isEmpty
-            ? null
-            : _thumbnailUrlController.text.trim(),
+        'thumbnail_url': _thumbnailData,
       };
 
       await _supabase
@@ -276,7 +352,8 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
             ),
             const SizedBox(height: 16),
 
-            // Audio URL
+            // Audio URL — kept as a URL: playback streams via UrlSource, and
+            // base64 is the wrong tool for multi-MB mp3s.
             TextFormField(
               controller: _audioUrlController,
               style: GoogleFonts.manrope(color: AppColors.osOnSurface),
@@ -285,19 +362,34 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
                 hint: 'https://example.com/audio.mp3',
                 icon: IconsaxPlusLinear.music,
               ),
+              validator: _validateAudioUrl,
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: _togglePreview,
+                icon: Icon(
+                  _isPreviewPlaying
+                      ? IconsaxPlusLinear.pause
+                      : IconsaxPlusLinear.play,
+                  size: 18,
+                  color: AppColors.osPrimary,
+                ),
+                label: Text(
+                  _isPreviewPlaying ? 'Dừng' : 'Nghe thử',
+                  style: GoogleFonts.manrope(
+                    color: AppColors.osPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 16),
 
-            // Thumbnail URL
-            TextFormField(
-              controller: _thumbnailUrlController,
-              style: GoogleFonts.manrope(color: AppColors.osOnSurface),
-              decoration: osFieldDecoration(
-                label: 'Đường dẫn ảnh bìa (tùy chọn)',
-                hint: 'https://example.com/image.jpg',
-                icon: IconsaxPlusLinear.gallery,
-              ),
-            ),
+            // Cover image — pick from gallery, stored as base64 (like avatars/
+            // posts/mood), so no Storage bucket is needed.
+            _buildThumbnailPicker(),
             const SizedBox(height: 32),
 
             // Save Button
@@ -332,6 +424,88 @@ class _EditMeditationPageState extends State<EditMeditationPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildThumbnailPicker() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Ảnh bìa (tùy chọn)',
+          style: GoogleFonts.manrope(
+            color: AppColors.osOnSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (_thumbnailData != null && _thumbnailData!.isNotEmpty) ...[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Stack(
+              children: [
+                AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Image(
+                    image: imageProviderFromSource(_thumbnailData!),
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () => setState(() => _thumbnailData = null),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        InkWell(
+          onTap: _pickThumbnail,
+          borderRadius: BorderRadius.circular(14),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.osSurfaceContainerHighest,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  IconsaxPlusLinear.gallery,
+                  color: AppColors.osPrimary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  _thumbnailData == null ? 'Chọn ảnh bìa' : 'Đổi ảnh khác',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: AppColors.osPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
