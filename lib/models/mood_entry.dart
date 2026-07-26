@@ -8,6 +8,7 @@ class MoodEntry {
   final DateTime timestamp;
   final List<String> emotionFactors;
   final List<String> tags;
+  final String? imageUrl; // base64 string or remote URL
 
   MoodEntry({
     required this.entryId,
@@ -17,6 +18,7 @@ class MoodEntry {
     required this.timestamp,
     this.emotionFactors = const [],
     this.tags = const [],
+    this.imageUrl,
   });
 
   // Convert to Map for Supabase
@@ -28,6 +30,7 @@ class MoodEntry {
       'note': note,
       'emotion_factors': emotionFactors,
       'tags': tags,
+      'image_url': imageUrl,
       // created_at is handled by DB
     };
   }
@@ -44,6 +47,7 @@ class MoodEntry {
           : DateTime.now(),
       emotionFactors: _parseList(map['emotion_factors']),
       tags: _parseList(map['tags']),
+      imageUrl: map['image_url']?.toString(),
     );
   }
 

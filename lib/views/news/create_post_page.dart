@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -70,7 +69,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
       // ponytail: base64 in the image_url column, mirroring how avatars are
       // stored in this app. Upgrade path: upload to a Supabase Storage bucket
       // if post images grow large/numerous.
-      final bytes = await File(picked.path).readAsBytes();
+      // XFile.readAsBytes() works on web too; dart:io File(picked.path) throws
+      // "Unsupported operation" there.
+      final bytes = await picked.readAsBytes();
       setState(() => _imageUrl = base64Encode(bytes));
     } catch (e) {
       if (mounted) {
@@ -79,6 +80,77 @@ class _CreatePostPageState extends State<CreatePostPage> {
         );
       }
     }
+  }
+
+  /// Asks for a URL and appends it to the post content.
+  Future<void> _attachLink() async {
+    final l10n = context.l10n;
+    final controller = TextEditingController();
+    final url = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: _kSurfaceContainerLowest,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          l10n.attachLink,
+          style: GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.w700,
+            color: _kOnSurface,
+          ),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: TextInputType.url,
+          style: GoogleFonts.manrope(color: _kOnSurface),
+          decoration: InputDecoration(
+            hintText: 'https://...',
+            hintStyle: GoogleFonts.manrope(
+              color: _kOnSurfaceVariant.withValues(alpha: 0.5),
+            ),
+            filled: true,
+            fillColor: _kSurfaceContainerLow,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          onSubmitted: (v) => Navigator.pop(ctx, v),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              l10n.cancel,
+              style: GoogleFonts.manrope(color: _kOnSurfaceVariant),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, controller.text),
+            child: Text(
+              l10n.confirm,
+              style: GoogleFonts.manrope(
+                color: _kPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (url == null || url.trim().isEmpty) return;
+    var link = url.trim();
+    if (!link.startsWith('http://') && !link.startsWith('https://')) {
+      link = 'https://$link';
+    }
+    final existing = _contentController.text;
+    final sep = existing.isEmpty || existing.endsWith('\n') ? '' : '\n';
+    _contentController.text = '$existing$sep$link';
+    _contentController.selection = TextSelection.fromPosition(
+      TextPosition(offset: _contentController.text.length),
+    );
+    setState(() {});
   }
 
   @override
@@ -644,6 +716,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
           child: _MediaButton(
             icon: IconsaxPlusLinear.link,
             label: l10n.attachLink,
+            onTap: _attachLink,
           ),
         ),
       ],

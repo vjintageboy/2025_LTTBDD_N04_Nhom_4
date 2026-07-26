@@ -71,13 +71,17 @@ class SupabaseService {
 
   // --- Mood Entries ---
   Future<void> createMoodEntry(MoodEntry entry) async {
-    await _supabase.from('mood_entries').insert({
+    final data = <String, dynamic>{
       'user_id': entry.userId,
       'mood_score': entry.moodLevel,
       'note': entry.note,
       'emotion_factors': entry.emotionFactors,
       'tags': entry.tags,
-    });
+    };
+    // Only sent when a photo is attached, so mood logging keeps working even
+    // before the image_url column migration is applied.
+    if (entry.imageUrl != null) data['image_url'] = entry.imageUrl;
+    await _supabase.from('mood_entries').insert(data);
 
     // ✅ Tự động tính lại streak sau mỗi lần log mood
     await recalculateStreak(entry.userId);

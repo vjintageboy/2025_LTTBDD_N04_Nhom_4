@@ -62,6 +62,7 @@ model MoodEntry {
   note           String?  @db.Text
   emotionFactors String[] @map("emotion_factors")
   tags           String[]
+  imageUrl       String?  @map("image_url") @db.Text
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
 

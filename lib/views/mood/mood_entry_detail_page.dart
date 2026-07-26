@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:intl/intl.dart';
@@ -405,6 +406,20 @@ class _MoodEntryDetailPageState extends State<MoodEntryDetailPage> {
                   ),
                 ),
               ),
+
+              // Attached photo (read-only)
+              if (widget.entry.imageUrl != null &&
+                  widget.entry.imageUrl!.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.memory(
+                    base64Decode(widget.entry.imageUrl!),
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ],
 
               const SizedBox(height: 32),
 

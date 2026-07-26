@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../models/mood_entry.dart';
 import '../../core/services/localization_service.dart';
 import '../../core/constants/app_colors.dart';
@@ -22,6 +24,7 @@ class _MoodLogPageState extends State<MoodLogPage> {
   late int _selectedMoodLevel;
   final Set<String> _selectedFactors = {};
   bool _isSaving = false;
+  String? _imageUrl; // base64 of an attached photo, null if none
 
   static const Color _kBg = Color(0xFFDBFCDF);
 
@@ -94,6 +97,28 @@ class _MoodLogPageState extends State<MoodLogPage> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 70,
+      );
+      if (picked == null) return;
+      // base64 in the image_url column, same as post/avatar images.
+      // XFile.readAsBytes() works on web too (dart:io File would throw there).
+      final bytes = await picked.readAsBytes();
+      setState(() => _imageUrl = base64Encode(bytes));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e')),
+        );
+      }
+    }
+  }
+
   Future<void> _saveMoodEntry() async {
     final user = _supabaseService.currentUser;
     if (user == null) return;
@@ -109,6 +134,7 @@ class _MoodLogPageState extends State<MoodLogPage> {
         emotionFactors: _selectedFactors.toList(),
         tags: [],
         timestamp: DateTime.now(),
+        imageUrl: _imageUrl,
       );
 
       await _supabaseService.createMoodEntry(moodEntry);
@@ -367,25 +393,58 @@ class _MoodLogPageState extends State<MoodLogPage> {
               contentPadding: const EdgeInsets.all(20),
               suffixIcon: Padding(
                 padding: const EdgeInsets.only(right: 8, bottom: 8),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildNoteAction(IconsaxPlusLinear.gallery),
-                    const SizedBox(width: 6),
-                    _buildNoteAction(IconsaxPlusLinear.microphone_2),
-                  ],
+                child: _buildNoteAction(
+                  IconsaxPlusLinear.gallery,
+                  onTap: _pickImage,
                 ),
               ),
             ),
           ),
         ),
+        if (_imageUrl != null) ...[
+          const SizedBox(height: 12),
+          _buildImagePreview(),
+        ],
       ],
     );
   }
 
-  Widget _buildNoteAction(IconData icon) {
+  Widget _buildImagePreview() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Stack(
+        children: [
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Image.memory(
+              base64Decode(_imageUrl!),
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned(
+            top: 8,
+            right: 8,
+            child: GestureDetector(
+              onTap: () => setState(() => _imageUrl = null),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, color: Colors.white, size: 18),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoteAction(IconData icon, {required VoidCallback onTap}) {
     return GestureDetector(
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
