@@ -8,6 +8,7 @@ import '../../models/news_post.dart';
 import '../../services/news_service.dart';
 import '../../services/supabase_service.dart';
 import '../../core/services/localization_service.dart';
+import '../../core/utils/image_source.dart';
 import 'create_post_page.dart';
 import 'post_detail_page.dart';
 
@@ -33,6 +34,7 @@ class NewsFeedPage extends StatefulWidget {
 class _NewsFeedPageState extends State<NewsFeedPage> {
   final NewsService _newsService = NewsService();
   final _sortButtonKey = GlobalKey();
+  final _searchController = TextEditingController();
   late final String currentUserId;
   Map<String, bool>? _optimisticLikeState;
   Map<String, int>? _optimisticLikeCount;
@@ -40,11 +42,50 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
 
   PostCategory? _selectedCategory;
   SortBy _sortBy = SortBy.latest;
+  bool _isSearching = false;
+  String _searchQuery = '';
+  String? _avatarUrl;
 
   @override
   void initState() {
     super.initState();
     currentUserId = SupabaseService.instance.currentUser!.id;
+    _loadAvatar();
+  }
+
+  /// The uploaded photo lives in `users.avatar_url`; auth metadata only ever
+  /// carries a Google sign-in photo, so it cannot be the source here.
+  Future<void> _loadAvatar() async {
+    final profile = await SupabaseService.instance.getUserProfile(currentUserId);
+    if (!mounted) return;
+    setState(() => _avatarUrl = profile?['avatar_url'] as String?);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _closeSearch() {
+    _searchController.clear();
+    setState(() {
+      _isSearching = false;
+      _searchQuery = '';
+    });
+  }
+
+  /// Filters the streamed posts in memory — the feed already holds every post,
+  /// so searching needs no extra query.
+  List<NewsPost> _filterPosts(List<NewsPost> posts) {
+    final query = _searchQuery.trim().toLowerCase();
+    if (query.isEmpty) return posts;
+    return posts
+        .where((post) =>
+            post.title.toLowerCase().contains(query) ||
+            post.content.toLowerCase().contains(query) ||
+            post.authorName.toLowerCase().contains(query))
+        .toList();
   }
 
   String _formatTime(DateTime dateTime) {
@@ -83,7 +124,8 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
   }
 
   PreferredSizeWidget _buildGlassAppBar() {
-    final user = SupabaseService.instance.currentUser;
+    // Stored as base64, so NetworkImage cannot render it.
+    final avatar = imageProviderFromSource(_avatarUrl);
     return PreferredSize(
       preferredSize: const Size.fromHeight(72),
       child: ClipRect(
@@ -97,16 +139,16 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                 height: 72,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
+                  child: _isSearching
+                      ? _buildSearchField()
+                      : Row(
                     children: [
                       // Avatar user hiện tại
                       CircleAvatar(
                         radius: 20,
                         backgroundColor: _kPrimaryContainer,
-                        backgroundImage: (user?.userMetadata?['avatar_url'] as String?)?.isNotEmpty == true
-                            ? NetworkImage(user!.userMetadata!['avatar_url'] as String)
-                            : null,
-                        child: (user?.userMetadata?['avatar_url'] as String?)?.isNotEmpty != true
+                        backgroundImage: avatar,
+                        child: avatar == null
                             ? Icon(IconsaxPlusBold.user, size: 20, color: _kPrimary)
                             : null,
                       ),
@@ -123,13 +165,9 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                       const Spacer(),
                       IconButton(
                         icon: const Icon(IconsaxPlusLinear.search_normal_1, color: _kOnSurface),
-                        onPressed: () {},
+                        onPressed: () => setState(() => _isSearching = true),
                         splashRadius: 22,
-                      ),
-                      IconButton(
-                        icon: const Icon(IconsaxPlusLinear.notification, color: _kOnSurface),
-                        onPressed: () {},
-                        splashRadius: 22,
+                        tooltip: context.l10n.search,
                       ),
                       IconButton(
                         icon: const Icon(IconsaxPlusLinear.add, color: _kOnSurface),
@@ -152,6 +190,58 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    final l10n = context.l10n;
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _searchController,
+            autofocus: true,
+            textInputAction: TextInputAction.search,
+            onChanged: (value) => setState(() => _searchQuery = value),
+            style: GoogleFonts.manrope(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: _kOnSurface,
+            ),
+            decoration: InputDecoration(
+              hintText: l10n.searchPosts,
+              hintStyle: GoogleFonts.manrope(
+                fontSize: 15,
+                color: _kOnSurfaceVariant,
+              ),
+              prefixIcon: const Icon(
+                IconsaxPlusLinear.search_normal_1,
+                size: 20,
+                color: _kOnSurfaceVariant,
+              ),
+              filled: true,
+              fillColor: _kSurfaceContainerLowest,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(9999),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: _closeSearch,
+          child: Text(
+            l10n.cancel,
+            style: GoogleFonts.manrope(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: _kPrimary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -319,7 +409,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
           return const Center(child: CircularProgressIndicator(color: _kPrimary));
         }
 
-        final posts = snapshot.data!;
+        final posts = _filterPosts(snapshot.data!);
         final sortedPosts = _sortPosts(posts);
 
         if (sortedPosts.isEmpty) {
@@ -339,7 +429,9 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  l10n.beFirstToShare,
+                  _searchQuery.trim().isEmpty
+                      ? l10n.beFirstToShare
+                      : l10n.tryDifferentSearch,
                   style: TextStyle(color: _kOnSurfaceVariant),
                 ),
               ],
@@ -348,7 +440,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
         }
 
         return RefreshIndicator(
-          onRefresh: () async => setState(() {}),
+          onRefresh: _loadAvatar,
           color: _kPrimary,
           child: ListView.builder(
             padding: const EdgeInsets.only(top: 8, bottom: 120),
