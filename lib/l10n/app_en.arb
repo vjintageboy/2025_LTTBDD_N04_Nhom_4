@@ -126,6 +126,7 @@
   "emailInvalid": "Please enter a valid email",
   "passwordRequired": "Password is required",
   "passwordTooShort": "Password must be at least 6 characters",
+  "passwordWeak": "Password must be at least 8 characters with an uppercase letter, a lowercase letter, a number and a special character",
   "passwordsDoNotMatch": "Passwords do not match",
   "nameRequired": "Name is required",
   "nameTooShort": "Name must be at least 2 characters",

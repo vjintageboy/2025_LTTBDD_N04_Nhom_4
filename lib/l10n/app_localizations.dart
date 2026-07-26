@@ -656,6 +656,12 @@ abstract class AppLocalizations {
   /// **'Password must be at least 6 characters'**
   String get passwordTooShort;
 
+  /// No description provided for @passwordWeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 8 characters with an uppercase letter, a lowercase letter, a number and a special character'**
+  String get passwordWeak;
+
   /// No description provided for @passwordsDoNotMatch.
   ///
   /// In en, this message translates to:

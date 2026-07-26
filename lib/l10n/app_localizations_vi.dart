@@ -300,6 +300,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get passwordTooShort => 'Mật khẩu phải có ít nhất 6 ký tự';
 
   @override
+  String get passwordWeak =>
+      'Mật khẩu phải từ 8 ký tự trở lên, gồm chữ hoa, chữ thường, số và ký tự đặc biệt';
+
+  @override
   String get passwordsDoNotMatch => 'Mật khẩu không khớp';
 
   @override

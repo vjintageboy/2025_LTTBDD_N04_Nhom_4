@@ -126,6 +126,7 @@
   "emailInvalid": "Vui lòng nhập email hợp lệ",
   "passwordRequired": "Mật khẩu là bắt buộc",
   "passwordTooShort": "Mật khẩu phải có ít nhất 6 ký tự",
+  "passwordWeak": "Mật khẩu phải từ 8 ký tự trở lên, gồm chữ hoa, chữ thường, số và ký tự đặc biệt",
   "passwordsDoNotMatch": "Mật khẩu không khớp",
   "nameRequired": "Tên là bắt buộc",
   "nameTooShort": "Tên phải có ít nhất 2 ký tự",

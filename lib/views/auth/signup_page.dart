@@ -9,6 +9,7 @@ import '../../core/providers/auth_provider.dart';
 import '../../core/services/localization_service.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/password_validator.dart';
 import '../../shared/widgets/modern_text_field.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/social_button.dart';
@@ -289,8 +290,8 @@ class _SignUpPageState extends State<SignUpPage>
                         if (value == null || value.isEmpty) {
                           return context.l10n.password;
                         }
-                        if (value.length < 6) {
-                          return context.l10n.password;
+                        if (!isStrongPassword(value)) {
+                          return context.l10n.passwordWeak;
                         }
                         return null;
                       },
