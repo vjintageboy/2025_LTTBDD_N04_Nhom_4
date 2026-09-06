@@ -8,6 +8,7 @@ import '../core/config/gemini_config.dart';
 import '../core/config/system_prompt.dart';
 import '../ai/safety_filter.dart';
 import '../ai/disclaimer.dart';
+import '../services/fallback_ai_service.dart';
 import '../services/rag_service.dart';
 
 /// AI Chatbot Service - Xử lý logic chatbot và AI responses
@@ -25,12 +26,6 @@ class AIChatbotService {
 
   // RAG service for dynamic context building
   final RAGService _ragService = RAGService();
-
-  // Cache for user context to avoid rebuilding on every message
-  UserContext? _cachedContext;
-  String? _contextUserId;
-  DateTime? _contextBuiltAt;
-  static const Duration _contextTTL = Duration(minutes: 5);
 
   // Initialize Gemini model
   void _initializeGemini() {
@@ -85,41 +80,6 @@ class AIChatbotService {
   // ===========================================================================
   // CONVERSATION + MESSAGE STORAGE (Supabase)
   // ===========================================================================
-
-  Future<String?> getOrCreateLatestConversation({String? title}) async {
-    final user = _currentUser;
-    if (user == null) return null;
-
-    try {
-      final latest = await _supabase
-          .from('ai_conversations')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('is_archived', false)
-          .order('updated_at', ascending: false)
-          .limit(1)
-          .maybeSingle();
-
-      if (latest != null && latest['id'] != null) {
-        return latest['id'].toString();
-      }
-
-      final created = await _supabase
-          .from('ai_conversations')
-          .insert({
-            'user_id': user.id,
-            'title': title ?? 'New conversation',
-            'is_archived': false,
-          })
-          .select('id')
-          .single();
-
-      return created['id']?.toString();
-    } catch (e) {
-      debugPrint('Error getOrCreateLatestConversation: $e');
-      return null;
-    }
-  }
 
   Future<String?> createConversation({String? title}) async {
     final user = _currentUser;
@@ -235,19 +195,32 @@ class AIChatbotService {
   /// Emit [text] in small character slices to mimic token streaming for paths
   /// that only produce a full string (e.g. the non-streaming tool-call loop).
   /// Concatenating the slices reproduces [text] exactly.
-  Stream<String> _sliceStream(String text) async* {
+  ///
+  /// A slice never ends inside a surrogate pair: Dart strings are UTF-16, so a
+  /// cut between the two halves of an emoji leaves a lone high surrogate on
+  /// screen and Text() throws "string is not well-formed UTF-16".
+  @visibleForTesting
+  static Stream<String> sliceStream(String text) async* {
     const sliceLen = 12;
-    for (var i = 0; i < text.length; i += sliceLen) {
-      final end = (i + sliceLen < text.length) ? i + sliceLen : text.length;
+    var i = 0;
+    while (i < text.length) {
+      var end = (i + sliceLen < text.length) ? i + sliceLen : text.length;
+      if (end < text.length && (text.codeUnitAt(end - 1) & 0xFC00) == 0xD800) {
+        end++;
+      }
       yield text.substring(i, end);
+      i = end;
       await Future.delayed(const Duration(milliseconds: 25));
     }
   }
 
   /// Get AI response with streaming (real-time typing effect)
+  /// [modelOverride] pins an OpenRouter model the user picked in the UI; the
+  /// Gemini paths (tools + streaming) are skipped entirely in that case.
   Stream<String> getAIResponseStream(
     String userMessage, {
     String? conversationId,
+    String? modelOverride,
   }) async* {
     try {
       // ── Safety pre-check ──────────────────────────────────────
@@ -275,6 +248,14 @@ class AIChatbotService {
           ? <ChatMessage>[]
           : await getConversationMessages(conversationId, limit: 12);
 
+      // The provider has already saved the current message, so it comes back
+      // as the newest row here; drop it or the model sees it as two user turns.
+      if (history.isNotEmpty &&
+          history.first.isUser &&
+          history.first.message == userMessage) {
+        history.removeAt(0);
+      }
+
       // Handed to Gemini as real conversation turns, so it is deliberately kept
       // out of the context blob below: sending both made the model read its own
       // past replies as part of what the user had just typed.
@@ -294,7 +275,9 @@ class AIChatbotService {
       }
 
       // Try function calling path first (non-streaming tool loop, then yield result)
-      if (_toolController != null && _modelWithTools != null) {
+      if (modelOverride == null &&
+          _toolController != null &&
+          _modelWithTools != null) {
         try {
           debugPrint('[AIChatbot] Stream: trying function calling path');
           final chat = _modelWithTools!.startChat(history: geminiHistory);
@@ -311,7 +294,7 @@ class AIChatbotService {
             );
             // Slice the tool-path result so the UI still types it out
             // progressively (the tool loop itself is non-streaming).
-            yield* _sliceStream(finalResponse);
+            yield* sliceStream(finalResponse);
             return;
           }
         } catch (toolError) {
@@ -321,32 +304,36 @@ class AIChatbotService {
       }
 
       // Try Gemini streaming (no tools / fallback)
-      if (_model != null) {
+      if (modelOverride == null && _model != null) {
         try {
           final responseStream = _model!
               .startChat(history: geminiHistory)
               .sendMessageStream(Content.text(contextMessage));
 
-          bool yielded = false;
+          // Buffered on purpose, not streamed straight through: a chunk that
+          // is already on screen cannot be taken back, so yielding live makes
+          // a MAX_TOKENS cut permanently visible. Costs almost no perceived
+          // latency — gemini-2.5-flash finishes thinking before it emits its
+          // first token either way — and _sliceStream types it out anyway,
+          // exactly like the other two lanes.
           String fullResponse = '';
+          bool truncated = false;
           await for (final chunk in responseStream) {
             final text = chunk.text;
-            if (text != null && text.isNotEmpty) {
-              fullResponse += text;
-              yielded = true;
-              yield text;
+            if (text != null && text.isNotEmpty) fullResponse += text;
+            if (chunk.candidates.firstOrNull?.finishReason ==
+                FinishReason.maxTokens) {
+              truncated = true;
             }
           }
 
-          if (yielded) {
-            // Inject disclaimer at the end if needed (final chunk)
-            final withDisclaimer = DisclaimerInjector.maybeAdd(
+          if (truncated) {
+            debugPrint('[AIChatbot] Stream: hit MAX_TOKENS, dropping to fallback');
+          } else if (fullResponse.isNotEmpty) {
+            yield* sliceStream(DisclaimerInjector.maybeAdd(
               aiResponse: fullResponse,
               userInput: userMessage,
-            );
-            if (withDisclaimer != fullResponse) {
-              yield withDisclaimer.substring(fullResponse.length);
-            }
+            ));
             return;
           }
         } catch (geminiError) {
@@ -354,7 +341,27 @@ class AIChatbotService {
         }
       }
 
-      // Nothing worked: Gemini is unreachable or unconfigured. Yielding nothing
+      // Either the user pinned an OpenRouter model, or every Gemini path
+      // failed (quota, network, safety block, empty answer).
+      final fallbackText = await FallbackAIService.complete(
+        model: modelOverride,
+        systemPrompt: GeminiConfig.systemPrompt,
+        userMessage: contextMessage.isNotEmpty ? contextMessage : userMessage,
+        history: history.reversed
+            .where((m) => m.message.trim().isNotEmpty)
+            .map((m) => (isUser: m.isUser, text: m.message))
+            .toList(),
+      );
+      if (fallbackText.isNotEmpty) {
+        yield* sliceStream(DisclaimerInjector.maybeAdd(
+          aiResponse: fallbackText,
+          userInput: userMessage,
+        ));
+        return;
+      }
+
+      // Nothing worked: Gemini and every backup model are unreachable or
+      // unconfigured. Yielding nothing
       // lets ChatbotProvider surface its "không thể trả lời lúc này" message,
       // which beats a keyword-matched canned answer pretending to have
       // understood a question the assistant never saw.
@@ -370,10 +377,6 @@ class AIChatbotService {
     // Prevents stale userId from a previous user's session leaking into tool calls.
     _toolController = null;
     _modelWithTools = null;
-    // Also clear RAG context cache
-    _cachedContext = null;
-    _contextUserId = null;
-    _contextBuiltAt = null;
     _ragService.resetModel();
   }
 
@@ -390,29 +393,19 @@ class AIChatbotService {
   ) async {
     final role = isAdmin ? 'Admin' : 'Người dùng';
 
-    // Try to get cached RAG context
+    // Built fresh every turn (~1s): the meditation search is keyed on this
+    // very message, so the old 5-minute cache answered "khó ngủ" with whatever
+    // matched the message before it.
     UserContext? ragContext;
-    final now = DateTime.now();
-    if (_contextUserId == userId &&
-        _cachedContext != null &&
-        _contextBuiltAt != null &&
-        now.difference(_contextBuiltAt!) < _contextTTL) {
-      ragContext = _cachedContext;
-      debugPrint('[AIChatbot] Using cached RAG context');
-    } else {
-      // Build fresh RAG context
-      try {
-        ragContext = await _ragService.buildUserContext(
-          userId: userId,
-          lastMessage: userMessage,
-        );
-        _cachedContext = ragContext;
-        _contextUserId = userId;
-        _contextBuiltAt = now;
-      } catch (e) {
-        debugPrint('[AIChatbot] Failed to build RAG context: $e');
-      }
+    try {
+      ragContext = await _ragService.buildUserContext(
+        userId: userId,
+        lastMessage: userMessage,
+      );
+    } catch (e) {
+      debugPrint('[AIChatbot] Failed to build RAG context: $e');
     }
+    final now = DateTime.now();
 
     // Build the full context string
     String ragContextStr = '';
@@ -420,11 +413,16 @@ class AIChatbotService {
       ragContextStr = '\n${ragContext.toPromptContext()}\n';
     }
 
-    // Use dynamic system prompt template instead of inline string
+    // Shape mirrors the "Ngữ cảnh mỗi lượt" section of the system prompt.
+    // Today's date is what lets "báo cáo tháng này" resolve to month/year
+    // for the report tool — the model has no clock of its own.
     return '''
-[User: $userName | Role: $role]
-$ragContextStr
-[Current user message]
+<context>
+Hôm nay: ${now.day}/${now.month}/${now.year}
+Người dùng: $userName (vai trò: $role)
+$ragContextStr</context>
+
+Dựa vào ngữ cảnh trên, trả lời tin nhắn này của người dùng:
 $userMessage
 ''';
   }
