@@ -446,6 +446,19 @@
   "flow": "Flow",
   "growth": "Growth",
   "keyInfluencers": "Key Influencers",
+  "aiInsight": "AI Insight",
+  "aiInsightPrompt": "Let AI read your mood data for this period and point out what stands out.",
+  "aiInsightAnalyze": "Analyze",
+  "aiInsightAnalyzing": "Analyzing…",
+  "aiInsightRetry": "Try again",
+  "aiInsightError": "Could not analyze right now. {error}",
+  "@aiInsightError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "moodTrends": "Mood Trends",
   "distribution": "Distribution",
   "monthlyHighlights": "Monthly Highlights",

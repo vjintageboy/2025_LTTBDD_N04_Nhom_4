@@ -446,6 +446,19 @@
   "flow": "Dòng chảy",
   "growth": "Tăng trưởng",
   "keyInfluencers": "Yếu tố ảnh hưởng chính",
+  "aiInsight": "Phân tích bằng AI",
+  "aiInsightPrompt": "Để AI đọc dữ liệu tâm trạng của bạn trong khoảng này và chỉ ra điều đáng chú ý.",
+  "aiInsightAnalyze": "Phân tích",
+  "aiInsightAnalyzing": "Đang phân tích…",
+  "aiInsightRetry": "Thử lại",
+  "aiInsightError": "Chưa phân tích được. {error}",
+  "@aiInsightError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "moodTrends": "Xu hướng tâm trạng",
   "distribution": "Phân bố",
   "monthlyHighlights": "Nổi bật tháng này",

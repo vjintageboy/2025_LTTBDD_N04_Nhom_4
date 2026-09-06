@@ -2240,6 +2240,42 @@ abstract class AppLocalizations {
   /// **'Key Influencers'**
   String get keyInfluencers;
 
+  /// No description provided for @aiInsight.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Insight'**
+  String get aiInsight;
+
+  /// No description provided for @aiInsightPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Let AI read your mood data for this period and point out what stands out.'**
+  String get aiInsightPrompt;
+
+  /// No description provided for @aiInsightAnalyze.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze'**
+  String get aiInsightAnalyze;
+
+  /// No description provided for @aiInsightAnalyzing.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing…'**
+  String get aiInsightAnalyzing;
+
+  /// No description provided for @aiInsightRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get aiInsightRetry;
+
+  /// No description provided for @aiInsightError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not analyze right now. {error}'**
+  String aiInsightError(String error);
+
   /// No description provided for @moodTrends.
   ///
   /// In en, this message translates to:

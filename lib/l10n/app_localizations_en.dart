@@ -1111,6 +1111,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keyInfluencers => 'Key Influencers';
 
   @override
+  String get aiInsight => 'AI Insight';
+
+  @override
+  String get aiInsightPrompt =>
+      'Let AI read your mood data for this period and point out what stands out.';
+
+  @override
+  String get aiInsightAnalyze => 'Analyze';
+
+  @override
+  String get aiInsightAnalyzing => 'Analyzing…';
+
+  @override
+  String get aiInsightRetry => 'Try again';
+
+  @override
+  String aiInsightError(String error) {
+    return 'Could not analyze right now. $error';
+  }
+
+  @override
   String get moodTrends => 'Mood Trends';
 
   @override

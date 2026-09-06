@@ -1119,6 +1119,27 @@ class AppLocalizationsVi extends AppLocalizations {
   String get keyInfluencers => 'Yếu tố ảnh hưởng chính';
 
   @override
+  String get aiInsight => 'Phân tích bằng AI';
+
+  @override
+  String get aiInsightPrompt =>
+      'Để AI đọc dữ liệu tâm trạng của bạn trong khoảng này và chỉ ra điều đáng chú ý.';
+
+  @override
+  String get aiInsightAnalyze => 'Phân tích';
+
+  @override
+  String get aiInsightAnalyzing => 'Đang phân tích…';
+
+  @override
+  String get aiInsightRetry => 'Thử lại';
+
+  @override
+  String aiInsightError(String error) {
+    return 'Chưa phân tích được. $error';
+  }
+
+  @override
   String get moodTrends => 'Xu hướng tâm trạng';
 
   @override

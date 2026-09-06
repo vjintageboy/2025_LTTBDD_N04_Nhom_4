@@ -4,6 +4,7 @@ import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../ai/mood_insight.dart';
 import '../../models/mood_entry.dart';
 import '../../core/services/localization_service.dart';
 import '../../services/supabase_service.dart';
@@ -31,6 +32,11 @@ class _MoodAnalyticsPageState extends State<MoodAnalyticsPage> {
   bool _isLoading = true;
   String _selectedPeriod = 'week';
 
+  // AI insight — recomputed on demand, never persisted.
+  String? _insight;
+  String? _insightError;
+  bool _insightLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -41,7 +47,12 @@ class _MoodAnalyticsPageState extends State<MoodAnalyticsPage> {
     final user = _supabaseService.currentUser;
     if (user == null) return;
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      // The insight describes the old period — drop it.
+      _insight = null;
+      _insightError = null;
+    });
 
     try {
       final now = DateTime.now();
@@ -90,6 +101,35 @@ class _MoodAnalyticsPageState extends State<MoodAnalyticsPage> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _runAIInsight() async {
+    if (_insightLoading || _moodEntries.isEmpty) return;
+
+    setState(() {
+      _insightLoading = true;
+      _insightError = null;
+    });
+
+    try {
+      final text = await MoodInsight.analyze(
+        entries: _moodEntries,
+        periodLabel: _periodLabel,
+      );
+      if (mounted) setState(() => _insight = text);
+    } catch (e) {
+      if (mounted) setState(() => _insightError = e.toString());
+    } finally {
+      if (mounted) setState(() => _insightLoading = false);
+    }
+  }
+
+  String get _periodLabel {
+    switch (_selectedPeriod) {
+      case 'month': return context.l10n.month;
+      case 'year': return context.l10n.year;
+      default: return context.l10n.week;
     }
   }
 
@@ -214,6 +254,8 @@ class _MoodAnalyticsPageState extends State<MoodAnalyticsPage> {
                     _buildTopEmotionFactors(),
                     const SizedBox(height: 20),
                     _buildBestWorstDays(),
+                    const SizedBox(height: 20),
+                    _buildAIInsight(),
                   ] else
                     _buildEmptyState(),
                 ],
@@ -594,6 +636,105 @@ class _MoodAnalyticsPageState extends State<MoodAnalyticsPage> {
           children: topFactors.map((entry) => _buildInfluencerChip(entry.key, entry.value)).toList(),
         ),
       ],
+    );
+  }
+
+  // ── AI insight ────────────────────────────────────────────────────────────
+
+  Widget _buildAIInsight() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 14),
+          child: Text(
+            context.l10n.aiInsight,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: _kOnSurface,
+            ),
+          ),
+        ),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: _kSurfaceContainerLowest,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: _kOnSurface.withValues(alpha: 0.06),
+                blurRadius: 32,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _insight ??
+                    (_insightError != null
+                        ? context.l10n.aiInsightError(_insightError!)
+                        : context.l10n.aiInsightPrompt),
+                style: GoogleFonts.manrope(
+                  fontSize: 14,
+                  height: 1.6,
+                  fontWeight: FontWeight.w500,
+                  color: _insightError != null ? _kOnSurfaceVariant : _kOnSurface,
+                ),
+              ),
+              const SizedBox(height: 18),
+              _buildInsightButton(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInsightButton() {
+    final label = _insightLoading
+        ? context.l10n.aiInsightAnalyzing
+        : (_insight != null || _insightError != null)
+            ? context.l10n.aiInsightRetry
+            : context.l10n.aiInsightAnalyze;
+
+    return GestureDetector(
+      onTap: _insightLoading ? null : _runAIInsight,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
+        decoration: BoxDecoration(
+          color: _insightLoading ? _kSurfaceContainerHighest : _kPrimary,
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_insightLoading)
+              const SizedBox(
+                width: 15,
+                height: 15,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(_kPrimary),
+                ),
+              )
+            else
+              const Icon(IconsaxPlusBold.magicpen, size: 17, color: Colors.white),
+            const SizedBox(width: 9),
+            Text(
+              label,
+              style: GoogleFonts.manrope(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: _insightLoading ? _kPrimary : Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
