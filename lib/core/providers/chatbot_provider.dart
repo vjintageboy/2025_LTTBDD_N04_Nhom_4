@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/ai_chatbot_service.dart';
+import '../../services/fallback_ai_service.dart';
 import '../config/gemini_config.dart';
 
 /// Chatbot Provider - Quản lý state của chatbot toàn app
@@ -15,6 +16,10 @@ class ChatbotProvider extends ChangeNotifier {
   final TextEditingController _messageController = TextEditingController();
   bool _isInputFocused = false;
   bool _quickRepliesDismissed = false;
+
+  /// null = Gemini (mặc định: có RAG + function calling + streaming thật).
+  /// Anything else is an OpenRouter slug from [FallbackAIService.models].
+  String? _selectedModel;
 
   ChatbotProvider() {
     _inputFocusNode.addListener(() {
@@ -36,6 +41,22 @@ class ChatbotProvider extends ChangeNotifier {
   List<ChatMessage> get messages => _messages;
   TextEditingController get messageController => _messageController;
   FocusNode get inputFocusNode => _inputFocusNode;
+  String? get selectedModel => _selectedModel;
+  String get selectedModelLabel => _selectedModel == null
+      ? 'Gemini 2.5 Flash'
+      : FallbackAIService.label(_selectedModel!);
+
+  /// Model options: Gemini first, then the OpenRouter backups (empty when no
+  /// OPENROUTER_API_KEY — the picker hides itself).
+  List<String?> get modelOptions =>
+      FallbackAIService.isConfigured ? [null, ...FallbackAIService.models] : [];
+
+  void selectModel(String? model) {
+    if (_selectedModel == model) return;
+    _selectedModel = model;
+    notifyListeners();
+  }
+
   bool get showQuickReplies => !_quickRepliesDismissed && !_hasUserMessages;
 
   bool get _hasUserMessages => _messages.any((m) => m.isUser);
@@ -56,15 +77,30 @@ class ChatbotProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Mở một đoạn chat trống. Không đụng tới DB: conversation chỉ được tạo khi
+  /// người dùng thực sự gửi tin nhắn đầu tiên (xem [sendMessage]), nên việc mở
+  /// chatbot nhiều lần không đẻ ra hàng loạt đoạn chat rỗng.
   Future<void> startNewConversation() async {
-    _activeConversationId = await _chatbotService.createConversation(
-      title: 'New conversation',
-    );
+    _activeConversationId = null;
     _messages.clear();
     _addWelcomeMessage();
     _quickRepliesDismissed = false;
-    await refreshConversations();
     notifyListeners();
+  }
+
+  /// Tên đoạn chat = tóm tắt câu hỏi đầu tiên: bỏ xuống dòng, cắt ở dấu câu
+  /// đầu tiên, tối đa 60 ký tự và không cắt giữa từ.
+  // ponytail: tóm tắt bằng cách cắt chuỗi; gọi LLM đặt tên nếu thấy chưa đủ gọn.
+  @visibleForTesting
+  static String titleFromMessage(String message) {
+    final oneLine = message.replaceAll(RegExp(r'\s+'), ' ').trim();
+    final stop = oneLine.indexOf(RegExp(r'[.!?;]'));
+    var title = (stop > 15 ? oneLine.substring(0, stop) : oneLine).trim();
+    if (title.length > 60) {
+      final space = title.lastIndexOf(' ', 60);
+      title = '${title.substring(0, space > 20 ? space : 60).trim()}…';
+    }
+    return title.isEmpty ? 'Cuộc trò chuyện' : title;
   }
 
   Future<void> loadConversation(String conversationId) async {
@@ -96,7 +132,10 @@ class ChatbotProvider extends ChangeNotifier {
 
     _quickRepliesDismissed = true;
 
-    _activeConversationId ??= await _chatbotService.getOrCreateLatestConversation();
+    // Tin nhắn đầu tiên mới sinh ra một đoạn chat, và nó lấy tên từ chính câu hỏi.
+    _activeConversationId ??= await _chatbotService.createConversation(
+      title: titleFromMessage(text),
+    );
 
     // Clear input
     _messageController.clear();
@@ -127,6 +166,7 @@ class ChatbotProvider extends ChangeNotifier {
       final responseStream = _chatbotService.getAIResponseStream(
         text,
         conversationId: _activeConversationId,
+        modelOverride: _selectedModel,
       );
       String fullResponse = '';
       bool hasInsertedAiMessage = false;
