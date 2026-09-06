@@ -1,35 +1,23 @@
 /// Medical Disclaimer Injector
 ///
-/// Appends a subtle medical disclaimer to AI responses when the user input
-/// or the AI response contains symptom-related / mental-health keywords.
+/// Deterministic safety net behind the system prompt: the prompt already asks
+/// the model to say it is an AI and to route diagnosis, medication and
+/// treatment questions to a professional, so this only fires on clinical
+/// vocabulary and stays silent when the reply already made that referral.
 ///
 /// The disclaimer is only added once (idempotent) and is appended at the
 /// end of the response.
 library;
 
 
-/// Keywords that signal a medical disclaimer should be appended.
-/// These are broader than the safety filter warning list — they cover
-/// any mention of symptoms, diagnoses, or psychological conditions.
+/// Clinical terms only: diagnoses, disorders, medication, treatment.
+/// Everyday emotion words (căng thẳng, lo âu, khóc, mất ngủ, stress) are the
+/// app's daily vocabulary and appear in meditation titles, so they no longer
+/// count — the old list stamped the notice under a plain list of meditations.
 final List<RegExp> _disclaimerTriggerPatterns = [
-  // Vietnamese symptom / condition keywords
+  // Vietnamese
   RegExp(r'trầm\s*cảm', caseSensitive: false),
   RegExp(r'tram\s*cam', caseSensitive: false),
-  RegExp(r'lo\s*âu', caseSensitive: false),
-  RegExp(r'hoảng\s*sợ', caseSensitive: false),
-  RegExp(r'mất\s*ngủ', caseSensitive: false),
-  RegExp(r'mat\s*ngu', caseSensitive: false),
-  RegExp(r'căng\s*thẳng', caseSensitive: false),
-  RegExp(r'cang\s*thang', caseSensitive: false),
-  RegExp(r'khóc', caseSensitive: false),
-  RegExp(r'sợ\s*hãi', caseSensitive: false),
-  RegExp(r'chán\s*nản', caseSensitive: false),
-  RegExp(r'chan\s*nan', caseSensitive: false),
-  RegExp(r'ám\s*ảnh', caseSensitive: false),
-  RegExp(r'am\s*anh', caseSensitive: false),
-  RegExp(r'hoảng\s*sợ', caseSensitive: false),
-  RegExp(r'hoang\s*so', caseSensitive: false),
-  RegExp(r'binge\s*eating', caseSensitive: false),
   RegExp(r'rối\s*loạn', caseSensitive: false),
   RegExp(r'roi\s*loan', caseSensitive: false),
   RegExp(r'tâm\s*thần', caseSensitive: false),
@@ -43,12 +31,11 @@ final List<RegExp> _disclaimerTriggerPatterns = [
   RegExp(r'thuoc', caseSensitive: false),
   RegExp(r'trị\s*liệu', caseSensitive: false),
   RegExp(r'tri\s*lieu', caseSensitive: false),
+  RegExp(r'binge\s*eating', caseSensitive: false),
 
   // English equivalents
   RegExp(r'\bdepression\b', caseSensitive: false),
-  RegExp(r'\banxiety\b', caseSensitive: false),
   RegExp(r'\bpanic\s*attack\b', caseSensitive: false),
-  RegExp(r'\binsomnia\b', caseSensitive: false),
   RegExp(r'\bptsd\b', caseSensitive: false),
   RegExp(r'\bocd\b', caseSensitive: false),
   RegExp(r'\bbipolar\b', caseSensitive: false),
@@ -58,12 +45,13 @@ final List<RegExp> _disclaimerTriggerPatterns = [
   RegExp(r'\bdiagnos', caseSensitive: false),
   RegExp(r'\bsymptom', caseSensitive: false),
   RegExp(r'\bdisorder\b', caseSensitive: false),
-  RegExp(r'\bstress\b', caseSensitive: false),
 ];
 
+/// Plain text, same voice as the system prompt ("mình"/"bạn"): the chat
+/// bubble renders a bare Text(), so the old `_…_` italics showed up raw.
 const String _disclaimerText =
-    '\n\n⚕️ _Lưu ý: Tôi là AI trợ lý, KHÔNG thay thế chẩn đoán hoặc điều trị y khoa. '
-    'Nếu bạn đang trải qua khủng hoảng, vui lòng liên hệ chuyên gia y tế._';
+    '\n\n⚕️ Mình là trợ lý AI, không thay thế bác sĩ hay chuyên gia tâm lý. '
+    'Nếu bạn cần giúp gấp, hãy gọi 115.';
 
 class DisclaimerInjector {
   /// Append a medical disclaimer if any trigger keywords are present
@@ -80,60 +68,30 @@ class DisclaimerInjector {
     // Already contains a disclaimer — don't duplicate.
     if (_alreadyHasDisclaimer(aiResponse)) return aiResponse;
 
+    // Raw text only. The old diacritic-stripped pass turned "quen thuộc"
+    // into "quen thuoc" and matched the medication pattern; typing without
+    // diacritics is already covered by the ASCII patterns above.
     final combined = [aiResponse, userInput ?? ''].join(' ');
-    final normalized = _normalize(combined);
-
     for (final pattern in _disclaimerTriggerPatterns) {
-      final matchCombined = pattern.hasMatch(combined);
-      final matchNormalized = pattern.hasMatch(normalized);
-      if (matchCombined || matchNormalized) {
-        return '$aiResponse$_disclaimerText';
-      }
+      if (pattern.hasMatch(combined)) return '$aiResponse$_disclaimerText';
     }
-
     return aiResponse;
   }
 
-  /// Normalize text for keyword matching (lowercase + collapse whitespace).
-  static String _normalize(String input) {
-    var text = input.toLowerCase().trim();
-    text = text.replaceAll(RegExp(r'\s+'), ' ');
-    text = _stripVietnameseDiacritics(text);
-    return text;
-  }
-
-  /// Remove Vietnamese diacritics for fuzzy matching.
-  static String _stripVietnameseDiacritics(String input) {
-    const vietnamese = [
-      'à', 'á', 'ạ', 'ả', 'ã', 'â', 'ầ', 'ấ', 'ậ', 'ẩ', 'ẫ', 'ă',
-      'ằ', 'ắ', 'ặ', 'ẳ', 'ẵ', 'è', 'é', 'ẹ', 'ẻ', 'ẽ', 'ê', 'ề',
-      'ế', 'ệ', 'ể', 'ễ', 'ì', 'í', 'ị', 'ỉ', 'ĩ', 'ò', 'ó', 'ọ',
-      'ỏ', 'õ', 'ô', 'ồ', 'ố', 'ộ', 'ổ', 'ỗ', 'ơ', 'ờ', 'ớ', 'ợ',
-      'ở', 'ỡ', 'ù', 'ú', 'ụ', 'ủ', 'ũ', 'ư', 'ừ', 'ứ', 'ự', 'ử',
-      'ữ', 'ỳ', 'ý', 'ỵ', 'ỷ', 'ỹ', 'đ',
-    ];
-    const ascii = [
-      'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
-      'a', 'a', 'a', 'a', 'a', 'e', 'e', 'e', 'e', 'e', 'e', 'e',
-      'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'i', 'o', 'o', 'o',
-      'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o',
-      'o', 'o', 'o', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u',
-      'u', 'u', 'u', 'u', 'u', 'u', 'u', 'd',
-    ];
-
-    var result = input;
-    for (var i = 0; i < vietnamese.length; i++) {
-      result = result.replaceAll(vietnamese[i], ascii[i]);
-    }
-    return result;
-  }
-
-  /// Check whether the response already contains a disclaimer substring.
+  /// Check whether the response already discloses or refers out: either the
+  /// notice itself, or the model doing what the prompt asks (naming itself as
+  /// AI, pointing to a doctor or specialist). Appending on top of that reads
+  /// as nagging.
   static bool _alreadyHasDisclaimer(String response) {
     final lower = response.toLowerCase();
-    return lower.contains('không thay thế chẩn đoán') ||
-        lower.contains('not a substitute') ||
+    return lower.contains('⚕️') ||
         lower.contains('không thay thế') ||
-        lower.contains('⚕️');
+        lower.contains('not a substitute') ||
+        lower.contains('trợ lý ai') ||
+        lower.contains('bác sĩ') ||
+        lower.contains('chuyên gia') ||
+        lower.contains('professional') ||
+        lower.contains('therapist') ||
+        lower.contains('doctor');
   }
 }
