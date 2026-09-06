@@ -24,12 +24,19 @@ class GeminiConfig {
   // billed against this same budget — a typical Vietnamese wellness question
   // spends ~450-550 on thinking and only ~150 on the reply. At 512 the reply
   // came back cut mid-sentence (finishReason MAX_TOKENS), or empty, which sent
-  // the service down to the keyword-matching fallback.
+  // the service down to the keyword-matching fallback. 2048 still truncated
+  // occasionally: thinking scales with the RAG context and tool results in the
+  // prompt, not with the answer, so a heavy turn blows past it.
   //
-  // ponytail: the SDK (google_generative_ai 0.4.7) cannot send thinkingConfig,
-  // so thinking cannot be turned off — only given room. Drop this back down if
-  // you ever move to raw HTTP and set thinkingBudget: 0.
-  static const int maxOutputTokens = 2048;
+  // This is a ceiling, not a reservation — an unused budget costs nothing, and
+  // the system prompt caps the reply at 6-8 sentences, so the headroom only
+  // ever feeds thinking.
+  //
+  // ponytail: the SDK (google_generative_ai 0.4.7 — the latest published) still
+  // cannot send thinkingConfig, so thinking cannot be turned off, only given
+  // room. Truncation is rare here, not impossible. Drop this back down if you
+  // ever move to raw HTTP and set thinkingBudget: 0.
+  static const int maxOutputTokens = 8192;
 
   // ─── Safety Settings (STRICT) ───────────────────────────────────
   // Use `low` threshold = block when medium or high probability of unsafe.

@@ -27,6 +27,17 @@ class ToolLoopController {
 
   const ToolLoopController({required this.dispatcher});
 
+  /// Thrown when Gemini stopped because it ran out of output budget.
+  ///
+  /// Half a sentence reads as a broken app, so the caller must treat this as a
+  /// failure and try another lane — never show the partial text.
+  static void _rejectIfTruncated(GenerateContentResponse response) {
+    if (response.candidates.firstOrNull?.finishReason ==
+        FinishReason.maxTokens) {
+      throw StateError('Gemini hết token budget (MAX_TOKENS)');
+    }
+  }
+
   /// Runs the tool-call loop.
   ///
   /// [userMessage] is the initial user prompt.
@@ -50,6 +61,7 @@ class ToolLoopController {
           : <FunctionCall>[];
 
       if (functionCalls.isEmpty) {
+        _rejectIfTruncated(response);
         return response.text ?? '';
       }
 
@@ -70,6 +82,7 @@ class ToolLoopController {
       Content.text('Vui lòng tóm tắt kết quả các actions đã thực hiện.'),
     ).timeout(const Duration(seconds: 30));
 
+    _rejectIfTruncated(finalResponse);
     return finalResponse.text ?? 'Đã hoàn thành các tác vụ.';
   }
 }

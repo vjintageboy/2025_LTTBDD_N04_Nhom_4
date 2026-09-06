@@ -296,6 +296,29 @@ void main() {
     });
 
     // -----------------------------------------------------------------------
+    // 7b. MAX_TOKENS: a cut-off answer must throw, never be returned
+    // -----------------------------------------------------------------------
+    test('max tokens: throws instead of returning a truncated answer', () async {
+      final controller = ToolLoopController(dispatcher: _makeDispatcher());
+
+      expect(
+        controller.execute(
+          userMessage: 'cut',
+          sendMessage: (_) async => GenerateContentResponse([
+            Candidate(
+              Content('model', [TextPart('Bạn đã có một tuần khá tích cực với')]),
+              null,
+              null,
+              FinishReason.maxTokens,
+              null,
+            ),
+          ], null),
+        ),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    // -----------------------------------------------------------------------
     // 8. Dispatcher called with correct toolName and args
     // -----------------------------------------------------------------------
     test('dispatcher receives exact toolName and args', () async {
