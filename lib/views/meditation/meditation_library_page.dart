@@ -1,6 +1,9 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import '../../core/constants/app_colors.dart';
 import '../../core/services/localization_service.dart';
 import '../../core/utils/image_source.dart';
 import '../../models/meditation.dart';
@@ -24,18 +27,18 @@ class _MeditationLibraryPageState extends State<MeditationLibraryPage> {
   MeditationCategory? _selectedCategory;
   String _sortBy = 'rating'; // rating, duration, title
 
-  // Dynamic colors for meditation cards
-  final List<Color> _meditationColors = [
-    Colors.green.shade700,
-    Colors.blue.shade400,
-    Colors.purple.shade400,
-    Colors.orange.shade400,
-    Colors.pink.shade400,
-    Colors.teal.shade400,
-  ];
-
-  Color _getMeditationColor(int index) {
-    return _meditationColors[index % _meditationColors.length];
+  // Tonal accents for meditation categories, kept within the app's green/teal family.
+  Color _getCategoryColor(MeditationCategory category) {
+    switch (category) {
+      case MeditationCategory.stress:
+        return AppColors.osPrimary;
+      case MeditationCategory.anxiety:
+        return AppColors.osTertiary;
+      case MeditationCategory.sleep:
+        return AppColors.osSecondary;
+      case MeditationCategory.focus:
+        return AppColors.osPrimaryDim;
+    }
   }
 
   @override
@@ -51,7 +54,7 @@ class _MeditationLibraryPageState extends State<MeditationLibraryPage> {
     try {
       final data = await _supabaseService.getMeditations();
       final meditations = data.map((m) => Meditation.fromMap(m)).toList();
-      
+
       if (mounted) {
         setState(() {
           _allMeditations = meditations;
@@ -112,81 +115,38 @@ class _MeditationLibraryPageState extends State<MeditationLibraryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      appBar: AppBar(
-        title: Text(
-          context.l10n.meditationLibrary,
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 0,
-      ),
+      backgroundColor: AppColors.osSurface,
+      extendBodyBehindAppBar: true,
+      appBar: _buildGlassAppBar(),
       body: Column(
         children: [
-          // Search & Filter Bar
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(16),
+          SizedBox(height: MediaQuery.of(context).padding.top + 64),
+
+          // Search & Sort
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
             child: Column(
               children: [
-                // Search Bar
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: context.l10n.searchMeditations,
-                    prefixIcon: Icon(IconsaxPlusLinear.search_normal_1),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey.shade100,
-                  ),
-                  onChanged: (value) {
-                    _searchQuery = value;
-                    _applyFilters();
-                  },
-                ),
+                _buildSearchField(),
                 const SizedBox(height: 12),
-
-                // Sort Options
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      Icon(IconsaxPlusLinear.sort, size: 20, color: Colors.grey),
-                      const SizedBox(width: 8),
-                      Text(
-                        context.l10n.sortBy,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      _buildSortChip(context.l10n.ratingSort, 'rating'),
-                      const SizedBox(width: 8),
-                      _buildSortChip(context.l10n.durationSort, 'duration'),
-                      const SizedBox(width: 8),
-                      _buildSortChip(context.l10n.nameSort, 'title'),
-                    ],
-                  ),
-                ),
+                _buildSortRow(),
               ],
             ),
           ),
 
           // Results Count
           if (!_isLoading)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              alignment: Alignment.centerLeft,
-              child: Text(
-                '${_filteredMeditations.length} ${_filteredMeditations.length != 1 ? context.l10n.meditationsFound : context.l10n.meditationFound}',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade700,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '${_filteredMeditations.length} ${_filteredMeditations.length != 1 ? context.l10n.meditationsFound : context.l10n.meditationFound}',
+                  style: GoogleFonts.manrope(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.osOnSurfaceVariant,
+                  ),
                 ),
               ),
             ),
@@ -195,27 +155,25 @@ class _MeditationLibraryPageState extends State<MeditationLibraryPage> {
           Expanded(
             child: _isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
+                    child: CircularProgressIndicator(color: AppColors.osPrimary),
                   )
                 : _filteredMeditations.isEmpty
                 ? _buildEmptyState()
                 : RefreshIndicator(
                     onRefresh: _loadMeditations,
+                    color: AppColors.osPrimary,
                     child: GridView.builder(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
-                            childAspectRatio: 0.75,
+                            childAspectRatio: 0.72,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
                           ),
                       itemCount: _filteredMeditations.length,
                       itemBuilder: (context, index) {
-                        return _buildMeditationCard(
-                          _filteredMeditations[index],
-                          _getMeditationColor(index),
-                        );
+                        return _buildMeditationCard(_filteredMeditations[index]);
                       },
                     ),
                   ),
@@ -225,33 +183,145 @@ class _MeditationLibraryPageState extends State<MeditationLibraryPage> {
     );
   }
 
-  Widget _buildSortChip(String label, String sortValue) {
-    final isSelected = _sortBy == sortValue;
-    return InkWell(
-      onTap: () {
-        setState(() => _sortBy = sortValue);
-        _applyFilters();
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF4CAF50) : Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : Colors.grey.shade700,
+  PreferredSizeWidget _buildGlassAppBar() {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(64),
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            color: AppColors.osSurface.withValues(alpha: 0.80),
+            child: SafeArea(
+              bottom: false,
+              child: SizedBox(
+                height: 64,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(IconsaxPlusLinear.arrow_left),
+                        color: AppColors.osOnSurface,
+                        splashRadius: 22,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        context.l10n.meditationLibrary,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.osOnSurface,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildMeditationCard(Meditation meditation, Color color) {
+  Widget _buildSearchField() {
+    return TextField(
+      onChanged: (value) {
+        _searchQuery = value;
+        _applyFilters();
+      },
+      style: GoogleFonts.manrope(
+        fontSize: 15,
+        fontWeight: FontWeight.w500,
+        color: AppColors.osOnSurface,
+      ),
+      decoration: InputDecoration(
+        hintText: context.l10n.searchMeditations,
+        hintStyle: GoogleFonts.manrope(
+          fontSize: 15,
+          color: AppColors.osOnSurfaceVariant,
+        ),
+        prefixIcon: const Icon(
+          IconsaxPlusLinear.search_normal_1,
+          size: 20,
+          color: AppColors.osOnSurfaceVariant,
+        ),
+        filled: true,
+        fillColor: AppColors.osSurfaceContainerLowest,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(9999),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortRow() {
+    return Row(
+      children: [
+        const Icon(IconsaxPlusLinear.sort, size: 18, color: AppColors.osOnSurfaceVariant),
+        const SizedBox(width: 8),
+        Text(
+          context.l10n.sortBy,
+          style: GoogleFonts.manrope(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: AppColors.osOnSurfaceVariant,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildSortChip(context.l10n.ratingSort, 'rating'),
+                const SizedBox(width: 8),
+                _buildSortChip(context.l10n.durationSort, 'duration'),
+                const SizedBox(width: 8),
+                _buildSortChip(context.l10n.nameSort, 'title'),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSortChip(String label, String sortValue) {
+    final isSelected = _sortBy == sortValue;
+    return GestureDetector(
+      onTap: () {
+        setState(() => _sortBy = sortValue);
+        _applyFilters();
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.osPrimary : AppColors.osSurfaceContainerHighest,
+          borderRadius: BorderRadius.circular(9999),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.manrope(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: isSelected ? AppColors.osOnPrimary : AppColors.osOnSurfaceVariant,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMeditationCard(Meditation meditation) {
     final cover = imageProviderFromSource(meditation.thumbnailUrl);
+    final accent = _getCategoryColor(meditation.category);
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -263,162 +333,113 @@ class _MeditationLibraryPageState extends State<MeditationLibraryPage> {
       },
       child: Container(
         decoration: BoxDecoration(
+          color: AppColors.osSurfaceContainerLowest,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: color.withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+              color: AppColors.osOnSurface.withValues(alpha: 0.06),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Stack(
-            children: [
-              // Background: Thumbnail or Gradient
-              Positioned.fill(
-                child:
-                    cover != null
-                    ? Image(
-                        image: cover,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          // Fallback to gradient if image fails
-                          return Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [color, color.withValues(alpha: 0.7)],
-                              ),
-                            ),
-                          );
-                        },
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          // Show gradient while loading
-                          return Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [color, color.withValues(alpha: 0.7)],
-                              ),
-                            ),
-                          );
-                        },
-                      )
-                    : Container(
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Cover image / fallback
+            AspectRatio(
+              aspectRatio: 4 / 3,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  cover != null
+                      ? Image(
+                          image: cover,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(color: AppColors.osSurfaceContainerHigh),
+                        )
+                      : Container(
+                          color: AppColors.osSurfaceContainerHigh,
+                          child: Icon(
+                            PhosphorIconsRegular.flowerLotus,
+                            size: 36,
+                            color: accent,
+                          ),
+                        ),
+                  if (meditation.rating > 0)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [color, color.withValues(alpha: 0.7)],
-                          ),
+                          color: AppColors.osOnSurface.withValues(alpha: 0.55),
+                          borderRadius: BorderRadius.circular(9999),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(IconsaxPlusBold.star, color: AppColors.osPrimaryFixed, size: 11),
+                            const SizedBox(width: 3),
+                            Text(
+                              meditation.rating.toStringAsFixed(1),
+                              style: GoogleFonts.manrope(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                    ),
+                ],
               ),
+            ),
 
-              // Overlay gradient for text readability
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.6),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // Subtle pattern overlay
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
-                      colors: [
-                        Colors.white.withValues(alpha: 0.1),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // Rating badge
-              if (meditation.rating > 0)
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.25),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(IconsaxPlusBold.star, color: Colors.white, size: 14),
-                        const SizedBox(width: 4),
-                        Text(
-                          meditation.rating.toStringAsFixed(1),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-              // Content
-              Padding(
-                padding: const EdgeInsets.all(16),
+            // Info
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
                       meditation.title,
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: AppColors.osOnSurface,
+                        height: 1.2,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${meditation.duration} ${context.l10n.min} • ${_getLevelLabel(context, meditation.level)}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white.withValues(alpha: 0.9),
-                      ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        const Icon(IconsaxPlusLinear.clock, size: 13, color: AppColors.osOnSurfaceVariant),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            '${meditation.duration} ${context.l10n.min} • ${_getLevelLabel(context, meditation.level)}',
+                            style: GoogleFonts.manrope(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.osOnSurfaceVariant,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -429,20 +450,20 @@ class _MeditationLibraryPageState extends State<MeditationLibraryPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(PhosphorIconsRegular.flowerLotus, size: 64, color: Colors.grey.shade400),
+          Icon(PhosphorIconsRegular.flowerLotus, size: 64, color: AppColors.osSurfaceContainerHighest),
           const SizedBox(height: 16),
           Text(
             context.l10n.noMeditationsFound,
-            style: TextStyle(
+            style: GoogleFonts.plusJakartaSans(
               fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w700,
+              color: AppColors.osOnSurface,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             context.l10n.tryDifferentSearch,
-            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+            style: GoogleFonts.manrope(fontSize: 14, color: AppColors.osOnSurfaceVariant),
           ),
         ],
       ),
