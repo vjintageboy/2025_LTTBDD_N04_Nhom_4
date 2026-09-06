@@ -28,7 +28,12 @@ class RAGConfig {
   static const int embeddingDimensions = 3072;
 
   // Cosine similarity threshold for meditation matching (0.0 to 1.0)
-  static const double similarityThreshold = 0.7;
+  // Calibrated 2026-09-07 on the 5 seeded meditations with gemini-embedding-001
+  // (no task type): right matches for Vietnamese queries scored 0.68–0.78,
+  // wrong titles 0.52–0.66, and an off-topic query ("báo cáo tháng này")
+  // peaked at 0.63. 0.7 dropped "mình khó ngủ" → "Thiền đi vào giấc ngủ" (0.683).
+  // ponytail: re-check once the library grows past a handful of titles.
+  static const double similarityThreshold = 0.65;
 
   // Maximum number of relevant meditations to return
   static const int maxMeditationResults = 3;
@@ -93,6 +98,11 @@ class UserContext {
   final bool hasMoodData;
   final bool hasMeditationData;
 
+  /// Size of the whole meditation library, not just the shortlist above.
+  /// Without it the model reads the 3 rows as everything that exists and
+  /// keeps re-offering the same titles when the user asks for more.
+  final int meditationLibrarySize;
+
   UserContext({
     this.userName,
     this.goals = const [],
@@ -101,6 +111,7 @@ class UserContext {
     this.lastUserMessage = '',
     this.hasMoodData = false,
     this.hasMeditationData = false,
+    this.meditationLibrarySize = 0,
   });
 
   /// Format the context into a string suitable for the LLM system prompt
@@ -142,15 +153,21 @@ class UserContext {
     }
     buffer.writeln('');
 
-    // Relevant meditations section
-    buffer.writeln('=== RELEVANT MEDITATIONS ===');
+    // Relevant meditations section. Fallback results carry similarity 0: they
+    // are the top-rated titles, not matches, so say so instead of "RELEVANT 0%"
+    // or the model presents them as tailored to what the user just said.
+    final isFallback = relevantMeditations.isNotEmpty &&
+        relevantMeditations.every((m) => m.similarity == 0);
+    buffer.writeln(isFallback
+        ? '=== POPULAR MEDITATIONS (not matched to the message) ==='
+        : '=== RELEVANT MEDITATIONS ===');
     if (hasMeditationData && relevantMeditations.isNotEmpty) {
       for (int i = 0; i < relevantMeditations.length; i++) {
         final m = relevantMeditations[i];
         buffer.writeln('${i + 1}. "${m.title}"'
             '${m.category != null ? ' [${m.category}]' : ''}'
             '${m.durationMinutes != null ? ' (${m.durationMinutes}min)' : ''}'
-            ' — Similarity: ${(m.similarity * 100).toStringAsFixed(0)}%');
+            '${isFallback ? '' : ' — Similarity: ${(m.similarity * 100).toStringAsFixed(0)}%'}');
         if (m.description.isNotEmpty) {
           buffer.writeln('   ${m.description.substring(0, m.description.length.clamp(0, 100))}'
               '${m.description.length > 100 ? '...' : ''}');
@@ -160,6 +177,10 @@ class UserContext {
       buffer.writeln('No highly relevant meditations found.');
       buffer.writeln(
           'Tip: Suggest general meditation or mindfulness exercises.');
+    }
+    if (meditationLibrarySize > relevantMeditations.length) {
+      buffer.writeln('Shortlist only — the Thiền tab has '
+          '$meditationLibrarySize meditations in total.');
     }
     buffer.writeln('');
 
@@ -306,7 +327,10 @@ class RAGService {
         return _getFallbackMeditations(limit: limit);
       }
 
-      final results = response
+      // rpc() returns dynamic; without the cast the chain below builds a
+      // List<dynamic> at runtime and the return-type check throws, which sent
+      // every real hit into the "popular" fallback.
+      final results = (response as List)
           .cast<Map<String, dynamic>>()
           .map(MeditationSearchResult.fromMap)
           .toList();
@@ -361,6 +385,17 @@ class RAGService {
     }
   }
 
+  /// Total meditations in the library. 0 on failure, which just omits the
+  /// line from the context.
+  Future<int> _countMeditations() async {
+    try {
+      return await _supabase.from('meditations').count();
+    } catch (e) {
+      debugPrint('[RAG] Error counting meditations: $e');
+      return 0;
+    }
+  }
+
   // ===========================================================================
   // 3. Context Builder — Parallel data fetching
   // ===========================================================================
@@ -397,6 +432,9 @@ class RAGService {
         embedding.isNotEmpty
             ? searchRelevantMeditations(embedding)
             : _getFallbackMeditations(),
+
+        // Query 4: How many meditations exist at all (head request, no rows)
+        _countMeditations(),
       ]);
 
       // ── Step 3: Assemble context
@@ -412,6 +450,7 @@ class RAGService {
         lastUserMessage: lastMessage,
         hasMoodData: moodEntries.isNotEmpty,
         hasMeditationData: meditations.isNotEmpty,
+        meditationLibrarySize: results[3] as int,
       );
 
       stopwatch.stop();

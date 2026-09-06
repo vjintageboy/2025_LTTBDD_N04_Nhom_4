@@ -21,7 +21,7 @@ void main() {
     });
 
     test('similarity threshold should be 0.7', () {
-      expect(RAGConfig.similarityThreshold, 0.7);
+      expect(RAGConfig.similarityThreshold, 0.65);
     });
 
     test('max meditation results should be 3', () {
@@ -329,6 +329,58 @@ void main() {
       expect(output, contains('[sleep]'));
       expect(output, contains('(15min)'));
       expect(output, contains('Similarity: 89%'));
+    });
+
+    test('toPromptContext labels fallback results and reveals library size',
+        () {
+      final popular = [
+        MeditationSearchResult(
+          id: 'med-1',
+          title: 'Deep Sleep',
+          description: '',
+          similarity: 0.0,
+        ),
+        MeditationSearchResult(
+          id: 'med-2',
+          title: 'Morning Start',
+          description: '',
+          similarity: 0.0,
+        ),
+      ];
+
+      final fallback = UserContext(
+        relevantMeditations: popular,
+        hasMeditationData: true,
+        meditationLibrarySize: 12,
+        lastUserMessage: 'Tìm meditation',
+      ).toPromptContext();
+
+      expect(fallback, contains('POPULAR MEDITATIONS'));
+      expect(fallback, isNot(contains('=== RELEVANT MEDITATIONS ===')));
+      expect(fallback, isNot(contains('Similarity:')),
+          reason: 'a 0% score reads as a bad match, not as "unranked"');
+      expect(fallback, contains('Shortlist only'));
+      expect(fallback, contains('12 meditations in total'));
+
+      // Real hits keep the relevant header and their scores.
+      final matched = UserContext(
+        relevantMeditations: [
+          MeditationSearchResult(
+            id: 'med-1',
+            title: 'Deep Sleep',
+            description: '',
+            similarity: 0.71,
+          ),
+        ],
+        hasMeditationData: true,
+        meditationLibrarySize: 1,
+        lastUserMessage: 'khó ngủ',
+      ).toPromptContext();
+
+      expect(matched, contains('=== RELEVANT MEDITATIONS ==='));
+      expect(matched, contains('Similarity: 71%'));
+      expect(matched, isNot(contains('Shortlist only')),
+          reason: 'the shortlist already is the whole library here');
     });
 
     test('toPromptContext handles no meditation data', () {
